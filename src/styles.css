@@ -759,6 +759,99 @@ body{
 .flex-between{display:flex;align-items:center;justify-content:space-between;}
 
 /* ═══════════════════════════════════════════
+   AURA CHARACTER SYSTEM
+═══════════════════════════════════════════ */
+.aura-char-card{
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  margin-bottom:12px;
+  transition:transform 0.15s;
+}
+.aura-char-card:active{transform:scale(0.98);}
+
+.aura-detail-card{
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  margin-bottom:12px;
+  margin-top:-8px;
+  animation:slideDown 0.2s ease;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* キャラクター絵文字ラッパー */
+.aura-emoji-wrap{
+  width:72px;height:72px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  position:relative;
+}
+.aura-emoji{font-size:40px;line-height:1;}
+
+/* ─── エフェクト: Gold ─── */
+.aura-emoji-wrap.gold{
+  background:radial-gradient(circle,#FFF3C4,#FFD700 80%);
+  box-shadow:0 0 16px #FFD70060, 0 0 32px #FFD70030;
+  animation:goldPulse 2s ease-in-out infinite;
+}
+@keyframes goldPulse{0%,100%{box-shadow:0 0 16px #FFD70060}50%{box-shadow:0 0 28px #FFD700AA}}
+.aura-gold{
+  background:linear-gradient(135deg,#B8860B,#FFD700,#DAA520,#FFD700);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 4px #FFD70080);
+}
+
+/* ─── エフェクト: Silver ─── */
+.aura-emoji-wrap.silver{
+  background:radial-gradient(circle,#F0F0F0,#C0C0C0 80%);
+  box-shadow:0 0 16px #C0C0C060;
+  animation:silverPulse 2.5s ease-in-out infinite;
+}
+@keyframes silverPulse{0%,100%{box-shadow:0 0 12px #C0C0C040}50%{box-shadow:0 0 24px #C0C0C0AA}}
+.aura-silver{
+  background:linear-gradient(135deg,#808080,#E0E0E0,#A0A0A0,#E8E8E8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 3px #C0C0C080);
+}
+
+/* ─── エフェクト: Rainbow ─── */
+.aura-emoji-wrap.rainbow,.aura-emoji-wrap.rainbow-sparkle,.aura-emoji-wrap.legendary{
+  background:conic-gradient(#FF6B6B,#FFD93D,#6BCB77,#4D96FF,#C77DFF,#FF6B6B);
+  box-shadow:0 0 20px rgba(108,99,255,0.5);
+  animation:rainbowSpin 3s linear infinite;
+}
+@keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+.aura-rainbow{
+  background:linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77,#4D96FF,#C77DFF,#FF6B6B);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:rainbowFlow 2s linear infinite;
+}
+@keyframes rainbowFlow{0%{background-position:0%}100%{background-position:200%}}
+
+/* ─── スパークル ─── */
+.sparkle-star{
+  color:#FFD700;
+  animation:sparklePop 1.8s ease-in-out infinite;
+  font-size:12px;
+}
+@keyframes sparklePop{
+  0%,100%{opacity:0;transform:scale(0.5) rotate(0deg)}
+  50%{opacity:1;transform:scale(1.2) rotate(180deg)}
+}
+
+/* ─── Legendary 追加エフェクト ─── */
+.aura-char-card.legendary{
+  background:linear-gradient(135deg,#FFFBEC,#FFF0F5,#F0F0FF,#FFFBEC)!important;
+  background-size:400% 400%!important;
+  animation:legendaryBg 4s ease infinite!important;
+}
+@keyframes legendaryBg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* ═══════════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════════ */
 @keyframes ckpop{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}

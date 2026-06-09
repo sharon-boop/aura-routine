@@ -6,6 +6,7 @@ import {
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
+import AuraCharacter from './AuraCharacter'
 
 /* ─── Quote Banner ─── */
 function QuoteBanner() {
@@ -374,6 +375,9 @@ export default function Home({ onNavigate, onSettings }) {
           </div>
         </div>
       )}
+
+      {/* ─── MY AURA キャラクター ─── */}
+      <AuraCharacter streak={streak} />
 
       {/* ─── Quote ─── */}
       <div className="sec">
