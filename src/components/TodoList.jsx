@@ -40,7 +40,7 @@ export default function TodoList() {
   const done = filtered.filter(t => t.done)
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start' }}>
           <div>

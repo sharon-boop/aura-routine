@@ -30,7 +30,7 @@ export default function ValueProvision() {
   const doneCnt = vp.filter(p => p.done).length
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div className="ph-eyebrow">Routine — Value</div>
         <div className="ph-title">今日の価値提供</div>

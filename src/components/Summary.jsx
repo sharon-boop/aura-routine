@@ -35,7 +35,7 @@ export default function Summary() {
   const handleDelete = (id) => { deleteSummary(id); refresh(); toast('削除しました') }
 
   if (showForm) return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start' }}>
           <div>
@@ -70,7 +70,7 @@ export default function Summary() {
   )
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start' }}>
           <div>

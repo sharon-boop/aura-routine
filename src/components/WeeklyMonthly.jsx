@@ -71,7 +71,7 @@ export default function WeeklyMonthly() {
   const ideas = tab === 'weekly' ? weeklyIdeas : monthlyIdeas
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div className="ph-eyebrow">Log — Challenge</div>
         <div className="ph-title">背伸びの経験</div>

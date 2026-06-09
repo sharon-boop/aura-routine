@@ -168,7 +168,6 @@ export default function App() {
         </div>
       </div>
 
-      <BottomNav nav={nav} setNav={(n) => { setShowSettings(false); setNav(n) }} />
       <Toast msg={msg} show={show} />
     </div>
   )

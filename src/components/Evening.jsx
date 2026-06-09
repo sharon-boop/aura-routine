@@ -52,7 +52,7 @@ export default function Evening() {
   const vp = data.morning?.valuePeople || []
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div className="ph-eyebrow">Routine — Evening</div>
         <div className="ph-title">今日を成長に変える</div>

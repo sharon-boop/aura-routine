@@ -399,7 +399,7 @@ export default function Settings({ onBack }) {
   const [tab, setTab] = useState('theme')
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div className="flex-between">
           <div>

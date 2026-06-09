@@ -185,8 +185,7 @@ body{
    MAIN AREA
 ═══════════════════════════════════════════ */
 .main-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.page-content{min-height:100dvh;padding-bottom:calc(var(--nav-h)+24px);}
-@media(min-width:768px){.page-content{padding-bottom:60px;}}
+.page-content{min-height:100dvh;padding-bottom:40px;}
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV (Mobile)
@@ -241,12 +240,15 @@ body{
 .sub-nav::-webkit-scrollbar{display:none;}
 @media(min-width:1024px){.sub-nav{padding:0 32px;}}
 .sub-tab{
-  flex-shrink:0;padding:16px 20px;
-  font-size:14px;font-weight:700;letter-spacing:0.5px;
+  flex:1;
+  padding:18px 8px;
+  font-size:15px;font-weight:700;letter-spacing:0.3px;
   border:none;border-bottom:3px solid transparent;
   background:transparent;color:var(--muted);cursor:pointer;
   transition:all 0.2s;font-family:var(--font);margin-bottom:-1px;
-  min-height:52px;
+  min-height:58px;
+  text-align:center;
+  white-space:nowrap;
 }
 .sub-tab.active{color:var(--main);border-bottom-color:var(--main);}
 

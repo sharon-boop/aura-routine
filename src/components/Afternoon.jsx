@@ -73,7 +73,7 @@ export default function Afternoon() {
   const done = checks.filter(c => dc[c.key]).length
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       <div className="ph">
         <div className="ph-eyebrow">Routine — Afternoon</div>
         <div className="ph-title">人と向き合う</div>

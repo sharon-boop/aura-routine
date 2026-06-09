@@ -277,7 +277,7 @@ export default function Morning() {
   const done = checks.filter(c => dc[c.key]).length
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 32px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
 
       {/* ── Header ── */}
       <div className="ph">

@@ -327,7 +327,7 @@ export default function Home({ onNavigate, onSettings }) {
   const vpDone = vp.filter(p => p.done).length
 
   return (
-    <div className="slide-up" style={{ paddingBottom: 'calc(var(--nav-h) + 24px)' }}>
+    <div className="slide-up" style={{ paddingBottom: '40px' }}>
       {/* ─── Header ─── */}
       <div className="home-header-bar">
         <div className="home-date-block">
