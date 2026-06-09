@@ -77,6 +77,36 @@ export const DEFAULT_QUOTES = [
   { id:12, text:'今日出会う人は、みんな何かを背負っている。だから優しくできる。', author:'名言風', fav:false },
   { id:13, text:'自分を整えた分だけ、人に与えられる。', author:'名言風', fav:false },
   { id:14, text:'感情をちゃんと出す人は、人の心を動かす。', author:'名言風', fav:false },
+  { id:15, text:'昨日より1%だけ良くなれ。それが365日続けば、あなたは別人になる。', author:'名言風', fav:false },
+  { id:16, text:'誰も見ていない時の行動が、本当の自分を作る。', author:'名言風', fav:false },
+  { id:17, text:'天才とは、1%の才能と99%の努力である。', author:'エジソン', fav:false },
+  { id:18, text:'やる前から諦める人に、チャンスは来ない。', author:'名言風', fav:false },
+  { id:19, text:'今日という日は、残りの人生の最初の日だ。', author:'名言風', fav:false },
+  { id:20, text:'成功とは、情熱を失わずに失敗を重ねていく能力である。', author:'チャーチル', fav:false },
+  { id:21, text:'最大の栄光は、一度も失敗しないことではなく、倒れるたびに起き上がることだ。', author:'孔子', fav:false },
+  { id:22, text:'行動しなければ何も変わらない。行動すれば何かが変わる。', author:'名言風', fav:false },
+  { id:23, text:'あなたの時間は限られている。他人の人生を生きて無駄にするな。', author:'スティーブ・ジョブズ', fav:false },
+  { id:24, text:'迷ったらやれ。後悔はやらなかった時に来る。', author:'名言風', fav:false },
+  { id:25, text:'自分を信じる力が、現実を変える最初の一歩だ。', author:'名言風', fav:false },
+  { id:26, text:'苦しい時ほど、笑え。それが強さの証明だ。', author:'名言風', fav:false },
+  { id:27, text:'人生に遅すぎることはない。今日が残りの人生で一番若い日だ。', author:'名言風', fav:false },
+  { id:28, text:'才能は練習で作られる。天才は継続で生まれる。', author:'名言風', fav:false },
+  { id:29, text:'どんな偉大な旅も、最初の一歩から始まる。', author:'老子', fav:false },
+  { id:30, text:'限界は、あなたが自分で設定したものだ。', author:'名言風', fav:false },
+  { id:31, text:'結果を出す人は、気分に関係なく動く。', author:'名言風', fav:false },
+  { id:32, text:'本気でやれば、大抵のことはできる。本気でやらないから、できない。', author:'名言風', fav:false },
+  { id:33, text:'辛い練習は、試合の時に助けてくれる。', author:'名言風', fav:false },
+  { id:34, text:'挑戦することで失敗するより、挑戦しないことで後悔する方が怖い。', author:'名言風', fav:false },
+  { id:35, text:'今日の自分への投資が、10年後の自分を作る。', author:'名言風', fav:false },
+  { id:36, text:'弱さを認める勇気が、本当の強さだ。', author:'名言風', fav:false },
+  { id:37, text:'人の悪口を言う暇があるなら、自分を磨け。', author:'名言風', fav:false },
+  { id:38, text:'環境のせいにするな。環境を変えるのが、お前の仕事だ。', author:'名言風', fav:false },
+  { id:39, text:'1日1日を全力で生きた人間だけが、死ぬ時に笑える。', author:'名言風', fav:false },
+  { id:40, text:'習慣は第二の天性である。', author:'キケロ', fav:false },
+  { id:41, text:'どんな小さな進歩も、昨日の自分への勝利だ。', author:'名言風', fav:false },
+  { id:42, text:'諦めた瞬間に、ゲームオーバーになる。', author:'名言風', fav:false },
+  { id:43, text:'自分が変われば、世界が変わる。', author:'名言風', fav:false },
+  { id:44, text:'熱量は伝染する。あなたの本気が周りを動かす。', author:'名言風', fav:false },
 ]
 
 export function getQuotes() { return load('quoteOptions') || DEFAULT_QUOTES }
@@ -369,4 +399,72 @@ export function initSampleData() {
   save('summaries', [
     { id:1, date:ydStr, type:'アニメ', title:'ハイキュー!! TO THE TOP', summary:'烏野高校が強豪校と戦うシーン。努力が突然花開く瞬間の描写が圧巻。チームワークと個の成長が交差する熱い作品。', movingScene:'日向が空中で止まって見えた瞬間', whyMoved:'努力が突然花開く瞬間の美しさ', learned:'努力の積み重ねは、ある日突然形になる', myLife:'毎日の小さな習慣が、いつか大きな変化を生む', howToTell:'バレーの試合中に時間が止まる感覚があってさ…', depth:'努力の継続が「ゾーン」を生むという感覚を学んだ' },
   ])
+}
+
+/* ═══════════════════════════════════════════
+   ACHIEVEMENT SYSTEM
+═══════════════════════════════════════════ */
+export const ACHIEVEMENT_DEFS = [
+  { id:'first_day',   label:'はじめの一歩',   desc:'初めてルーティンを記録した',         icon:'🌱', badge:'ROOKIE',   color:'#84A98C', streakReq:0,  perfectReq:0,  gachaUnlock:3  },
+  { id:'streak_3',    label:'3日の継続',       desc:'3日連続でルーティンを続けた',         icon:'🔥', badge:'3 DAYS',   color:'#E8813A', streakReq:3,  perfectReq:0,  gachaUnlock:5  },
+  { id:'streak_7',    label:'一週間の戦士',    desc:'7日連続でルーティンを続けた',         icon:'⚡', badge:'1 WEEK',   color:'#6C63FF', streakReq:7,  perfectReq:0,  gachaUnlock:8  },
+  { id:'streak_14',   label:'二週間の覚悟',    desc:'14日連続でルーティンを続けた',        icon:'💎', badge:'2 WEEKS',  color:'#2196F3', streakReq:14, perfectReq:0,  gachaUnlock:12 },
+  { id:'streak_30',   label:'一ヶ月の本気',    desc:'30日連続でルーティンを続けた',        icon:'👑', badge:'30 DAYS',  color:'#F7D87C', streakReq:30, perfectReq:0,  gachaUnlock:18 },
+  { id:'streak_60',   label:'二ヶ月の覚醒',    desc:'60日連続でルーティンを続けた',        icon:'🌟', badge:'60 DAYS',  color:'#E85D2A', streakReq:60, perfectReq:0,  gachaUnlock:25 },
+  { id:'streak_100',  label:'100日の伝説',     desc:'100日連続でルーティンを続けた',       icon:'🏆', badge:'100 DAYS', color:'#FFD700', streakReq:100,perfectReq:0,  gachaUnlock:35 },
+  { id:'perfect_1',   label:'完璧な一日',      desc:'1日100%達成を初めて達成した',         icon:'✨', badge:'PERFECT',  color:'#52B788', streakReq:0,  perfectReq:1,  gachaUnlock:3  },
+  { id:'perfect_5',   label:'5回の完全燃焼',   desc:'100%達成を5回達成した',              icon:'🎯', badge:'× 5',      color:'#F06292', streakReq:0,  perfectReq:5,  gachaUnlock:6  },
+  { id:'perfect_10',  label:'10回の完全制覇',  desc:'100%達成を10回達成した',             icon:'🌈', badge:'× 10',     color:'#AB47BC', streakReq:0,  perfectReq:10, gachaUnlock:10 },
+]
+
+// 実績解除に応じてガチャ候補を解放する追加リスト
+export const UNLOCKABLE_ATTITUDES = [
+  '静かな自信を持つ男','圧倒的な存在感','誰とでも5分で仲良くなれる人','場を支配する男',
+  '絶対に諦めない人間','光を放つ存在','本質を見抜く人','選ばれ続ける存在',
+  '自分の道を歩む者','全員から信頼される人','余裕の中に強さがある男','空気を変える人',
+  '誰かの記憶に残る存在','逆境を力に変える人','静かに燃え続ける男','磁力を持つ人間',
+  '感情をコントロールできる男','常に成長し続ける存在','器が大きい男','自然体で最強な人',
+  '一流の雰囲気を纏う人','孤独を力にできる男','言葉に重みがある存在','動じない人間',
+  '周りを幸せにする存在','時代を作る人間','深みのある男','圧倒的な主人公','伝説になる人間',
+  '1%の違いを生み出す男','自分を超え続ける存在','誰も追いつけない速度で成長する人',
+  '覚悟が違う男','本物の強さを持つ存在','世界を変える人間',
+]
+
+export function getAchievements() { return load('achievements') || [] }
+export function saveAchievements(list) { save('achievements', list) }
+
+export function getUnlockedAttitudeCount() {
+  const unlocked = getAchievements()
+  if (!unlocked.length) return 0
+  const maxGacha = unlocked.reduce((m, id) => {
+    const def = ACHIEVEMENT_DEFS.find(a => a.id === id)
+    return def ? Math.max(m, def.gachaUnlock) : m
+  }, 0)
+  return maxGacha
+}
+
+export function getUnlockedAttitudes() {
+  const count = getUnlockedAttitudeCount()
+  return UNLOCKABLE_ATTITUDES.slice(0, count)
+}
+
+// 実績チェック → 新しく解除されたものを返す
+export function checkAchievements() {
+  const streak = getStreak()
+  const records = getAllRecords()
+  const perfectCount = Object.values(records).filter(r => calcDayProgress(r) >= 100).length
+  const current = getAchievements()
+  const newUnlocks = []
+
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (current.includes(def.id)) continue
+    let earned = false
+    if (def.id === 'first_day' && Object.keys(records).length >= 1) earned = true
+    if (def.streakReq > 0 && streak >= def.streakReq) earned = true
+    if (def.perfectReq > 0 && perfectCount >= def.perfectReq) earned = true
+    if (earned) newUnlocks.push(def.id)
+  }
+
+  if (newUnlocks.length) saveAchievements([...current, ...newUnlocks])
+  return newUnlocks
 }

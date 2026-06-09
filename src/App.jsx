@@ -12,7 +12,7 @@ import Records from './components/Records'
 import WeeklyMonthly from './components/WeeklyMonthly'
 import Settings from './components/Settings'
 import { Toast, useToast } from './components/Toast'
-import { initSampleData, getStreak, getSettings } from './utils/storage'
+import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS } from './utils/storage'
 
 const NAV = [
   { id:'home',    icon:'⌂', label:'Home' },
@@ -78,10 +78,38 @@ function BottomNav({ nav, setNav }) {
   )
 }
 
+function AchievementToast({ ids, onClose }) {
+  const [idx, setIdx] = useState(0)
+  if (!ids.length) return null
+  const def = ACHIEVEMENT_DEFS.find(a => a.id === ids[idx])
+  if (!def) return null
+  const next = () => { if (idx + 1 < ids.length) setIdx(i => i + 1); else onClose() }
+  return (
+    <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:24 }}>
+      <div style={{ background:'#fff',borderRadius:28,padding:'40px 32px',maxWidth:340,width:'100%',textAlign:'center',boxShadow:'0 24px 60px rgba(0,0,0,0.3)' }}>
+        <div style={{ fontSize:64,marginBottom:12 }}>{def.icon}</div>
+        <div style={{ fontSize:11,fontWeight:900,letterSpacing:3,textTransform:'uppercase',color:def.color,marginBottom:8 }}>Achievement Unlocked</div>
+        <div style={{ fontSize:24,fontWeight:900,letterSpacing:-0.5,marginBottom:8 }}>{def.label}</div>
+        <div style={{ display:'inline-block',background:def.color,color:'#fff',fontWeight:900,fontSize:13,letterSpacing:2,padding:'5px 18px',borderRadius:50,marginBottom:16 }}>{def.badge}</div>
+        <div style={{ fontSize:14,color:'#666',lineHeight:1.6,marginBottom:8 }}>{def.desc}</div>
+        {def.gachaUnlock > 0 && (
+          <div style={{ background:'#F7F1E8',borderRadius:14,padding:'12px 16px',marginBottom:24,fontSize:13,fontWeight:700,color:'#E85D2A' }}>
+            🎰 ガチャの在り方が {def.gachaUnlock} 種類に解放！
+          </div>
+        )}
+        <button onClick={next} style={{ width:'100%',padding:'14px',background:'#151515',color:'#fff',border:'none',borderRadius:14,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit' }}>
+          {idx + 1 < ids.length ? `次へ (${idx+1}/${ids.length})` : '閉じる'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [nav, setNav] = useState('home')
   const [showSettings, setShowSettings] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [newAchievements, setNewAchievements] = useState([])
   const [routineTab,  setRoutineTab]  = useState('morning')
   const [worldTab,    setWorldTab]    = useState('summary')
   const [investTab,   setInvestTab]   = useState('investment')
@@ -92,11 +120,12 @@ export default function App() {
   useEffect(() => {
     initSampleData()
     setStreak(getStreak())
-    // Apply saved theme
     const s = getSettings()
     if (s.theme && s.theme !== 'cream-street') {
       document.documentElement.setAttribute('data-theme', s.theme)
     }
+    const unlocked = checkAchievements()
+    if (unlocked.length) setNewAchievements(unlocked)
   }, [])
 
   const handleNavigate = (section, sub) => {
@@ -169,6 +198,7 @@ export default function App() {
       </div>
 
       <Toast msg={msg} show={show} />
+      {newAchievements.length > 0 && <AchievementToast ids={newAchievements} onClose={() => setNewAchievements([])} />}
     </div>
   )
 }

@@ -164,16 +164,16 @@ body{
 }
 .sb-sub{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;letter-spacing:1px;}
 .sb-item{
-  display:flex;align-items:center;gap:12px;
-  padding:13px 24px;cursor:pointer;
+  display:flex;align-items:center;gap:16px;
+  padding:18px 28px;cursor:pointer;
   color:rgba(255,255,255,0.4);
-  font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   transition:all 0.2s;border:none;background:none;font-family:var(--font);
-  width:100%;text-align:left;border-left:3px solid transparent;
+  width:100%;text-align:left;border-left:4px solid transparent;
 }
 .sb-item:hover{color:rgba(255,255,255,0.8);}
 .sb-item.active{color:#fff;background:rgba(255,255,255,0.08);border-left-color:var(--orange);}
-.sb-icon{font-size:16px;}
+.sb-icon{font-size:22px;}
 .sb-footer{
   margin-top:auto;padding:20px 24px;
   border-top:1px solid rgba(255,255,255,0.08);
@@ -245,12 +245,12 @@ body{
 @media(min-width:1024px){.sub-nav{padding:0 32px;}}
 .sub-tab{
   flex:1;
-  padding:18px 8px;
-  font-size:15px;font-weight:700;letter-spacing:0.3px;
+  padding:20px 8px;
+  font-size:17px;font-weight:700;letter-spacing:0.3px;
   border:none;border-bottom:3px solid transparent;
   background:transparent;color:var(--muted);cursor:pointer;
   transition:all 0.2s;font-family:var(--font);margin-bottom:-1px;
-  min-height:58px;
+  min-height:64px;
   text-align:center;
   white-space:nowrap;
 }

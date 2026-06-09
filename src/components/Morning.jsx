@@ -5,6 +5,7 @@ import {
   getAttitudeOptions, RARE_ATTITUDES,
   getWordThemeOptions, getMustKeepOptions,
   getFavorites, saveFavorites,
+  getUnlockedAttitudes,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -71,14 +72,16 @@ function AttitudeSection({ value, onChange }) {
     if (spinning) return
     setSpinning(true); setIsRare(false)
     let count = 0
-    const all = [...options, ...RARE_ATTITUDES]
+    const unlocked = getUnlockedAttitudes()
+    const normalPool = [...options, ...unlocked]
+    const all = [...normalPool, ...RARE_ATTITUDES]
     ivRef.current = setInterval(() => {
       setDisplay(all[Math.floor(Math.random() * all.length)])
       count++
       if (count >= 20) {
         clearInterval(ivRef.current)
         const rare = Math.random() < 0.15
-        const pool = rare ? RARE_ATTITUDES : options
+        const pool = rare ? RARE_ATTITUDES : normalPool
         const result = pool[Math.floor(Math.random() * pool.length)]
         setDisplay(result); setIsRare(rare); setSpinning(false)
         onChange(result)
