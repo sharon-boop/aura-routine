@@ -70,7 +70,7 @@ body{
   flex-direction:column;
 }
 
-/* ─── Desktop layout (1024px以上のみサイドバー表示) ─── */
+/* ─── Desktop layout (1024px以上) ─── */
 @media(min-width:1024px){
   .app-shell{flex-direction:row;}
   .sidebar-nav{display:flex!important;transform:translateX(0)!important;}
@@ -78,11 +78,11 @@ body{
   .main-area{margin-left:var(--sw);flex:1;}
   .page-content{max-width:800px;}
   .sidebar-backdrop{display:none!important;}
-  .hamburger-btn{display:none!important;}
+  .mobile-topbar{display:none!important;}
 }
+/* ─── Mobile/Tablet layout (1023px以下) ─── */
 @media(max-width:1023px){
-  .main-area{width:100%;}
-  .hamburger-btn{display:flex!important;}
+  .main-area{width:100%;padding-top:56px;}
 }
 
 /* ═══════════════════════════════════════════
@@ -113,24 +113,41 @@ body{
 }
 .sidebar-nav.sidebar-open{transform:translateX(0);}
 
-/* Hamburger button — fixed top-left, tablet/mobile only */
-.hamburger-btn{
+/* ─── Mobile top bar ─── */
+.mobile-topbar{
   display:none;
   position:fixed;
-  top:16px;
-  left:16px;
-  z-index:500;
-  width:48px;height:48px;
-  flex-direction:column;justify-content:center;align-items:center;gap:6px;
-  border:none;
-  background:var(--main);
-  cursor:pointer;
-  border-radius:14px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.25);
+  top:0;left:0;right:0;
+  height:56px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  z-index:400;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+@media(max-width:1023px){.mobile-topbar{display:flex;}}
+
+.mobile-topbar-title{
+  font-size:11px;font-weight:900;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--main);
+  position:absolute;left:50%;transform:translateX(-50%);
+}
+.mobile-topbar-spacer{width:44px;}
+
+/* Hamburger button — inside mobile topbar */
+.hamburger-btn{
+  width:44px;height:44px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5.5px;
+  border:none;background:transparent;cursor:pointer;padding:10px;
+  border-radius:10px;flex-shrink:0;
 }
 .hamburger-btn span{
-  display:block;width:22px;height:2.5px;
-  background:#fff;border-radius:2px;
+  display:block;width:22px;height:2px;
+  background:var(--ink);border-radius:2px;
+  transition:all 0.2s;
 }
 .sb-brand{
   padding:0 24px 28px;
@@ -196,7 +213,7 @@ body{
 /* ═══════════════════════════════════════════
    PAGE HEADERS
 ═══════════════════════════════════════════ */
-.ph{padding:80px 20px 20px;}
+.ph{padding:32px 20px 20px;}
 @media(min-width:1024px){.ph{padding:56px 36px 28px;}}
 .ph-eyebrow{
   font-size:10px;font-weight:600;letter-spacing:0.22em;
@@ -212,11 +229,17 @@ body{
 .sub-nav{
   display:flex;gap:0;overflow-x:auto;scrollbar-width:none;
   border-bottom:1px solid var(--border);
-  background:var(--bg);position:sticky;top:0;z-index:50;
+  background:var(--bg);
+  position:sticky;
+  top:0;          /* desktop: sticks to top */
+  z-index:50;
   padding:0 20px;
 }
+@media(max-width:1023px){
+  .sub-nav{top:56px;} /* mobile: sticks below topbar */
+}
 .sub-nav::-webkit-scrollbar{display:none;}
-@media(min-width:768px){.sub-nav{padding:0 32px;}}
+@media(min-width:1024px){.sub-nav{padding:0 32px;}}
 .sub-tab{
   flex-shrink:0;padding:16px 20px;
   font-size:14px;font-weight:700;letter-spacing:0.5px;
@@ -471,7 +494,7 @@ body{
    HOME — PROGRESS RING
 ═══════════════════════════════════════════ */
 .home-header-bar{
-  padding:80px 20px 20px;
+  padding:24px 20px 20px;
   display:flex;align-items:flex-start;
   justify-content:space-between;gap:16px;
 }
