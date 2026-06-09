@@ -152,16 +152,12 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="main-area">
-        {/* Mobile hamburger header */}
-        <div className="mobile-header">
-          <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
-            <span /><span /><span />
-          </button>
-          <div className="mobile-header-title">1% AURA ROUTINE</div>
-          <div style={{width:44}} />
-        </div>
+      {/* Mobile hamburger button — fixed top-left */}
+      <button className="hamburger-btn" onClick={() => setSidebarOpen(s => !s)}>
+        <span /><span /><span />
+      </button>
 
+      <div className="main-area">
         <div className="page-content slide-up" key={`${nav}-${routineTab}-${worldTab}-${investTab}-${logTab}-${showSettings}`}>
           {!showSettings && nav !== 'home' && renderSubNav()}
           {renderPage()}

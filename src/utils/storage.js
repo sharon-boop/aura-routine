@@ -1,7 +1,10 @@
 /* ═══════════════════════════════════════════
    CORE HELPERS
 ═══════════════════════════════════════════ */
-export function getToday() { return new Date().toISOString().split('T')[0] }
+export function getToday() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
 
 export function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
@@ -334,7 +337,7 @@ export function initSampleData() {
   if (load('dailyRecords')) return
   const today = getToday()
   const yd = new Date(); yd.setDate(yd.getDate() - 1)
-  const ydStr = yd.toISOString().split('T')[0]
+  const ydStr = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`
   const records = {
     [ydStr]: { ...createEmptyDayRecord(ydStr),
       mood:'😌',
