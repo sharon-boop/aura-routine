@@ -2,13 +2,21 @@ import { useState, useEffect } from 'react'
 import { getAllRecords, getSummaries, getFunnyStories, getTodos, getStreak, calcDayProgress, formatDate, getToday } from '../utils/storage'
 
 function DayModal({ date, record, onClose }) {
-  const ev = record.evening || {}
-  const vp = record.morning?.valuePeople || []
+  const ev = record?.evening || {}
+  const vp = record?.morning?.valuePeople || []
+  const hasContent = ev.diary || record?.morning?.arikata || vp.filter(p=>p.name).length > 0 || ev.satisfaction > 0
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-sheet" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
         <div style={{ fontWeight:900,fontSize:18,marginBottom:16,letterSpacing:-0.5 }}>{formatDate(date)}</div>
+
+        {!hasContent && (
+          <div style={{ textAlign:'center',padding:'32px 0',color:'var(--muted)',fontSize:14 }}>
+            この日の記録はありません
+          </div>
+        )}
 
         {ev.diary && (
           <div style={{ background:'var(--ink)',borderRadius:12,padding:18,marginBottom:14 }}>
@@ -17,10 +25,17 @@ function DayModal({ date, record, onClose }) {
           </div>
         )}
 
-        {record.morning?.arikata && (
+        {record?.morning?.arikata && (
           <div style={{ marginBottom:12 }}>
             <div style={{ fontSize:10,color:'var(--muted)',fontWeight:900,letterSpacing:2,textTransform:'uppercase',marginBottom:4 }}>Identity</div>
             <div style={{ fontWeight:700,fontSize:16 }}>{record.morning.arikata}</div>
+          </div>
+        )}
+
+        {record?.morning?.wordTheme && (
+          <div style={{ marginBottom:12 }}>
+            <div style={{ fontSize:10,color:'var(--muted)',fontWeight:900,letterSpacing:2,textTransform:'uppercase',marginBottom:4 }}>Word Theme</div>
+            <div style={{ fontWeight:600,fontSize:15 }}>{record.morning.wordTheme}</div>
           </div>
         )}
 
@@ -38,13 +53,13 @@ function DayModal({ date, record, onClose }) {
         )}
 
         {ev.satisfaction > 0 && (
-          <div>
+          <div style={{ marginBottom:12 }}>
             <div style={{ fontSize:10,color:'var(--muted)',fontWeight:900,letterSpacing:2,textTransform:'uppercase',marginBottom:4 }}>Satisfaction</div>
             <div style={{ fontSize:18 }}>{'★'.repeat(ev.satisfaction)}{'☆'.repeat(5 - ev.satisfaction)}</div>
           </div>
         )}
 
-        <button className="btn btn-main" style={{ marginTop:24 }} onClick={onClose}>閉じる</button>
+        <button className="btn btn-main" style={{ marginTop:16,width:'100%' }} onClick={onClose}>閉じる</button>
       </div>
     </div>
   )

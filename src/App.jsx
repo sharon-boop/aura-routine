@@ -39,26 +39,29 @@ function SubNav({ tabs, active, onChange }) {
   )
 }
 
-function Sidebar({ nav, setNav, streak }) {
+function Sidebar({ nav, setNav, streak, open, onClose }) {
   return (
-    <aside className="sidebar-nav">
-      <div className="sb-brand">
-        <div className="sb-appname">1% AURA<br />ROUTINE</div>
-        <div className="sb-sub">1日3人の人生を1%良くする</div>
-      </div>
-      {NAV.map(item => (
-        <button key={item.id} className={`sb-item ${nav === item.id ? 'active' : ''}`} onClick={() => setNav(item.id)}>
-          <span className="sb-icon">{item.icon}</span>
-          {item.label}
-        </button>
-      ))}
-      <div className="sb-footer">
-        <div className="sb-streak">
-          <span>🔥</span>
-          <div><strong>{streak}</strong> 日連続</div>
+    <>
+      {open && <div className="sidebar-backdrop" onClick={onClose} />}
+      <aside className={`sidebar-nav${open ? ' sidebar-open' : ''}`}>
+        <div className="sb-brand">
+          <div className="sb-appname">1% AURA<br />ROUTINE</div>
+          <div className="sb-sub">1日3人の人生を1%良くする</div>
         </div>
-      </div>
-    </aside>
+        {NAV.map(item => (
+          <button key={item.id} className={`sb-item ${nav === item.id ? 'active' : ''}`} onClick={() => { setNav(item.id); onClose(); }}>
+            <span className="sb-icon">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+        <div className="sb-footer">
+          <div className="sb-streak">
+            <span>🔥</span>
+            <div><strong>{streak}</strong> 日連続</div>
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }
 
@@ -78,6 +81,7 @@ function BottomNav({ nav, setNav }) {
 export default function App() {
   const [nav, setNav] = useState('home')
   const [showSettings, setShowSettings] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [routineTab,  setRoutineTab]  = useState('morning')
   const [worldTab,    setWorldTab]    = useState('summary')
   const [investTab,   setInvestTab]   = useState('investment')
@@ -140,9 +144,24 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar nav={showSettings ? 'settings' : nav} setNav={(n) => { setShowSettings(false); setNav(n) }} streak={streak} />
+      <Sidebar
+        nav={showSettings ? 'settings' : nav}
+        setNav={(n) => { setShowSettings(false); setNav(n) }}
+        streak={streak}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       <div className="main-area">
+        {/* Mobile hamburger header */}
+        <div className="mobile-header">
+          <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
+            <span /><span /><span />
+          </button>
+          <div className="mobile-header-title">1% AURA ROUTINE</div>
+          <div style={{width:44}} />
+        </div>
+
         <div className="page-content slide-up" key={`${nav}-${routineTab}-${worldTab}-${investTab}-${logTab}-${showSettings}`}>
           {!showSettings && nav !== 'home' && renderSubNav()}
           {renderPage()}
