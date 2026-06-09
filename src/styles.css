@@ -769,6 +769,20 @@ body{
   transition:transform 0.15s;
 }
 .aura-char-card:active{transform:scale(0.98);}
+.aura-char-card.rainbow-border{
+  border:3px solid transparent!important;
+  background-clip:padding-box;
+  position:relative;
+}
+.aura-char-card.rainbow-border::before{
+  content:'';
+  position:absolute;inset:-3px;
+  border-radius:calc(var(--r) + 3px);
+  background:linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77,#4D96FF,#C77DFF,#FF6B6B);
+  background-size:200% auto;
+  animation:rainbowFlow 2s linear infinite;
+  z-index:-1;
+}
 
 .aura-detail-card{
   background:#fff;
