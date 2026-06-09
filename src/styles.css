@@ -185,7 +185,8 @@ body{
    MAIN AREA
 ═══════════════════════════════════════════ */
 .main-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.page-content{min-height:100dvh;padding-bottom:40px;}
+.page-content{min-height:100dvh;padding-bottom:40px;padding-top:48px;}
+@media(min-width:1024px){.page-content{padding-top:0;}}
 
 /* ═══════════════════════════════════════════
    BOTTOM NAV (Mobile)
