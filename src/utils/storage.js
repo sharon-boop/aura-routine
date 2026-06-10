@@ -353,12 +353,18 @@ export function getStreak() {
  *   3. 自己投資90分タイマー完了
  *   4. 価値提供3人 全員完了
  */
+// 朝の儀式完了判定：現在のテンプレート項目が全てチェック済みかどうか
+function isMorningChecksDone(record) {
+  const template = getChecklistTemplate('morning')
+  if (template.length === 0) return false
+  const checks = record.morning?.checks || {}
+  return template.every(c => checks[c.key] === true)
+}
+
 export function isPerfectDay(record) {
   if (!record) return false
-  // 1. 朝の儀式：チェックが1つ以上あり、全てtrue
-  const mc = Object.values(record.morning?.checks || {})
-  const checkedCount = mc.filter(Boolean).length
-  if (mc.length === 0 || checkedCount < mc.length) return false
+  // 1. 朝の儀式：現在のテンプレート全項目チェック済み
+  if (!isMorningChecksDone(record)) return false
   // 2. 振り返り：日記の題名または本文が書かれている
   const hasDiary = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
   if (!hasDiary) return false
@@ -372,11 +378,10 @@ export function isPerfectDay(record) {
   return true
 }
 
-// 完璧な日の各条件チェック（デバッグ/表示用）
+// 完璧な日の各条件チェック（表示用）
 export function getPerfectDayStatus(record) {
   if (!record) return { checks: false, diary: false, invest: false, value: false }
-  const mc = Object.values(record.morning?.checks || {})
-  const checks = mc.length > 0 && mc.every(Boolean)
+  const checks = isMorningChecksDone(record)
   const diary  = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
   const invest = record.investment?.timerDone === true || (record.investment?.manualMinutes || 0) >= 90
   const value  = (record.morning?.valuePeople || []).some(p => p.done)
