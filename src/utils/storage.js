@@ -362,10 +362,9 @@ export function isPerfectDay(record) {
   if (!record.evening?.diary?.trim()) return false
   // 3. 自己投資90分完了
   if (!record.investment?.timerDone) return false
-  // 4. 価値提供3人：3人以上いて全員done
+  // 4. 価値提供1人以上：1人以上いてdone
   const vp = record.morning?.valuePeople || []
-  if (vp.length < 3) return false
-  if (!vp.slice(0, 3).every(p => p.done)) return false
+  if (!vp.some(p => p.done)) return false
   return true
 }
 
