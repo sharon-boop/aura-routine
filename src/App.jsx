@@ -10,6 +10,7 @@ import Investment from './components/Investment'
 import TodoList from './components/TodoList'
 import Records from './components/Records'
 import WeeklyMonthly from './components/WeeklyMonthly'
+import WeeklyReview from './components/WeeklyReview'
 import Settings from './components/Settings'
 import { Toast, useToast } from './components/Toast'
 import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS } from './utils/storage'
@@ -22,10 +23,10 @@ const NAV = [
   { id:'log',     icon:'▦', label:'Log' },
 ]
 
-const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'afternoon', label:'昼' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }]
+const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'afternoon', label:'昼' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }, { id:'challenge', label:'チャレンジ' }]
 const WORLD_TABS    = [{ id:'summary', label:'要約' }, { id:'funny', label:'話術' }]
 const INVEST_TABS   = [{ id:'investment', label:'90分投資' }, { id:'todo', label:'ToDo' }]
-const LOG_TABS      = [{ id:'records', label:'カレンダー' }, { id:'challenge', label:'チャレンジ' }]
+const LOG_TABS      = [{ id:'records', label:'カレンダー' }, { id:'weekly', label:'週次レビュー' }]
 
 function SubNav({ tabs, active, onChange }) {
   return (
@@ -156,6 +157,7 @@ export default function App() {
       if (routineTab === 'afternoon') return <Afternoon />
       if (routineTab === 'value')     return <ValueProvision />
       if (routineTab === 'evening')   return <Evening />
+      if (routineTab === 'challenge') return <WeeklyMonthly />
     }
     if (nav === 'world') {
       if (worldTab === 'summary') return <Summary />
@@ -166,8 +168,8 @@ export default function App() {
       if (investTab === 'todo')       return <TodoList />
     }
     if (nav === 'log') {
-      if (logTab === 'records')   return <Records />
-      if (logTab === 'challenge') return <WeeklyMonthly />
+      if (logTab === 'records') return <Records />
+      if (logTab === 'weekly')  return <WeeklyReview />
     }
   }
 

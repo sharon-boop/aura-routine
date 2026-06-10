@@ -186,7 +186,15 @@ export function createEmptyDayRecord(date) {
     evening: {
       arikataResult:'', goodInteraction:'', eyeContact:'', praised:'',
       improvedScene:'', roughAction:'', emotionBreak:'', emotionBg:'',
-      bgView:'', tomorrowImprove:'', satisfaction:3, diary:'',
+      bgView:'', tomorrowImprove:'',
+      // スコア制（0-100）
+      score: 0,
+      // EQ ログ
+      eqEmotion:'', eqReason:'', eqNeed:'', eqAction:'',
+      // IQ・学び
+      learnedToday:'', iqSummary:'',
+      // 日記
+      diary:'', diaryTitle:'',
     },
     investment: {
       theme:'TOEIC', toeicSub:'', plan:'', done:'', focus:3,
@@ -288,6 +296,62 @@ export const DEFAULT_MONTHLY_IDEAS = [
 
 export function getLogIdeas(key, defaults) { return load(`logIdeas_${key}`) || defaults }
 export function saveLogIdeas(key, list) { save(`logIdeas_${key}`, list) }
+
+/* ═══════════════════════════════════════════
+   WEEKLY REVIEW
+═══════════════════════════════════════════ */
+// weekKey = "YYYY-WNN"
+export function getWeekKey(date = new Date()) {
+  const d = new Date(date); d.setHours(0,0,0,0)
+  // 月曜始まりの週番号
+  const dow = (d.getDay() + 6) % 7
+  const monday = new Date(d); monday.setDate(d.getDate() - dow)
+  const year = monday.getFullYear()
+  const startOfYear = new Date(year, 0, 1)
+  const weekNum = Math.ceil(((monday - startOfYear) / 86400000 + 1) / 7)
+  return `${year}-W${String(weekNum).padStart(2,'0')}`
+}
+
+export function getWeeklyReview(weekKey) {
+  const all = load('weeklyReviews') || {}
+  return all[weekKey] || { weekKey, note:'', plans:['','',''] }
+}
+
+export function saveWeeklyReview(weekKey, data) {
+  const all = load('weeklyReviews') || {}
+  all[weekKey] = { ...data, weekKey, updatedAt: Date.now() }
+  save('weeklyReviews', all)
+}
+
+// ガチャ回数カウント（シークレット報酬用）
+export function getGachaCount() { return load('gachaCount') || 0 }
+export function incrementGachaCount() {
+  const n = getGachaCount() + 1; save('gachaCount', n); return n
+}
+
+// 各種カウンター（シークレット条件）
+export function getSecretCounts() {
+  const records = getAllRecords()
+  const vals = Object.values(records)
+  const diaryCount  = vals.filter(r => r.evening?.diary?.trim() || r.evening?.diaryTitle?.trim()).length
+  const eqDays      = vals.filter(r => r.evening?.eqEmotion?.trim()).length
+  const gachaCount  = getGachaCount()
+  const perfect     = vals.filter(r => {
+    // 簡易チェック（循環参照回避のためインライン）
+    const mc = Object.values(r.morning?.checks || {})
+    const timerOk = r.investment?.timerDone === true
+    const manualOk = (r.investment?.manualMinutes || 0) >= 90
+    const hasDiary = !!(r.evening?.diary?.trim() || r.evening?.diaryTitle?.trim())
+    const vp = r.morning?.valuePeople || []
+    return mc.length > 0 && mc.every(Boolean) && hasDiary && (timerOk || manualOk) && vp.some(p => p.done)
+  }).length
+  const weeklyCount = Object.keys(load('weeklyReviews') || {}).length
+  const worldCount  = load('worldViewCount') || 0
+  return { diaryCount, eqDays, gachaCount, perfect, weeklyCount, worldCount }
+}
+export function incrementWorldCount() {
+  const n = (load('worldViewCount') || 0) + 1; save('worldViewCount', n); return n
+}
 
 /* ═══════════════════════════════════════════
    WORD THEME OPTIONS

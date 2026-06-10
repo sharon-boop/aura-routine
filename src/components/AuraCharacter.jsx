@@ -7,7 +7,9 @@ import {
   PERFECT_POKEMON, TIMELINE,
   isUnlocked, getAllRewardsAtDay,
   getEquipped, saveEquipped,
+  SECRET_REWARDS, checkSecretUnlocks, getSecretUnlocked,
 } from '../utils/rewards'
+import { getSecretCounts } from '../utils/storage'
 
 const SPRITE = (id) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
@@ -41,10 +43,11 @@ export function RewardToast({ rewards, onClose }) {
     pokemon:'ポケモン', frame:'フレーム', acc:'アクセサリー',
     bg:'背景テーマ', title:'称号', effect:'エフェクト', stamp:'スタンプ'
   }
+  const isSecret = r.secret === true
   return (
     <div className="reward-toast-overlay">
-      <div className="reward-toast-card slide-up">
-        <div className="reward-toast-badge">🎁 REWARD UNLOCKED</div>
+      <div className={`reward-toast-card slide-up ${isSecret ? 'reward-toast-secret' : ''}`}>
+        <div className="reward-toast-badge">{isSecret ? '🔮 SECRET UNLOCKED' : '🎁 REWARD UNLOCKED'}</div>
         <div className="reward-toast-type">{typeLabel[r.type] || r.type}</div>
         <div className="reward-toast-name">{r.label || r.name}</div>
         {r.type === 'pokemon' && r.pokeId && (
@@ -196,6 +199,16 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
       prevPerfectRef.current = perfect
     }
   }, [perfect])
+
+  // シークレット報酬チェック（マウント時）
+  useEffect(() => {
+    const counts = getSecretCounts()
+    const secrets = checkSecretUnlocks(counts)
+    if (secrets.length) {
+      setNewRewards(u => [...u, ...secrets])
+      setShowToast(true)
+    }
+  }, [])
 
   const equip = (type, id) => {
     const next = { ...equipped, [type]: id }

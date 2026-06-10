@@ -541,6 +541,62 @@ export const PERFECT_POKEMON = POKE_PERFECT.map(([id,pokeId,name,pReq]) => ({
   id, pokeId, name, type:'pokemon', day:0, perfectReq:pReq
 }))
 
+/* ─── シークレット報酬 ─── */
+// 特定の行動で解放されるサプライズ報酬
+export const SECRET_REWARDS = [
+  // 日記10回書いたら → 隠しスタンプ
+  { id:'secret_diary10', type:'stamp', emoji:'📖', stampBg:'linear-gradient(135deg,#667eea,#764ba2)',
+    name:'日記マスター', label:'日記マスター', secret:true,
+    unlockCondition: 'diary10', hint:'ある行動を10回続けると解放…' },
+  // ガチャ30回引いたら → 隠しエフェクト
+  { id:'secret_gacha30', type:'effect', cssClass:'effect-rainbow',
+    name:'ガチャ中毒', label:'ガチャ中毒', secret:true,
+    unlockCondition: 'gacha30', hint:'在り方ガチャを引き続けると…' },
+  // EQログを7日書いたら → 隠しフレーム
+  { id:'secret_eq7', type:'frame', style:{ border:'2px solid #9B59B6', boxShadow:'0 0 16px rgba(155,89,182,0.6)' },
+    name:'EQ覚醒', label:'EQ覚醒', secret:true,
+    unlockCondition: 'eq7', hint:'感情と向き合い続けると…' },
+  // 完璧な日15回 → 超レアポケモン（ルカリオ）
+  { id:'secret_perfect15', type:'pokemon', pokeId:448, name:'ルカリオ', secret:true,
+    unlockCondition: 'perfect15', hint:'完璧な日を重ねると伝説が現れる…' },
+  // 週次レビュー3回書いたら → 隠し称号
+  { id:'secret_weekly3', type:'title', label:'振り返りの人', color:'#6C63FF',
+    name:'振り返りの人', secret:true,
+    unlockCondition: 'weekly3', hint:'週を丁寧に振り返ると…' },
+  // ストーリー/要約を5回使ったら → 隠しポケモン（ゾロアーク）
+  { id:'secret_world5', type:'pokemon', pokeId:571, name:'ゾロアーク', secret:true,
+    unlockCondition: 'world5', hint:'知識を蓄え続けると…' },
+]
+
+export function checkSecretUnlocks({ diaryCount, gachaCount, eqDays, perfect, weeklyCount, worldCount }) {
+  const unlocked = []
+  const stored   = (() => { try { return JSON.parse(localStorage.getItem('secretUnlocked')) || [] } catch { return [] } })()
+  const alreadyUnlocked = new Set(stored)
+
+  const check = (id, condition) => {
+    if (!alreadyUnlocked.has(id) && condition) {
+      unlocked.push(SECRET_REWARDS.find(r => r.id === id))
+      alreadyUnlocked.add(id)
+    }
+  }
+
+  check('secret_diary10',  diaryCount  >= 10)
+  check('secret_gacha30',  gachaCount  >= 30)
+  check('secret_eq7',      eqDays      >= 7)
+  check('secret_perfect15',perfect     >= 15)
+  check('secret_weekly3',  weeklyCount >= 3)
+  check('secret_world5',   worldCount  >= 5)
+
+  if (unlocked.length) {
+    localStorage.setItem('secretUnlocked', JSON.stringify([...alreadyUnlocked]))
+  }
+  return unlocked.filter(Boolean)
+}
+
+export function getSecretUnlocked() {
+  try { return JSON.parse(localStorage.getItem('secretUnlocked')) || [] } catch { return [] }
+}
+
 /* ─── ユーティリティ ─── */
 export function isUnlocked(item, streak, perfect = 0) {
   if (item.perfectReq) return perfect >= item.perfectReq
