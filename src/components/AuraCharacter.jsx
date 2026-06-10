@@ -66,23 +66,23 @@ export function RewardToast({ rewards, onClose }) {
   )
 }
 
-/* ─── Upcoming Rewards Preview ─── */
+/* ─── Upcoming Rewards Preview（内容は???で隠す）─── */
 function NextRewards({ streak }) {
   const upcoming = []
-  for (let s = streak + 1; s <= streak + 30 && upcoming.length < 5; s++) {
-    getAllRewardsAtStreak(s).forEach(r => {
-      if (upcoming.length < 5) upcoming.push({ ...r, daysLeft: s - streak })
-    })
+  for (let s = streak + 1; s <= streak + 20 && upcoming.length < 4; s++) {
+    if (getAllRewardsAtStreak(s).length > 0) {
+      upcoming.push({ daysLeft: s - streak, day: s })
+    }
   }
   if (upcoming.length === 0) return null
   return (
     <div className="next-rewards-wrap">
-      <div className="next-rewards-title">🔒 次の報酬プレビュー</div>
+      <div className="next-rewards-title">🔒 次の報酬まで</div>
       <div className="next-rewards-list">
         {upcoming.map((r, i) => (
           <div key={i} className="next-reward-item">
             <span className="next-reward-days">あと {r.daysLeft}日</span>
-            <span className="next-reward-name">{r.name || r.label}</span>
+            <span className="next-reward-name next-reward-mystery">???</span>
           </div>
         ))}
       </div>
@@ -93,42 +93,48 @@ function NextRewards({ streak }) {
 /* ─── Collection Item Card ─── */
 function CollItem({ item, equipped, unlocked, type, onEquip }) {
   const isEq = equipped[type] === item.id
+
+  // ロック中は内容を隠す（ミステリーロック）
+  if (!unlocked) {
+    const reqLabel = item.perfectReq
+      ? `完璧${item.perfectReq}回`
+      : item.streakReq === 0 ? '初期' : `${item.streakReq}日`
+    return (
+      <div className="coll-item coll-item-locked">
+        <div className="coll-mystery-icon">🔒</div>
+        <div className="coll-item-name" style={{ color:'#bbb' }}>???</div>
+        <div className="coll-item-lock">{reqLabel}</div>
+      </div>
+    )
+  }
+
   return (
     <div
-      className={`coll-item ${isEq ? 'coll-item-equipped' : ''} ${!unlocked ? 'coll-item-locked' : ''}`}
-      onClick={() => unlocked && onEquip(type, item.id)}
+      className={`coll-item ${isEq ? 'coll-item-equipped' : ''}`}
+      onClick={() => onEquip(type, item.id)}
     >
       {type === 'pokemon' && (
-        <img src={SPRITE(item.pokeId)} alt={item.name} className="coll-poke-img"
-          style={{ opacity: unlocked ? 1 : 0.25 }} />
+        <img src={SPRITE(item.pokeId)} alt={item.name} className="coll-poke-img" />
       )}
       {type === 'frame' && (
-        <div className={`coll-frame-preview ${unlocked ? item.cssClass : 'frame-none'}`} />
+        <div className={`coll-frame-preview ${item.cssClass}`} />
       )}
       {type === 'acc' && (
-        <div className="coll-acc-emoji" style={{ opacity: unlocked ? 1 : 0.25 }}>
-          {item.emoji || '—'}
-        </div>
+        <div className="coll-acc-emoji">{item.emoji || '—'}</div>
       )}
       {type === 'bg' && (
-        <div className="coll-bg-preview" style={{ background: item.bg, opacity: unlocked ? 1 : 0.35 }} />
+        <div className="coll-bg-preview" style={{ background: item.bg }} />
       )}
       {type === 'title' && (
         <div className="coll-title-label"
-          style={{ color: unlocked ? item.color : '#bbb', fontWeight:800, fontSize:11 }}>
+          style={{ color: item.color, fontWeight:800, fontSize:11 }}>
           {item.label}
         </div>
       )}
       {type === 'effect' && (
-        <div className={`coll-effect-demo ${unlocked ? item.cssClass : ''}`}
-          style={{ opacity: unlocked ? 1 : 0.25 }}>✦</div>
+        <div className={`coll-effect-demo ${item.cssClass}`}>✦</div>
       )}
       <div className="coll-item-name">{item.name || item.label}</div>
-      {!unlocked && (
-        <div className="coll-item-lock">
-          🔒 {item.perfectReq ? `完璧${item.perfectReq}回` : `${item.streakReq}日`}
-        </div>
-      )}
       {isEq && <div className="coll-item-check">✓</div>}
     </div>
   )

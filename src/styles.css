@@ -1202,6 +1202,11 @@ body{
   color:#fff;font-size:9px;font-weight:900;
   display:flex;align-items:center;justify-content:center;
 }
+/* Mystery lock */
+.coll-mystery-icon{font-size:28px;padding:6px 0;filter:grayscale(1);}
+.next-reward-mystery{
+  color:var(--muted);letter-spacing:0.15em;font-weight:700;
+}
 
 /* ═══════════════════════════════════════════
    SPARKLE EFFECTS
