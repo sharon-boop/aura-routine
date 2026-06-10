@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import {
-  getTodayRecord, updateTodayRecord, calcDayProgress, getStreak,
+  getTodayRecord, updateTodayRecord, calcDayProgress, getStreak, getPerfectCount,
   formatDate, getToday, getQuotes, getDailyQuote, saveQuotes,
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
 } from '../utils/storage'
@@ -310,12 +310,14 @@ export default function Home({ onNavigate, onSettings }) {
   const [record, setRecord] = useState(null)
   const [progress, setProgress] = useState(0)
   const [streak, setStreak] = useState(0)
+  const [perfect, setPerfect] = useState(0)
 
   useEffect(() => {
     const r = getTodayRecord()
     setRecord(r)
     setProgress(calcDayProgress(r))
     setStreak(getStreak())
+    setPerfect(getPerfectCount())
   }, [])
 
   const setArikata = (val) => {
@@ -377,7 +379,7 @@ export default function Home({ onNavigate, onSettings }) {
       )}
 
       {/* ─── MY AURA キャラクター ─── */}
-      <AuraCharacter streak={streak} />
+      <AuraCharacter streak={streak} perfect={perfect} />
 
       {/* ─── Quote ─── */}
       <div className="sec">

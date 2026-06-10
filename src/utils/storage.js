@@ -346,6 +346,11 @@ export function getStreak() {
   return streak
 }
 
+export function getPerfectCount() {
+  const records = getAllRecords()
+  return Object.values(records).filter(r => calcDayProgress(r) >= 100).length
+}
+
 export function calcDayProgress(record) {
   if (!record) return 0
   let total = 0, done = 0
