@@ -494,6 +494,12 @@ export function calcDayProgress(record) {
    SAMPLE DATA (first launch only)
 ═══════════════════════════════════════════ */
 export function initSampleData() {
+  // 初回ログイン時にプレミアムガチャチケット5枚付与
+  if (!load('firstLoginDone')) {
+    const current = load('gachaTickets') || 0
+    save('gachaTickets', current + 5)
+    save('firstLoginDone', true)
+  }
   if (load('dailyRecords')) return
   const today = getToday()
   const yd = new Date(); yd.setDate(yd.getDate() - 1)

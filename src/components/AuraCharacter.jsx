@@ -238,26 +238,28 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   const pgEffects = PREMIUM_GACHA_POOL.filter(r  => r.type === 'effect')
   const pdStamps  = PERFECT_DAY_REWARDS.filter(r => r.type === 'stamp')
   const pgStamps  = PREMIUM_GACHA_POOL.filter(r  => r.type === 'stamp')
-  const poke   = allPoke.find(p => p.id === equipped.pokemon) || POKEMON_REWARDS[0]
-  const frame  = FRAME_REWARDS.find(f => f.id === equipped.frame)
-    || { id:'none', label:'デフォルト', type:'frame', style:{ border:'2px solid #E8E2D8' } }
-  const acc    = ACCESSORY_REWARDS.find(a => a.id === equipped.acc)
-    || { id:'none', label:'なし', type:'acc', emoji:'', pos:{} }
-  const bg     = BG_REWARDS.find(b => b.id === equipped.bg)
-    || { id:'cream', label:'クリーム', type:'bg', bg:'#FAFAF7' }
-  const title  = TITLE_REWARDS.find(t => t.id === equipped.title)
-    || { id:'beginner', label:'新人', type:'title', color:'#9A9A9A' }
-  const effect = EFFECT_REWARDS.find(e => e.id === equipped.effect)
-    || { id:'none', label:'なし', type:'effect', cssClass:'effect-none' }
-  const stamp  = STAMP_REWARDS.find(s => s.id === equipped.stamp)
-    || { id:'none', label:'なし', type:'stamp', emoji:'', stampBg:'transparent' }
+  // 全カテゴリの結合リスト（プレミアムガチャ含む）
+  const allFrames  = [...FRAME_REWARDS,     ...pdFrames,  ...pgFrames]
+  const allAccs    = [...ACCESSORY_REWARDS, ...pdAccs,    ...pgAccs]
+  const allBgs     = [...BG_REWARDS,        ...pdBgs,     ...pgBgs]
+  const allTitles  = [...TITLE_REWARDS,     ...pdTitles,  ...pgTitles]
+  const allEffects = [...EFFECT_REWARDS,    ...pdEffects, ...pgEffects]
+  const allStamps  = [...STAMP_REWARDS,     ...pdStamps,  ...pgStamps]
 
-  const allFrames  = [...FRAME_REWARDS,  ...pdFrames,  ...pgFrames]
-  const allAccs    = [...ACCESSORY_REWARDS, ...pdAccs, ...pgAccs]
-  const allBgs     = [...BG_REWARDS,     ...pdBgs,     ...pgBgs]
-  const allTitles  = [...TITLE_REWARDS,  ...pdTitles,  ...pgTitles]
-  const allEffects = [...EFFECT_REWARDS, ...pdEffects, ...pgEffects]
-  const allStamps  = [...STAMP_REWARDS,  ...pdStamps,  ...pgStamps]
+  // 装備中アイテムの解決（プレミアムガチャ由来も含めて検索）
+  const poke   = allPoke.find(p => p.id === equipped.pokemon) || POKEMON_REWARDS[0]
+  const frame  = allFrames.find(f => f.id === equipped.frame)
+    || { id:'none', label:'デフォルト', type:'frame', style:{ border:'2px solid #E8E2D8' } }
+  const acc    = allAccs.find(a => a.id === equipped.acc)
+    || { id:'none', label:'なし', type:'acc', emoji:'', pos:{} }
+  const bg     = allBgs.find(b => b.id === equipped.bg)
+    || { id:'cream', label:'クリーム', type:'bg', bg:'#FAFAF7' }
+  const title  = allTitles.find(t => t.id === equipped.title)
+    || { id:'beginner', label:'新人', type:'title', color:'#9A9A9A' }
+  const effect = allEffects.find(e => e.id === equipped.effect)
+    || { id:'none', label:'なし', type:'effect', cssClass:'effect-none' }
+  const stamp  = allStamps.find(s => s.id === equipped.stamp)
+    || { id:'none', label:'なし', type:'stamp', emoji:'', stampBg:'transparent' }
 
   // Unlock counts
   const unlockedPoke   = allPoke.filter(r => isUnlocked(r, streak, perfect)).length
