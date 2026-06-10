@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   getAllRecords, getWeekKey, getWeeklyReview, saveWeeklyReview,
+  addGachaTickets, wasTicketAwarded, markTicketAwarded,
 } from '../utils/storage'
 import { toast } from './Toast'
 
@@ -227,7 +228,17 @@ export default function WeeklyReview() {
 
       {/* 保存確認 */}
       <div className="sec">
-        <button className="btn btn-main" onClick={() => { saveWeeklyReview(weekKey, review); toast('週次レビューを保存しました ✓') }}>
+        <button className="btn btn-main" onClick={() => {
+          saveWeeklyReview(weekKey, review)
+          // チケット付与（週1回）
+          const ticketKey = `weekly_${weekKey}`
+          if (!wasTicketAwarded(ticketKey)) {
+            addGachaTickets(3); markTicketAwarded(ticketKey)
+            toast('週次レビューを保存しました ✓ +3チケット🎟️')
+          } else {
+            toast('週次レビューを保存しました ✓')
+          }
+        }}>
           週次レビューを保存する
         </button>
       </div>

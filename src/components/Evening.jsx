@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
-import { getTodayRecord, updateTodayRecord, getDailyQuote } from '../utils/storage'
+import {
+  getTodayRecord, updateTodayRecord, getDailyQuote,
+  getChecklistTemplate, saveChecklistTemplate,
+  getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
+} from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 
@@ -72,11 +76,10 @@ function ScoreInput({ value, onChange }) {
   )
 }
 
+/* ─── 振り返りフィールド（眼・褒めた削除） ─── */
 const EV_FIELDS = [
   { key:'arikataResult',  label:'今日の在り方はできたか',   ph:'正直に振り返ろう。できてなくてもOK。' },
   { key:'goodInteraction',label:'今日、良かった関わり',     ph:'誰と・どんな場面？' },
-  { key:'eyeContact',     label:'目を見て話せた場面',       ph:'' },
-  { key:'praised',        label:'今日褒めたこと',           ph:'誰を・どう褒めた？' },
   { key:'improvedScene',  label:'今日、場を良くできた行動', ph:'' },
   { key:'roughAction',    label:'今日、雑だった対応',       ph:'責めなくていい。ただ気づく。' },
   { key:'emotionBreak',   label:'感情が乱れた場面',         ph:'' },
@@ -85,25 +88,102 @@ const EV_FIELDS = [
   { key:'tomorrowImprove',label:'明日、一つだけ改善すること', ph:'具体的に一つだけ' },
 ]
 
+/* ─── 夜のチェックリスト AddItem ─── */
+function AddItemInput({ onAdd }) {
+  const [open, setOpen] = useState(false)
+  const [val, setVal] = useState('')
+  if (!open) return (
+    <button className="add-item-btn" onClick={() => setOpen(true)}>＋ 項目を追加する</button>
+  )
+  return (
+    <div style={{ display:'flex', gap:8, marginTop:8 }}>
+      <input
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && val.trim() && (onAdd(val.trim()), setVal(''), setOpen(false))}
+        placeholder="新しいチェック項目"
+        autoFocus
+        style={{ flex:1, padding:'11px 14px', borderRadius:'var(--r-sm)', border:'1.5px solid var(--border)', background:'#FDFBF8', fontFamily:'var(--font)', fontSize:14, outline:'none' }}
+      />
+      <button className="btn btn-sm btn-main" style={{ width:'auto' }}
+        onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal(''); setOpen(false) } }}>追加</button>
+      <button className="btn btn-sm btn-ghost" style={{ width:'auto' }}
+        onClick={() => { setOpen(false); setVal('') }}>×</button>
+    </div>
+  )
+}
+
 export default function Evening() {
   const [data, setData] = useState(null)
+  const [evChecks, setEvChecks] = useState([])
   const [saved, setSaved] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [iqOpen, setIqOpen] = useState(false)
+  const [ticketMsg, setTicketMsg] = useState('')
   const quote = getDailyQuote()
 
-  useEffect(() => { setData(getTodayRecord()) }, [])
+  useEffect(() => {
+    setData(getTodayRecord())
+    setEvChecks(getChecklistTemplate('evening'))
+  }, [])
 
   const setEv = (partial) => {
     const updated = updateTodayRecord({ evening: { ...data.evening, ...partial } })
     setData(updated)
   }
 
+  const toggleAfternoonMini = (key) => {
+    const mini = { ...(data.evening?.afternoonMini || {}), [key]: !data.evening?.afternoonMini?.[key] }
+    setEv({ afternoonMini: mini })
+    if (!data.evening?.afternoonMini?.[key]) toast('✓')
+  }
+
+  const toggleEvCheck = (key) => {
+    const checks = { ...(data.evening?.checks || {}), [key]: !data.evening?.checks?.[key] }
+    setEv({ checks })
+    if (!data.evening?.checks?.[key]) toast('✓')
+  }
+
+  const addEvItem = (label) => {
+    const key = `ec_${Date.now()}`
+    const next = [...evChecks, { key, label }]
+    setEvChecks(next); saveChecklistTemplate('evening', next)
+    const checks = { ...(data.evening?.checks || {}), [key]: false }
+    setEv({ checks })
+    toast('追加しました')
+  }
+
+  const removeEvItem = (key) => {
+    const next = evChecks.filter(c => c.key !== key)
+    setEvChecks(next); saveChecklistTemplate('evening', next)
+    const checks = { ...(data.evening?.checks || {}) }; delete checks[key]
+    setEv({ checks })
+  }
+
   const handleSave = () => {
     updateTodayRecord({ evening: data.evening })
+
+    // ガチャチケット付与
+    const ev = data.evening || {}
+    let ticketsEarned = 0
+    if (!wasTicketAwarded('diary') && (ev.diary?.trim() || ev.diaryTitle?.trim())) {
+      addGachaTickets(1); markTicketAwarded('diary'); ticketsEarned++
+    }
+    if (!wasTicketAwarded('eq') && ev.eqEmotion?.trim()) {
+      addGachaTickets(1); markTicketAwarded('eq'); ticketsEarned++
+    }
+    if (!wasTicketAwarded('iq') && ev.iqSummary?.trim()) {
+      addGachaTickets(1); markTicketAwarded('iq'); ticketsEarned++
+    }
+
     setSaved(true)
+    if (ticketsEarned > 0) {
+      const total = getGachaTickets()
+      setTicketMsg(`🎟️ ガチャチケット +${ticketsEarned}枚（合計 ${total}枚）`)
+      setTimeout(() => setTicketMsg(''), 5000)
+    }
     toast('今日も少し、人と自分を前に進めた 🌙')
-    setTimeout(() => confetti({ particleCount: 55, spread: 55, origin: { y: 0.7 }, colors: ['#2F4858','#F2994A','#6C63FF','#84A98C'] }), 300)
+    setTimeout(() => confetti({ particleCount:55, spread:55, origin:{y:0.7}, colors:['#2F4858','#F2994A','#6C63FF','#84A98C'] }), 300)
     setTimeout(() => setSaved(false), 4000)
   }
 
@@ -111,6 +191,16 @@ export default function Evening() {
   const ev = data.evening || {}
   const vp = data.morning?.valuePeople || []
   const score = ev.score || 0
+  const mini = ev.afternoonMini || {}
+  const evCheckState = ev.checks || {}
+
+  const MINI_ITEMS = [
+    { key:'breathe', label:'深呼吸を1回する' },
+    { key:'emotion', label:'今の感情を確認する' },
+    { key:'plan',    label:'午後にやることを1つ決める' },
+  ]
+
+  const evCheckDone = evChecks.filter(c => evCheckState[c.key]).length
 
   return (
     <div className="slide-up" style={{ paddingBottom:'40px' }}>
@@ -126,6 +216,19 @@ export default function Evening() {
           <div style={{ fontSize:12, fontWeight:700, color:'var(--orange)', letterSpacing:1, marginBottom:5, textTransform:'uppercase' }}>Today's Words</div>
           <div style={{ fontSize:14, fontWeight:700, lineHeight:1.6 }}>「{quote.text}」</div>
           <div style={{ fontSize:11, color:'var(--muted)', marginTop:4 }}>— {quote.author}</div>
+        </div>
+      </div>
+
+      {/* ── 午後の3チェック ── */}
+      <div className="sec">
+        <div className="sec-title">午後の確認</div>
+        <div className="card static">
+          {MINI_ITEMS.map(item => (
+            <div key={item.key} className="ck-item" onClick={() => toggleAfternoonMini(item.key)}>
+              <div className={`ck-box ${mini[item.key] ? 'on' : ''}`} />
+              <span className={`ck-label ${mini[item.key] ? 'done' : ''}`}>{item.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -169,8 +272,7 @@ export default function Evening() {
         {eqOpen && (
           <div className="card static">
             <div style={{ fontSize:11, color:'var(--muted)', marginBottom:14, lineHeight:1.7, padding:'10px 12px', background:'var(--cream)', borderRadius:8 }}>
-              💡 感情に名前をつけることで、EQが高まります。<br/>
-              「なんかムカつく」→「今自分は焦っている。理由は〇〇。だから〇〇しよう」
+              💡 感情に名前をつけることで、EQが高まります。
             </div>
             {[
               { key:'eqEmotion', label:'今日の感情', ph:'例：焦り・安心・前向き・悲しい' },
@@ -220,7 +322,7 @@ export default function Evening() {
       <div className="sec">
         <div className="sec-title">今日の振り返り</div>
         <div className="card static">
-          {EV_FIELDS.slice(0,5).map((f,i,arr) => (
+          {EV_FIELDS.slice(0,4).map((f,i,arr) => (
             <div className="f" key={f.key} style={{ marginBottom:i<arr.length-1?16:0 }}>
               <label className="fl">{f.label}</label>
               <textarea value={ev[f.key]||''} onChange={e=>setEv({[f.key]:e.target.value})} placeholder={f.ph} rows={2} />
@@ -232,12 +334,42 @@ export default function Evening() {
       <div className="sec">
         <div className="sec-title">気づきと改善</div>
         <div className="card static">
-          {EV_FIELDS.slice(5).map((f,i,arr) => (
+          {EV_FIELDS.slice(4).map((f,i,arr) => (
             <div className="f" key={f.key} style={{ marginBottom:i<arr.length-1?16:0 }}>
               <label className="fl">{f.label}</label>
               <textarea value={ev[f.key]||''} onChange={e=>setEv({[f.key]:e.target.value})} placeholder={f.ph} rows={2} />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── 夜のチェックリスト ── */}
+      <div className="sec">
+        <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span>夜のチェックリスト</span>
+          {evChecks.length > 0 && (
+            <span style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>{evCheckDone}/{evChecks.length}</span>
+          )}
+        </div>
+        <div className="card static">
+          {evChecks.length === 0 && (
+            <div style={{ fontSize:13, color:'var(--muted)', padding:'8px 0', marginBottom:8 }}>
+              チェック項目を追加して夜のルーティンを作ろう
+            </div>
+          )}
+          {evChecks.map(c => {
+            const isCustom = c.key.startsWith('ec_')
+            return (
+              <div key={c.key} className="ck-item" onClick={() => toggleEvCheck(c.key)}>
+                <div className={`ck-box ${evCheckState[c.key] ? 'on' : ''}`} />
+                <span className={`ck-label ${evCheckState[c.key] ? 'done' : ''}`}>{c.label}</span>
+                {isCustom && (
+                  <button className="ck-del" onClick={e => { e.stopPropagation(); removeEvItem(c.key) }}>×</button>
+                )}
+              </div>
+            )
+          })}
+          <AddItemInput onAdd={addEvItem} />
         </div>
       </div>
 
@@ -268,6 +400,14 @@ export default function Evening() {
           <div className="diary-count">{(ev.diary||'').length} 文字</div>
         </div>
       </div>
+
+      {ticketMsg && (
+        <div className="sec">
+          <div style={{ background:'linear-gradient(135deg,#6C63FF,#F2994A)', color:'#fff', borderRadius:14, padding:'14px 20px', textAlign:'center', fontWeight:800, fontSize:14 }}>
+            {ticketMsg}
+          </div>
+        </div>
+      )}
 
       <div className="sec">
         {saved ? (

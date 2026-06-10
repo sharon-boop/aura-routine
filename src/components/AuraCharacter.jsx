@@ -5,6 +5,7 @@ import {
   POKEMON_REWARDS, FRAME_REWARDS, ACCESSORY_REWARDS,
   BG_REWARDS, TITLE_REWARDS, EFFECT_REWARDS, STAMP_REWARDS,
   PERFECT_POKEMON, TIMELINE,
+  PERFECT_DAY_REWARDS, PREMIUM_GACHA_POOL, getPremiumUnlocked,
   isUnlocked, getAllRewardsAtDay,
   getEquipped, saveEquipped,
   SECRET_REWARDS, checkSecretUnlocks, getSecretUnlocked,
@@ -195,6 +196,9 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
         .forEach(r => unlocked.push(r))
       TITLE_REWARDS.filter(r => r.perfectReq && r.perfectReq <= perfect && r.perfectReq > prev)
         .forEach(r => unlocked.push(r))
+      // PERFECT_DAY_REWARDS (50 items)
+      PERFECT_DAY_REWARDS.filter(r => r.perfectCount <= perfect && r.perfectCount > prev)
+        .forEach(r => unlocked.push(r))
       if (unlocked.length) { setNewRewards(u => [...u, ...unlocked]); setShowToast(true) }
       prevPerfectRef.current = perfect
     }
@@ -217,7 +221,21 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   const closeToast = () => { setShowToast(false); setNewRewards([]); setTab('collection') }
 
   // Resolve active items（デフォルト値はリストにないためフォールバックで補完）
-  const allPoke = [...POKEMON_REWARDS, ...PERFECT_POKEMON]
+  const pdPoke    = PERFECT_DAY_REWARDS.filter(r => r.type === 'pokemon')
+  const pgPoke    = PREMIUM_GACHA_POOL.filter(r  => r.type === 'pokemon')
+  const allPoke   = [...POKEMON_REWARDS, ...PERFECT_POKEMON, ...pdPoke, ...pgPoke]
+  const pdFrames  = PERFECT_DAY_REWARDS.filter(r => r.type === 'frame')
+  const pgFrames  = PREMIUM_GACHA_POOL.filter(r  => r.type === 'frame')
+  const pdAccs    = PERFECT_DAY_REWARDS.filter(r => r.type === 'acc')
+  const pgAccs    = PREMIUM_GACHA_POOL.filter(r  => r.type === 'acc')
+  const pdBgs     = PERFECT_DAY_REWARDS.filter(r => r.type === 'bg')
+  const pgBgs     = PREMIUM_GACHA_POOL.filter(r  => r.type === 'bg')
+  const pdTitles  = PERFECT_DAY_REWARDS.filter(r => r.type === 'title')
+  const pgTitles  = PREMIUM_GACHA_POOL.filter(r  => r.type === 'title')
+  const pdEffects = PERFECT_DAY_REWARDS.filter(r => r.type === 'effect')
+  const pgEffects = PREMIUM_GACHA_POOL.filter(r  => r.type === 'effect')
+  const pdStamps  = PERFECT_DAY_REWARDS.filter(r => r.type === 'stamp')
+  const pgStamps  = PREMIUM_GACHA_POOL.filter(r  => r.type === 'stamp')
   const poke   = allPoke.find(p => p.id === equipped.pokemon) || POKEMON_REWARDS[0]
   const frame  = FRAME_REWARDS.find(f => f.id === equipped.frame)
     || { id:'none', label:'デフォルト', type:'frame', style:{ border:'2px solid #E8E2D8' } }
@@ -232,24 +250,31 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   const stamp  = STAMP_REWARDS.find(s => s.id === equipped.stamp)
     || { id:'none', label:'なし', type:'stamp', emoji:'', stampBg:'transparent' }
 
+  const allFrames  = [...FRAME_REWARDS,  ...pdFrames,  ...pgFrames]
+  const allAccs    = [...ACCESSORY_REWARDS, ...pdAccs, ...pgAccs]
+  const allBgs     = [...BG_REWARDS,     ...pdBgs,     ...pgBgs]
+  const allTitles  = [...TITLE_REWARDS,  ...pdTitles,  ...pgTitles]
+  const allEffects = [...EFFECT_REWARDS, ...pdEffects, ...pgEffects]
+  const allStamps  = [...STAMP_REWARDS,  ...pdStamps,  ...pgStamps]
+
   // Unlock counts
   const unlockedPoke   = allPoke.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedFrame  = FRAME_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedAcc    = ACCESSORY_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedBg     = BG_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedTitle  = TITLE_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedEffect = EFFECT_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedStamp  = STAMP_REWARDS.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedFrame  = allFrames.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedAcc    = allAccs.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedBg     = allBgs.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedTitle  = allTitles.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedEffect = allEffects.filter(r => isUnlocked(r, streak, perfect)).length
+  const unlockedStamp  = allStamps.filter(r => isUnlocked(r, streak, perfect)).length
   const totalUnlocked  = unlockedPoke + unlockedFrame + unlockedAcc + unlockedBg + unlockedTitle + unlockedEffect + unlockedStamp
 
   const CATS = [
-    { id:'pokemon', label:`ポケモン (${unlockedPoke})`, items:[...POKEMON_REWARDS,...PERFECT_POKEMON] },
-    { id:'frame',   label:`フレーム (${unlockedFrame})`, items:FRAME_REWARDS },
-    { id:'acc',     label:`アクセサリー (${unlockedAcc})`, items:ACCESSORY_REWARDS },
-    { id:'bg',      label:`背景 (${unlockedBg})`, items:BG_REWARDS },
-    { id:'title',   label:`称号 (${unlockedTitle})`, items:TITLE_REWARDS },
-    { id:'effect',  label:`エフェクト (${unlockedEffect})`, items:EFFECT_REWARDS },
-    { id:'stamp',   label:`スタンプ (${unlockedStamp})`, items:STAMP_REWARDS },
+    { id:'pokemon', label:`ポケモン (${unlockedPoke})`, items:allPoke },
+    { id:'frame',   label:`フレーム (${unlockedFrame})`, items:allFrames },
+    { id:'acc',     label:`アクセサリー (${unlockedAcc})`, items:allAccs },
+    { id:'bg',      label:`背景 (${unlockedBg})`, items:allBgs },
+    { id:'title',   label:`称号 (${unlockedTitle})`, items:allTitles },
+    { id:'effect',  label:`エフェクト (${unlockedEffect})`, items:allEffects },
+    { id:'stamp',   label:`スタンプ (${unlockedStamp})`, items:allStamps },
   ]
 
   const showSparkles = ['effect-sparkle','effect-legendary','effect-rainbow','effect-lightning'].includes(effect.cssClass)

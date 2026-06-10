@@ -135,6 +135,13 @@ export const DEFAULT_CHECKLISTS = {
     { key:'workout',    label:'軽い筋トレをした' },
     { key:'arikataCk',  label:'今日の在り方を確認した' },
   ],
+  evening: [
+    { key:'ev_score',   label:'今日のスコアをつけた' },
+    { key:'ev_diary',   label:'日記を書いた' },
+    { key:'ev_eq',      label:'感情ログを記録した' },
+    { key:'ev_learn',   label:'今日の学びをメモした' },
+    { key:'ev_tomorrow',label:'明日やることを1つ決めた' },
+  ],
   afternoon: [
     { key:'greet',     label:'目を見て挨拶した' },
     { key:'name',      label:'名前を呼んだ' },
@@ -184,9 +191,13 @@ export function createEmptyDayRecord(date) {
       praised:'', improvedScene:'', noticedbg:'', weakPerson:'', selfCare:'',
     },
     evening: {
-      arikataResult:'', goodInteraction:'', eyeContact:'', praised:'',
+      arikataResult:'', goodInteraction:'',
       improvedScene:'', roughAction:'', emotionBreak:'', emotionBg:'',
       bgView:'', tomorrowImprove:'',
+      // 午後の3チェック（夜タブに表示）
+      afternoonMini: { breathe: false, emotion: false, plan: false },
+      // 夜のチェックリスト（カスタマイズ可）
+      checks: {},
       // スコア制（0-100）
       score: 0,
       // EQ ログ
@@ -557,6 +568,20 @@ export function getUnlockedAttitudeCount() {
 export function getUnlockedAttitudes() {
   const count = getUnlockedAttitudeCount()
   return UNLOCKABLE_ATTITUDES.slice(0, count)
+}
+
+/* ═══════════════════════════════════════════
+   PREMIUM GACHA TICKETS
+═══════════════════════════════════════════ */
+export function getGachaTickets() { return load('gachaTickets') || 0 }
+export function addGachaTickets(n) { const t = getGachaTickets() + n; save('gachaTickets', t); return t }
+export function useGachaTicket() { const t = getGachaTickets(); if (t < 1) return false; save('gachaTickets', t - 1); return true }
+
+// チケット付与の重複防止（1日1回）
+export function getTicketsAwardedToday() { return load(`ticketsAwarded_${getToday()}`) || {} }
+export function wasTicketAwarded(reason) { return !!getTicketsAwardedToday()[reason] }
+export function markTicketAwarded(reason) {
+  const t = getTicketsAwardedToday(); t[reason] = true; save(`ticketsAwarded_${getToday()}`, t)
 }
 
 // 実績チェック → 新しく解除されたものを返す

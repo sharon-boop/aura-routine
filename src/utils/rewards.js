@@ -456,6 +456,20 @@ const toEffects = () => EFFECTS.map(([id,label,cssClass]) => ({ id, label, cssCl
 const mkPoke = ([id,pokeId,name,day], isBonus=false) =>
   ({ id, pokeId, name, type:'pokemon', day, isBonus })
 
+// 序盤ボーナス（day 1〜10 の追加報酬 / ポケモンと同日に解放）
+const EARLY_BONUSES = [
+  { id:'eb01', type:'stamp', emoji:'🌱', stampBg:'#84A98C',                                        name:'序盤の芽', label:'序盤の芽', day:1  },
+  { id:'eb02', type:'title', label:'始動者',  color:'#84A98C',                                      name:'始動者',   day:2  },
+  { id:'eb03', type:'acc',   emoji:'⭐', pos:ACC_POS.tr,                                             name:'スター',   label:'スター',  day:3  },
+  { id:'eb04', type:'stamp', emoji:'🔥', stampBg:'linear-gradient(135deg,#FF5722,#FF9800)',           name:'一週の炎', label:'一週の炎', day:4  },
+  { id:'eb05', type:'bg',    bg:'linear-gradient(135deg,#A1C4FD,#C2E9FB)',                           name:'空色',     label:'空色',    day:5  },
+  { id:'eb06', type:'frame', style:{border:'2px solid #E91E63',boxShadow:'0 0 12px rgba(233,30,99,0.3)'}, name:'ピンクフレーム', label:'ピンクフレーム', day:6 },
+  { id:'eb07', type:'title', label:'火花',    color:'#FF9800',                                      name:'火花',     day:7  },
+  { id:'eb08', type:'acc',   emoji:'💎', pos:ACC_POS.tl,                                             name:'ダイヤ',   label:'ダイヤ',  day:8  },
+  { id:'eb09', type:'stamp', emoji:'✨', stampBg:'linear-gradient(135deg,#FFD700,#FFA500)',           name:'序盤の光', label:'序盤の光', day:9  },
+  { id:'eb10', type:'bg',    bg:'linear-gradient(135deg,#D4FC79,#96E6A1)',                           name:'序盤グリーン', label:'序盤グリーン', day:10 },
+]
+
 function buildTimeline() {
   const titles  = toTitles()
   const bgs     = toBgs()
@@ -475,8 +489,11 @@ function buildTimeline() {
   const timeline = []
   // day 0: スターター
   timeline.push(mkPoke(POKE_STARTER))
-  // day 1〜10: 序盤ボーナス
-  POKE_EARLY.forEach(p => timeline.push(mkPoke(p)))
+  // day 1〜10: 序盤ボーナス（ポケモン + ボーナス報酬）
+  POKE_EARLY.forEach((p, idx) => {
+    timeline.push(mkPoke(p))
+    timeline.push(EARLY_BONUSES[idx]) // 同日に非ポケモン報酬も付与
+  })
   // 7日サイクル
   POKE_7DAY.forEach(p => timeline.push(mkPoke(p)))
   // 節目ボーナス（isBonus=true）
@@ -597,9 +614,112 @@ export function getSecretUnlocked() {
   try { return JSON.parse(localStorage.getItem('secretUnlocked')) || [] } catch { return [] }
 }
 
+/* ─── 完璧な日の達成報酬（50日分）─── */
+export const PERFECT_DAY_REWARDS = [
+  { id:'pd_1',  type:'stamp',   emoji:'⭐', stampBg:'linear-gradient(135deg,#FFD700,#FFA500)', name:'はじめての完璧', label:'はじめての完璧', perfectCount:1  },
+  { id:'pd_2',  type:'title',   label:'真剣モード', color:'#6C63FF', name:'真剣モード', perfectCount:2  },
+  { id:'pd_3',  type:'acc',     emoji:'🌟', pos:ACC_POS.tr, name:'ゴールドスター', label:'ゴールドスター', perfectCount:3  },
+  { id:'pd_4',  type:'stamp',   emoji:'🎯', stampBg:'linear-gradient(135deg,#EF4444,#B91C1C)', name:'的中の証', label:'的中の証', perfectCount:4  },
+  { id:'pd_5',  type:'frame',   style:{border:'2px solid #FFD700', boxShadow:'0 0 14px rgba(255,215,0,0.5)'}, name:'パーフェクトフレームI', label:'パーフェクトフレームI', perfectCount:5  },
+  { id:'pd_6',  type:'title',   label:'向上する者', color:'#00C851', name:'向上する者', perfectCount:6  },
+  { id:'pd_7',  type:'bg',      bg:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)', name:'パープルグラデ', label:'パープルグラデ', perfectCount:7  },
+  { id:'pd_8',  type:'acc',     emoji:'💎', pos:ACC_POS.tl, name:'ダイヤモンド', label:'ダイヤモンド', perfectCount:8  },
+  { id:'pd_9',  type:'stamp',   emoji:'💪', stampBg:'linear-gradient(135deg,#2F4858,#4A7B96)', name:'努力の証', label:'努力の証', perfectCount:9  },
+  { id:'pd_10', type:'pokemon', pokeId:175, name:'トゲピー',  perfectCount:10 },
+  { id:'pd_11', type:'title',   label:'10日の戦士', color:'#F2994A', name:'10日の戦士', perfectCount:11 },
+  { id:'pd_12', type:'effect',  cssClass:'effect-gold-glow', name:'ゴールドオーラ', label:'ゴールドオーラ', perfectCount:12 },
+  { id:'pd_13', type:'frame',   cssClass:'frame-aurora', name:'オーロラフレーム', label:'オーロラフレーム', perfectCount:13 },
+  { id:'pd_14', type:'bg',      bg:'linear-gradient(135deg,#0f0c29,#302b63,#24243e)', name:'ギャラクシー夜', label:'ギャラクシー夜', perfectCount:14 },
+  { id:'pd_15', type:'pokemon', pokeId:385, name:'ジラーチ',  perfectCount:15 },
+  { id:'pd_16', type:'title',   label:'自分に勝った人', color:'#E85D2A', name:'自分に勝った人', perfectCount:16 },
+  { id:'pd_17', type:'stamp',   emoji:'🔥', stampBg:'linear-gradient(135deg,#FF6B35,#F2994A)', name:'炎の証', label:'炎の証', perfectCount:17 },
+  { id:'pd_18', type:'acc',     emoji:'👑', pos:ACC_POS.tc, name:'完璧王冠', label:'完璧王冠', perfectCount:18 },
+  { id:'pd_19', type:'effect',  cssClass:'effect-silver', name:'シルバーオーラ', label:'シルバーオーラ', perfectCount:19 },
+  { id:'pd_20', type:'pokemon', pokeId:151, name:'ミュウ',    perfectCount:20 },
+  { id:'pd_21', type:'title',   label:'覚醒者', color:'#9B59B6', name:'覚醒者', perfectCount:21 },
+  { id:'pd_22', type:'bg',      bg:'linear-gradient(135deg,#FF416C,#FF4B2B)', name:'レッドフレイム', label:'レッドフレイム', perfectCount:22 },
+  { id:'pd_23', type:'frame',   cssClass:'frame-rainbow', name:'レインボーフレーム（完璧）', label:'レインボーフレーム（完璧）', perfectCount:23 },
+  { id:'pd_24', type:'stamp',   emoji:'🦋', stampBg:'linear-gradient(135deg,#667eea,#764ba2)', name:'変容の証', label:'変容の証', perfectCount:24 },
+  { id:'pd_25', type:'pokemon', pokeId:494, name:'ビクティニ', perfectCount:25 },
+  { id:'pd_26', type:'title',   label:'25日の奇跡', color:'#FFD700', name:'25日の奇跡', perfectCount:26 },
+  { id:'pd_27', type:'effect',  cssClass:'effect-rainbow', name:'レインボーオーラ（完璧）', label:'レインボーオーラ（完璧）', perfectCount:27 },
+  { id:'pd_28', type:'acc',     emoji:'⚡', pos:ACC_POS.tr, name:'稲妻アクセ', label:'稲妻アクセ', perfectCount:28 },
+  { id:'pd_29', type:'bg',      bg:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)', name:'ディープネイビー', label:'ディープネイビー', perfectCount:29 },
+  { id:'pd_30', type:'pokemon', pokeId:150, name:'ミュウツー', perfectCount:30 },
+  { id:'pd_31', type:'title',   label:'習慣の達人（完璧）', color:'#00C851', name:'習慣の達人（完璧）', perfectCount:31 },
+  { id:'pd_32', type:'frame',   cssClass:'frame-legendary', name:'レジェンダリーフレーム（完璧）', label:'レジェンダリーフレーム（完璧）', perfectCount:32 },
+  { id:'pd_33', type:'stamp',   emoji:'🏆', stampBg:'linear-gradient(135deg,#FFD700,#FF8C00)', name:'トロフィー', label:'トロフィー', perfectCount:33 },
+  { id:'pd_34', type:'effect',  cssClass:'effect-legendary', name:'伝説のオーラ（完璧）', label:'伝説のオーラ（完璧）', perfectCount:34 },
+  { id:'pd_35', type:'pokemon', pokeId:249, name:'ルギア',    perfectCount:35 },
+  { id:'pd_36', type:'title',   label:'真の継続者', color:'#E85D2A', name:'真の継続者', perfectCount:36 },
+  { id:'pd_37', type:'bg',      bg:'radial-gradient(ellipse at center, #1a0533 0%, #6C63FF 50%, #1a0533 100%)', name:'神秘の宇宙', label:'神秘の宇宙', perfectCount:37 },
+  { id:'pd_38', type:'acc',     emoji:'👁️', pos:ACC_POS.tl, name:'神の眼', label:'神の眼', perfectCount:38 },
+  { id:'pd_39', type:'frame',   cssClass:'frame-godlike', name:'神級フレーム（完璧）', label:'神級フレーム（完璧）', perfectCount:39 },
+  { id:'pd_40', type:'pokemon', pokeId:250, name:'ホウオウ',  perfectCount:40 },
+  { id:'pd_41', type:'title',   label:'不動心', color:'#9B59B6', name:'不動心', perfectCount:41 },
+  { id:'pd_42', type:'effect',  cssClass:'effect-sparkle', name:'スパークルオーラ（完璧）', label:'スパークルオーラ（完璧）', perfectCount:42 },
+  { id:'pd_43', type:'stamp',   emoji:'🌌', stampBg:'linear-gradient(135deg,#0f0c29,#302b63)', name:'宇宙の証', label:'宇宙の証', perfectCount:43 },
+  { id:'pd_44', type:'bg',      bg:'linear-gradient(135deg,#000000 0%,#1a0533 50%,#000000 100%)', name:'黒耀', label:'黒耀', perfectCount:44 },
+  { id:'pd_45', type:'pokemon', pokeId:384, name:'レックウザ', perfectCount:45 },
+  { id:'pd_46', type:'title',   label:'究極の在り方', color:'#FFD700', name:'究極の在り方', perfectCount:46 },
+  { id:'pd_47', type:'frame',   style:{border:'3px solid #FFD700', boxShadow:'0 0 24px rgba(255,215,0,0.9), 0 0 48px rgba(255,140,0,0.4)'}, name:'神聖なる輝き', label:'神聖なる輝き', perfectCount:47 },
+  { id:'pd_48', type:'acc',     emoji:'🌠', pos:ACC_POS.tr, name:'流れ星', label:'流れ星', perfectCount:48 },
+  { id:'pd_49', type:'effect',  cssClass:'effect-fire-aura', name:'炎神のオーラ（完璧）', label:'炎神のオーラ（完璧）', perfectCount:49 },
+  { id:'pd_50', type:'pokemon', pokeId:483, name:'ディアルガ', perfectCount:50 },
+]
+
+/* ─── プレミアムガチャプール ─── */
+export const PREMIUM_GACHA_POOL = [
+  // common (モンスターボール)
+  { id:'pg_st01', type:'stamp',  emoji:'🎪', stampBg:'linear-gradient(135deg,#FF6B35,#F2994A)', name:'プレミアムサーカス', label:'プレミアムサーカス', rarity:'common', premiumGacha:true },
+  { id:'pg_st02', type:'stamp',  emoji:'🌊', stampBg:'linear-gradient(135deg,#0288D1,#039BE5)', name:'プレミアム波', label:'プレミアム波', rarity:'common', premiumGacha:true },
+  { id:'pg_st03', type:'stamp',  emoji:'🎭', stampBg:'linear-gradient(135deg,#9C27B0,#673AB7)', name:'プレミアム演', label:'プレミアム演', rarity:'common', premiumGacha:true },
+  { id:'pg_t01',  type:'title',  label:'ガチャ好き', color:'#FF9800', name:'ガチャ好き', rarity:'common', premiumGacha:true },
+  { id:'pg_t02',  type:'title',  label:'継続中', color:'#4CAF50', name:'継続中', rarity:'common', premiumGacha:true },
+  { id:'pg_ac01', type:'acc',    emoji:'🎀', pos:ACC_POS.tr, name:'リボン（プレミアム）', label:'リボン（プレミアム）', rarity:'common', premiumGacha:true },
+  // uncommon (スーパーボール)
+  { id:'pg_bg01', type:'bg',     bg:'linear-gradient(135deg,#1CB5E0,#000851)', name:'プレミアムネイビー', label:'プレミアムネイビー', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_bg02', type:'bg',     bg:'linear-gradient(135deg,#fc4a1a,#f7b733)', name:'プレミアムサンセット', label:'プレミアムサンセット', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_fr01', type:'frame',  style:{border:'2px solid #00E5FF',boxShadow:'0 0 16px rgba(0,229,255,0.5)'}, name:'プレミアムシアン', label:'プレミアムシアン', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_t03',  type:'title',  label:'粘り強い', color:'#2196F3', name:'粘り強い', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_t04',  type:'title',  label:'探求者', color:'#9C27B0', name:'探求者', rarity:'uncommon', premiumGacha:true },
+  // rare (ハイパーボール) + Pokémon
+  { id:'pg_ef01', type:'effect', cssClass:'effect-pulse',    name:'パルスオーラ', label:'パルスオーラ', rarity:'rare', premiumGacha:true },
+  { id:'pg_ef02', type:'effect', cssClass:'effect-ice-aura', name:'アイスオーラ', label:'アイスオーラ', rarity:'rare', premiumGacha:true },
+  { id:'pg_fr02', type:'frame',  cssClass:'frame-fire',      name:'炎フレーム（プレミアム）', label:'炎フレーム（プレミアム）', rarity:'rare', premiumGacha:true },
+  { id:'pg_t05',  type:'title',  label:'挑戦者', color:'#E85D2A', name:'挑戦者', rarity:'rare', premiumGacha:true },
+  { id:'pg_pk01', type:'pokemon', pokeId:54,  name:'コダック',   rarity:'rare',  premiumGacha:true },
+  { id:'pg_pk02', type:'pokemon', pokeId:52,  name:'ニャース',   rarity:'rare',  premiumGacha:true },
+  { id:'pg_pk03', type:'pokemon', pokeId:133, name:'イーブイ',   rarity:'rare',  premiumGacha:true },
+  { id:'pg_pk04', type:'pokemon', pokeId:39,  name:'プリン',     rarity:'rare',  premiumGacha:true },
+  { id:'pg_pk05', type:'pokemon', pokeId:113, name:'ラッキー',   rarity:'rare',  premiumGacha:true },
+  // ultra (マスターボール) + legendary Pokémon
+  { id:'pg_ef03', type:'effect', cssClass:'effect-lightning', name:'ライトニングオーラ（プレミアム）', label:'ライトニングオーラ（プレミアム）', rarity:'ultra', premiumGacha:true },
+  { id:'pg_fr03', type:'frame',  cssClass:'frame-diamond',    name:'ダイヤモンドフレーム', label:'ダイヤモンドフレーム', rarity:'ultra', premiumGacha:true },
+  { id:'pg_t06',  type:'title',  label:'プレミアムマスター', color:'#FFD700', name:'プレミアムマスター', rarity:'ultra', premiumGacha:true },
+  { id:'pg_pk06', type:'pokemon', pokeId:144, name:'フリーザー', rarity:'ultra', premiumGacha:true },
+  { id:'pg_pk07', type:'pokemon', pokeId:145, name:'サンダー',   rarity:'ultra', premiumGacha:true },
+  { id:'pg_pk08', type:'pokemon', pokeId:146, name:'ファイヤー', rarity:'ultra', premiumGacha:true },
+  { id:'pg_pk09', type:'pokemon', pokeId:243, name:'ライコウ',   rarity:'ultra', premiumGacha:true },
+  { id:'pg_pk10', type:'pokemon', pokeId:245, name:'スイクン',   rarity:'ultra', premiumGacha:true },
+]
+
+// プレミアムガチャ解放済み管理
+export function getPremiumUnlocked() {
+  try { return JSON.parse(localStorage.getItem('premiumUnlocked')) || [] } catch { return [] }
+}
+export function addPremiumUnlocked(id) {
+  const list = getPremiumUnlocked()
+  if (!list.includes(id)) { list.push(id); localStorage.setItem('premiumUnlocked', JSON.stringify(list)) }
+}
+
 /* ─── ユーティリティ ─── */
 export function isUnlocked(item, streak, perfect = 0) {
+  if (item.perfectCount != null) return perfect >= item.perfectCount
   if (item.perfectReq) return perfect >= item.perfectReq
+  if (item.premiumGacha) {
+    try { return (JSON.parse(localStorage.getItem('premiumUnlocked')) || []).includes(item.id) } catch { return false }
+  }
   const req = item.day ?? item.streakReq ?? 0
   return req <= streak
 }

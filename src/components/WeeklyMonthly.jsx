@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getWeeklyChallenges, saveWeeklyChallenge, getMonthlyChallenges, saveMonthlyChallenge, getLogIdeas, saveLogIdeas } from '../utils/storage'
+import { getWeeklyChallenges, saveWeeklyChallenge, getMonthlyChallenges, saveMonthlyChallenge, getLogIdeas, saveLogIdeas, addGachaTickets } from '../utils/storage'
 import { toast } from './Toast'
 
 const DEFAULT_WEEKLY = ['友達を誘ってご飯を企画する', '勉強会を作る', '後輩や友達の相談に乗る', '旅行や遊びを企画する', 'SNSで学びを発信する', '先輩・社会人に会う']
@@ -15,7 +15,6 @@ export default function WeeklyMonthly() {
   const [mForm, setMForm] = useState({ challenge: '', reason: '', feeling: '', aura: '' })
   const [editW, setEditW] = useState(null)
   const [editM, setEditM] = useState(null)
-  const [newIdea, setNewIdea] = useState('')
 
   useEffect(() => {
     setWeeklyList(getWeeklyChallenges())
@@ -33,7 +32,8 @@ export default function WeeklyMonthly() {
     setWeeklyList(getWeeklyChallenges())
     setWForm({ challenge: '', date: '', people: '', result: '', learned: '' })
     setEditW(null)
-    toast('週1チャレンジを記録しました')
+    addGachaTickets(2)
+    toast('週1チャレンジを記録しました ✓ +2チケット🎟️')
   }
 
   const saveM = () => {
@@ -43,29 +43,6 @@ export default function WeeklyMonthly() {
     setMForm({ challenge: '', reason: '', feeling: '', aura: '' })
     setEditM(null)
     toast('月1チャレンジを記録しました')
-  }
-
-  const addIdea = (isWeekly) => {
-    if (!newIdea.trim()) return
-    if (isWeekly) {
-      const next = [...weeklyIdeas, newIdea.trim()]
-      setWeeklyIdeas(next); saveLogIdeas('weekly', next)
-    } else {
-      const next = [...monthlyIdeas, newIdea.trim()]
-      setMonthlyIdeas(next); saveLogIdeas('monthly', next)
-    }
-    setNewIdea('')
-    toast('アイデアを追加しました')
-  }
-
-  const removeIdea = (isWeekly, idx) => {
-    if (isWeekly) {
-      const next = weeklyIdeas.filter((_, i) => i !== idx)
-      setWeeklyIdeas(next); saveLogIdeas('weekly', next)
-    } else {
-      const next = monthlyIdeas.filter((_, i) => i !== idx)
-      setMonthlyIdeas(next); saveLogIdeas('monthly', next)
-    }
   }
 
   const ideas = tab === 'weekly' ? weeklyIdeas : monthlyIdeas
@@ -106,23 +83,9 @@ export default function WeeklyMonthly() {
             </div>
           </div>
 
-          {/* アイデア編集 */}
-          <div style={{ marginTop:8,borderTop:'1px solid #F0EDE7',paddingTop:10 }}>
-            <div style={{ fontSize:11,color:'var(--muted)',fontWeight:700,marginBottom:6 }}>アイデアを編集</div>
-            <div style={{ display:'flex',flexWrap:'wrap',gap:6,marginBottom:8 }}>
-              {ideas.map((idea, i) => (
-                <div key={i} style={{ display:'flex',alignItems:'center',gap:4,background:'var(--cream)',borderRadius:20,padding:'4px 10px' }}>
-                  <span style={{ fontSize:12 }}>{idea}</span>
-                  <button onClick={() => removeIdea(tab==='weekly', i)} style={{ background:'none',border:'none',cursor:'pointer',fontSize:12,color:'var(--muted)',padding:'0 2px' }}>×</button>
-                </div>
-              ))}
-            </div>
-            <div style={{ display:'flex',gap:8 }}>
-              <input value={newIdea} onChange={e=>setNewIdea(e.target.value)}
-                onKeyDown={e=>e.key==='Enter'&&addIdea(tab==='weekly')}
-                placeholder="新しいアイデアを追加"
-                style={{ flex:1,padding:'9px 14px',borderRadius:50,border:'1.5px solid #E8E4DC',background:'#FDFBF8',fontFamily:'var(--font)',fontSize:13,outline:'none' }} />
-              <button className="btn btn-sm btn-outline" style={{ width:'auto' }} onClick={() => addIdea(tab==='weekly')}>追加</button>
+          <div style={{ marginTop:8, padding:'8px 0 0', borderTop:'1px solid #F0EDE7' }}>
+            <div style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>
+              アイデアの編集は <strong>設定</strong> タブから行えます
             </div>
           </div>
         </div>

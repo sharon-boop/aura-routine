@@ -1707,3 +1707,155 @@ body{
 .reward-toast-desc{
   font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:4px;
 }
+
+/* ═══════════════════════════════════════════
+   PREMIUM GACHA
+═══════════════════════════════════════════ */
+.pg-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9000;
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:fadeIn 0.25s ease;
+}
+.pg-modal{
+  background:linear-gradient(180deg,#1a1a2e 0%,#0f0c29 100%);
+  border-radius:28px 28px 0 0;padding:28px 24px 40px;
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;
+}
+.pg-header{
+  display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;
+}
+.pg-tickets{
+  display:flex;align-items:center;gap:10;justify-content:center;
+  background:rgba(255,255,255,0.06);border-radius:50px;
+  padding:12px 24px;margin-bottom:28px;
+}
+.pg-ticket-icon{ font-size:24px; }
+.pg-ticket-count{
+  font-size:36px;font-weight:900;color:#FFD700;line-height:1;letter-spacing:-2px;margin:0 6px;
+}
+.pg-ticket-label{ font-size:13px;color:rgba(255,255,255,0.4);font-weight:700; }
+
+.pg-stage{
+  min-height:200px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:20px 0;
+}
+
+/* ボール演出 */
+.pg-ball-idle{
+  display:flex;gap:12px;justify-content:center;
+}
+.pg-ball-mini{
+  width:28px;height:28px;border-radius:50%;opacity:0.6;
+}
+.pg-ball-wrap{
+  display:flex;align-items:center;justify-content:center;
+}
+.pg-ball-wrap.phase-dropping .pg-ball-container{
+  animation:pgBallDrop 0.7s cubic-bezier(.17,.67,.36,1.3) forwards;
+}
+.pg-ball-wrap.phase-shaking .pg-ball-container{
+  animation:pgBallShake 0.25s ease-in-out 4;
+}
+.pg-ball-wrap.phase-opening .pg-ball-container{
+  animation:none;
+}
+.pg-ball-container{
+  position:relative;width:90px;height:90px;
+}
+.pg-ball-top{
+  position:absolute;top:0;left:0;width:90px;height:45px;
+  border-radius:45px 45px 0 0;overflow:hidden;
+  transition:transform 0.5s cubic-bezier(.17,.67,.36,1.3);
+}
+.pg-ball-bot{
+  position:absolute;bottom:0;left:0;width:90px;height:45px;
+  border-radius:0 0 45px 45px;overflow:hidden;
+  transition:transform 0.5s cubic-bezier(.17,.67,.36,1.3);
+}
+.pg-ball-seam{
+  position:absolute;top:43px;left:0;width:90px;height:4px;
+  background:#151515;z-index:2;
+}
+.pg-ball-btn{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  width:18px;height:18px;border-radius:50%;
+  border:3px solid rgba(0,0,0,0.3);
+}
+.pg-ball-top.ball-top-open{
+  transform:translateY(-40px) rotate(-20deg);opacity:0;
+}
+.pg-ball-bot.ball-bot-open{
+  transform:translateY(30px) rotate(15deg);opacity:0;
+}
+
+.pg-flash{
+  width:100%;height:160px;background:#fff;
+  border-radius:16px;
+  animation:pgFlash 0.4s ease forwards;
+}
+
+.pg-reward-card{
+  text-align:center;padding:24px;background:rgba(255,255,255,0.06);
+  border-radius:20px;width:100%;
+}
+
+.pg-actions{
+  margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:10;width:100%;
+}
+.pg-pull-btn{
+  width:100%;font-size:16px;padding:18px;
+  background:linear-gradient(135deg,#6C63FF,#F2994A);
+  border-radius:50px;border:none;color:#fff;font-weight:900;
+  font-family:var(--font);cursor:pointer;
+  box-shadow:0 8px 24px rgba(108,99,255,0.4);
+  transition:transform 0.15s,opacity 0.2s;
+}
+.pg-pull-btn:disabled{
+  opacity:0.4;cursor:not-allowed;background:#666;box-shadow:none;
+}
+.pg-pull-btn:not(:disabled):active{ transform:scale(0.97); }
+
+.pg-hint{
+  margin-top:20px;padding:14px 16px;background:rgba(255,255,255,0.04);
+  border-radius:14px;text-align:center;
+}
+
+/* ─── アニメーション ─── */
+@keyframes pgBallDrop{
+  from{transform:translateY(-200px) rotate(-15deg);opacity:0;}
+  60%{transform:translateY(8px) rotate(5deg);}
+  80%{transform:translateY(-4px);}
+  to{transform:translateY(0) rotate(0deg);opacity:1;}
+}
+@keyframes pgBallShake{
+  0%,100%{transform:rotate(0deg);}
+  25%{transform:rotate(-22deg) scale(1.05);}
+  75%{transform:rotate(22deg) scale(1.05);}
+}
+@keyframes pgFlash{
+  0%{opacity:1;}
+  100%{opacity:0;}
+}
+
+/* Home画面プレミアムガチャバナー */
+.pg-banner{
+  background:linear-gradient(135deg,#1a1a2e,#302b63);
+  border-radius:var(--r-sm);padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;border:1px solid rgba(108,99,255,0.3);
+  transition:transform 0.15s;
+}
+.pg-banner:active{ transform:scale(0.98); }
+.pg-banner-left{ flex:1; }
+.pg-banner-title{
+  font-size:16px;font-weight:900;color:#fff;letter-spacing:-0.5px;margin-bottom:2px;
+}
+.pg-banner-sub{
+  font-size:12px;color:rgba(255,255,255,0.5);font-weight:600;
+}
+.pg-banner-badge{
+  background:linear-gradient(135deg,#6C63FF,#F2994A);
+  color:#fff;font-size:11px;font-weight:900;
+  padding:6px 14px;border-radius:50px;white-space:nowrap;
+}
+

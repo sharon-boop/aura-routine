@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   getTodayRecord, updateTodayRecord, calcDayProgress, getStreak, getPerfectCount,
-  getPerfectDayStatus,
+  getPerfectDayStatus, getGachaTickets,
   formatDate, getToday, getQuotes, getDailyQuote, saveQuotes,
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 import AuraCharacter from './AuraCharacter'
+import PremiumGacha from './PremiumGacha'
 
 /* ─── Quote Banner ─── */
 function QuoteBanner() {
@@ -313,6 +314,8 @@ export default function Home({ onNavigate, onSettings }) {
   const [streak, setStreak] = useState(0)
   const [perfect, setPerfect] = useState(0)
   const [perfectStatus, setPerfectStatus] = useState(null)
+  const [tickets, setTickets] = useState(0)
+  const [showGacha, setShowGacha] = useState(false)
 
   useEffect(() => {
     const r = getTodayRecord()
@@ -321,6 +324,7 @@ export default function Home({ onNavigate, onSettings }) {
     setStreak(getStreak())
     setPerfect(getPerfectCount())
     setPerfectStatus(getPerfectDayStatus(r))
+    setTickets(getGachaTickets())
   }, [])
 
   const setArikata = (val) => {
@@ -487,6 +491,23 @@ export default function Home({ onNavigate, onSettings }) {
           </div>
         </div>
       </div>
+
+      {/* ─── プレミアムガチャ ─── */}
+      {tickets > 0 && (
+        <div className="sec" style={{ paddingTop:0 }}>
+          <div className="pg-banner" onClick={() => setShowGacha(true)}>
+            <div className="pg-banner-left">
+              <div className="pg-banner-title">🎰 プレミアムガチャ</div>
+              <div className="pg-banner-sub">チケット {tickets}枚 所持中</div>
+            </div>
+            <div className="pg-banner-badge">引く →</div>
+          </div>
+        </div>
+      )}
+
+      {showGacha && (
+        <PremiumGacha onClose={() => { setShowGacha(false); setTickets(getGachaTickets()) }} />
+      )}
 
       {/* ─── 夜の日記への導線 ─── */}
       <div className="sec">
