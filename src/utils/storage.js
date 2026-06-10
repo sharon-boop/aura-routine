@@ -360,8 +360,10 @@ export function isPerfectDay(record) {
   if (mc.length === 0 || !mc.every(Boolean)) return false
   // 2. 振り返り：日記が書かれている
   if (!record.evening?.diary?.trim()) return false
-  // 3. 自己投資90分完了
-  if (!record.investment?.timerDone) return false
+  // 3. 自己投資90分完了（タイマーまたは手動入力）
+  const timerOk  = record.investment?.timerDone === true
+  const manualOk = (record.investment?.manualMinutes || 0) >= 90
+  if (!timerOk && !manualOk) return false
   // 4. 価値提供1人以上：1人以上いてdone
   const vp = record.morning?.valuePeople || []
   if (!vp.some(p => p.done)) return false

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+
+const TOAST_STREAK_KEY = 'rewardLastStreak'
 import {
   POKEMON_REWARDS, FRAME_REWARDS, ACCESSORY_REWARDS,
   BG_REWARDS, TITLE_REWARDS, EFFECT_REWARDS, STAMP_REWARDS,
@@ -166,18 +168,22 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   const prevStreakRef = useRef(streak)
   const prevPerfectRef = useRef(perfect)
 
-  // Detect new streak unlocks
+  // Detect new streak unlocks — 1日1回のみ表示
   useEffect(() => {
-    const prev = prevStreakRef.current
-    if (streak > prev) {
+    const lastShown = parseInt(localStorage.getItem(TOAST_STREAK_KEY) || '0')
+    if (streak > lastShown) {
       const unlocked = []
-      for (let d = prev + 1; d <= streak; d++) getAllRewardsAtDay(d).forEach(r => unlocked.push(r))
-      if (unlocked.length) { setNewRewards(unlocked); setShowToast(true) }
+      for (let d = lastShown + 1; d <= streak; d++) getAllRewardsAtDay(d).forEach(r => unlocked.push(r))
+      if (unlocked.length) {
+        setNewRewards(unlocked)
+        setShowToast(true)
+      }
+      localStorage.setItem(TOAST_STREAK_KEY, String(streak))
       prevStreakRef.current = streak
     }
   }, [streak])
 
-  // Detect perfect unlocks
+  // Detect perfect unlocks — 1日1回のみ
   useEffect(() => {
     const prev = prevPerfectRef.current
     if (perfect > prev) {
@@ -197,15 +203,21 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   }
   const closeToast = () => { setShowToast(false); setNewRewards([]); setTab('collection') }
 
-  // Resolve active items
+  // Resolve active items（デフォルト値はリストにないためフォールバックで補完）
   const allPoke = [...POKEMON_REWARDS, ...PERFECT_POKEMON]
   const poke   = allPoke.find(p => p.id === equipped.pokemon) || POKEMON_REWARDS[0]
-  const frame  = FRAME_REWARDS.find(f => f.id === equipped.frame) || FRAME_REWARDS[0]
-  const acc    = ACCESSORY_REWARDS.find(a => a.id === equipped.acc) || ACCESSORY_REWARDS[0]
-  const bg     = BG_REWARDS.find(b => b.id === equipped.bg) || BG_REWARDS[0]
-  const title  = TITLE_REWARDS.find(t => t.id === equipped.title) || TITLE_REWARDS[0]
-  const effect = EFFECT_REWARDS.find(e => e.id === equipped.effect) || EFFECT_REWARDS[0]
-  const stamp  = STAMP_REWARDS.find(s => s.id === equipped.stamp) || STAMP_REWARDS[0]
+  const frame  = FRAME_REWARDS.find(f => f.id === equipped.frame)
+    || { id:'none', label:'デフォルト', type:'frame', style:{ border:'2px solid #E8E2D8' } }
+  const acc    = ACCESSORY_REWARDS.find(a => a.id === equipped.acc)
+    || { id:'none', label:'なし', type:'acc', emoji:'', pos:{} }
+  const bg     = BG_REWARDS.find(b => b.id === equipped.bg)
+    || { id:'cream', label:'クリーム', type:'bg', bg:'#FAFAF7' }
+  const title  = TITLE_REWARDS.find(t => t.id === equipped.title)
+    || { id:'beginner', label:'新人', type:'title', color:'#9A9A9A' }
+  const effect = EFFECT_REWARDS.find(e => e.id === equipped.effect)
+    || { id:'none', label:'なし', type:'effect', cssClass:'effect-none' }
+  const stamp  = STAMP_REWARDS.find(s => s.id === equipped.stamp)
+    || { id:'none', label:'なし', type:'stamp', emoji:'', stampBg:'transparent' }
 
   // Unlock counts
   const unlockedPoke   = allPoke.filter(r => isUnlocked(r, streak, perfect)).length

@@ -518,7 +518,7 @@ const _defaults = {
 function listFor(type) {
   const def   = _defaults[type]
   const items = TIMELINE.filter(r => r.type === type && r.id !== def?.id)
-  return def ? [def, ...items] : items
+  return items   // デフォルト項目はコレクションに含めない
 }
 
 export const POKEMON_REWARDS = [
@@ -531,7 +531,6 @@ export const FRAME_REWARDS     = listFor('frame')
 export const ACCESSORY_REWARDS = listFor('acc')
 export const BG_REWARDS        = listFor('bg')
 export const TITLE_REWARDS     = [
-  _defaults.title,
   ...listFor('title'),
   ...PERFECT_TITLES.map(([id,label,color,pReq,rainbow]) => ({ id, label, color, rainbow, type:'title', perfectReq:pReq })),
 ]

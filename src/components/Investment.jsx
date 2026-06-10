@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getTodayRecord, updateTodayRecord } from '../utils/storage'
+import { getTodayRecord, updateTodayRecord, getAllRecords, formatDate } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 
@@ -20,16 +20,140 @@ function Stars({ value, onChange }) {
   )
 }
 
+/* ─── 投資カレンダー ─── */
+function InvestCalendar() {
+  const [open, setOpen] = useState(false)
+  const [records, setRecords] = useState([])
+
+  useEffect(() => {
+    if (!open) return
+    const all = getAllRecords()
+    const list = Object.entries(all)
+      .filter(([, r]) => r.investment && (r.investment.timerDone || r.investment.manualMinutes > 0 || r.investment.theme))
+      .map(([date, r]) => ({ date, inv: r.investment }))
+      .sort((a, b) => b.date.localeCompare(a.date))
+    setRecords(list)
+  }, [open])
+
+  if (!open) {
+    return (
+      <div className="sec">
+        <button
+          className="btn btn-outline"
+          style={{ width: '100%' }}
+          onClick={() => setOpen(true)}
+        >
+          📅 投資記録を見る
+        </button>
+      </div>
+    )
+  }
+
+  const totalMins = records.reduce((sum, { inv }) => {
+    if (inv.timerDone) return sum + 90
+    return sum + (inv.manualMinutes || Math.round((inv.timerSeconds || 0) / 60))
+  }, 0)
+
+  return (
+    <div className="sec">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div className="sec-title" style={{ marginBottom: 0 }}>📅 投資記録</div>
+        <button
+          onClick={() => setOpen(false)}
+          style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--muted)', cursor: 'pointer', fontFamily: 'var(--font)', fontWeight: 700 }}
+        >
+          閉じる ↑
+        </button>
+      </div>
+
+      {/* 累計サマリー */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <div className="card static" style={{ flex: 1, textAlign: 'center', padding: '14px 8px' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--main)' }}>{records.length}</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>記録日数</div>
+        </div>
+        <div className="card static" style={{ flex: 1, textAlign: 'center', padding: '14px 8px' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--orange)' }}>{totalMins}</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>累計分</div>
+        </div>
+        <div className="card static" style={{ flex: 1, textAlign: 'center', padding: '14px 8px' }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--purple)' }}>{Math.floor(totalMins / 60)}h</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>累計時間</div>
+        </div>
+      </div>
+
+      {records.length === 0 ? (
+        <div className="card static" style={{ textAlign: 'center', padding: '24px', color: 'var(--muted)', fontSize: 13 }}>
+          まだ記録がありません
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {records.map(({ date, inv }) => {
+            const mins = inv.timerDone ? 90
+              : inv.manualMinutes > 0 ? inv.manualMinutes
+              : Math.round((inv.timerSeconds || 0) / 60)
+            const pct = Math.min(Math.round((mins / 90) * 100), 100)
+            const done = inv.timerDone || inv.manualMinutes >= 90
+            return (
+              <div key={date} className="card static" style={{ padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--main)' }}>
+                    {formatDate(date)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {done && <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--success)', letterSpacing: 0.5 }}>✓ 達成</span>}
+                    <span style={{ fontSize: 13, fontWeight: 900, color: done ? 'var(--success)' : 'var(--orange)' }}>
+                      {mins}分
+                    </span>
+                  </div>
+                </div>
+                {/* 進捗バー */}
+                <div style={{ height: 4, background: '#F0EDE7', borderRadius: 4, marginBottom: 8, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', width: `${pct}%`,
+                    background: done ? 'var(--success)' : 'var(--orange)',
+                    borderRadius: 4,
+                  }} />
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {inv.theme && (
+                    <span style={{ fontSize: 11, background: 'var(--cream)', borderRadius: 20, padding: '3px 10px', fontWeight: 700, color: 'var(--ink2)' }}>
+                      {inv.theme}{inv.toeicSub ? ` / ${inv.toeicSub}` : ''}
+                    </span>
+                  )}
+                  {inv.focus && (
+                    <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>
+                      集中度 {'★'.repeat(inv.focus)}{'☆'.repeat(5 - inv.focus)}
+                    </span>
+                  )}
+                </div>
+                {inv.done && (
+                  <div style={{ fontSize: 12, color: 'var(--ink2)', marginTop: 6, lineHeight: 1.5 }}>
+                    {inv.done}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── メインコンポーネント ─── */
 export default function Investment() {
   const [data, setData] = useState(null)
   const [running, setRunning] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const [manualInput, setManualInput] = useState('')
   const ivRef = useRef(null)
 
   useEffect(() => {
     const r = getTodayRecord()
     setData(r)
     setElapsed(r.investment?.timerSeconds || 0)
+    setManualInput(r.investment?.manualMinutes > 0 ? String(r.investment.manualMinutes) : '')
   }, [])
 
   useEffect(() => {
@@ -60,6 +184,16 @@ export default function Investment() {
     setData(prev => ({ ...prev, investment: { ...prev.investment, ...partial } }))
   }
 
+  const handleManualSave = () => {
+    const mins = parseInt(manualInput)
+    if (!mins || mins <= 0) return
+    setInv({ manualMinutes: mins })
+    toast(`${mins}分の投資を記録した ✓`)
+    if (mins >= 90) {
+      setTimeout(() => confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 }, colors: ['#2F4858', '#F2994A', '#6C63FF'] }), 200)
+    }
+  }
+
   if (!data) return null
 
   const inv = data.investment || {}
@@ -67,6 +201,8 @@ export default function Investment() {
   const remaining = TOTAL - elapsed
   const C = 2 * Math.PI * 70
   const dash = C - (pct / 100) * C
+  const manualMins = inv.manualMinutes || 0
+  const isDone = inv.timerDone || manualMins >= 90
 
   return (
     <div className="slide-up" style={{ paddingBottom: '40px' }}>
@@ -76,13 +212,14 @@ export default function Investment() {
         <div className="ph-sub">今日の90分が未来を変える</div>
       </div>
 
+      {/* ── タイマー ── */}
       <div className="sec">
         <div className="card static" style={{ textAlign:'center',padding:'32px 20px' }}>
           <div style={{ position:'relative',display:'inline-block' }}>
             <svg width="180" height="180" viewBox="0 0 180 180">
               <circle cx="90" cy="90" r="70" fill="none" stroke="#F0EDE7" strokeWidth="8" />
               <circle cx="90" cy="90" r="70" fill="none"
-                stroke={inv.timerDone ? 'var(--success)' : 'var(--main)'}
+                stroke={isDone ? 'var(--success)' : 'var(--main)'}
                 strokeWidth="8"
                 strokeDasharray={C}
                 strokeDashoffset={dash}
@@ -97,9 +234,9 @@ export default function Investment() {
             </div>
           </div>
 
-          {inv.timerDone ? (
+          {isDone ? (
             <div style={{ marginTop:16,fontSize:13,fontWeight:900,color:'var(--success)',letterSpacing:0.5 }}>
-              今日の90分は、未来の自分への投資 ✓
+              今日の自己投資 達成 ✓
             </div>
           ) : (
             <div style={{ display:'flex',gap:10,marginTop:24,justifyContent:'center' }}>
@@ -114,6 +251,46 @@ export default function Investment() {
         </div>
       </div>
 
+      {/* ── 手動記録 ── */}
+      <div className="sec">
+        <div className="sec-title">手動で時間を記録する</div>
+        <div className="card static">
+          <div style={{ fontSize:12,color:'var(--muted)',marginBottom:12,lineHeight:1.6 }}>
+            タイマー以外で投資した時間（読書・勉強など）を分単位で入力できます。
+          </div>
+          <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+            <input
+              type="number"
+              min="1"
+              max="480"
+              value={manualInput}
+              onChange={e => setManualInput(e.target.value)}
+              placeholder="分を入力（例：60）"
+              style={{
+                flex:1, padding:'12px 14px', borderRadius:10,
+                border:'1.5px solid var(--border)', background:'var(--card)',
+                fontSize:16, fontFamily:'var(--font)', fontWeight:700,
+                color:'var(--ink)', outline:'none',
+              }}
+            />
+            <span style={{ fontSize:13,fontWeight:700,color:'var(--muted)',flexShrink:0 }}>分</span>
+            <button
+              className="btn btn-main"
+              style={{ width:80,flexShrink:0 }}
+              onClick={handleManualSave}
+            >
+              記録
+            </button>
+          </div>
+          {manualMins > 0 && (
+            <div style={{ marginTop:10,fontSize:12,fontWeight:700,color:'var(--success)' }}>
+              ✓ {manualMins}分 記録済み{manualMins >= 90 ? ' — 90分達成！' : ` — あと${90 - manualMins}分で達成`}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── テーマ・内容 ── */}
       <div className="sec">
         <div className="sec-title">今日の自己投資テーマ</div>
         <div className="card static">
@@ -159,6 +336,9 @@ export default function Investment() {
           記録を保存する
         </button>
       </div>
+
+      {/* ── 投資カレンダー ── */}
+      <InvestCalendar />
     </div>
   )
 }
