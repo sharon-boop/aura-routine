@@ -371,7 +371,8 @@ const toFrames = () => FRAMES_RAW.map(([id,label,border,shadow,cssClass]) => ({
 const toAccs   = () => ACCS_RAW.map(([id,label,emoji,posKey]) => ({ id, label, emoji, pos: ACC_POS[posKey]||{}, type:'acc' }))
 const toStamps = () => STAMPS_RAW.map(([id,label,emoji,bg]) => ({ id, label, emoji, stampBg:bg, type:'stamp' }))
 const toEffects= () => EFFECTS.map(([id,label,cssClass]) => ({ id, label, cssClass, type:'effect' }))
-const toPoke   = () => POKE.map(([id,pokeId,name]) => ({ id, pokeId, name, type:'pokemon' }))
+// index 0 = day 0 (starter), index 1 = day 10, index 2 = day 20, ...
+const toPoke   = () => POKE.map(([id,pokeId,name], i) => ({ id, pokeId, name, type:'pokemon', day: i * 10 }))
 
 function buildTimeline() {
   const titles  = toTitles()
