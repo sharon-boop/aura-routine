@@ -450,17 +450,25 @@ export function isPerfectDay(record) {
   // 4. 価値提供1人以上：1人以上いてdone
   const vp = record.morning?.valuePeople || []
   if (!vp.some(p => p.done)) return false
+  // 5. 夜のチェックリスト全達成（テンプレートに項目がある場合）
+  const eveningTemplate = getChecklistTemplate('evening')
+  if (eveningTemplate.length > 0) {
+    const evChecks = record.evening?.checks || {}
+    if (!eveningTemplate.every(c => evChecks[c.key] === true)) return false
+  }
   return true
 }
 
 // 完璧な日の各条件チェック（表示用）
 export function getPerfectDayStatus(record) {
-  if (!record) return { checks: false, diary: false, invest: false, value: false }
+  if (!record) return { checks: false, diary: false, invest: false, value: false, eveningChecks: false }
   const checks = isMorningChecksDone(record)
   const diary  = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
   const invest = record.investment?.timerDone === true || (record.investment?.manualMinutes || 0) >= 90
   const value  = (record.morning?.valuePeople || []).some(p => p.done)
-  return { checks, diary, invest, value }
+  const eveningTemplate = getChecklistTemplate('evening')
+  const eveningChecks = eveningTemplate.length === 0 || eveningTemplate.every(c => (record.evening?.checks || {})[c.key] === true)
+  return { checks, diary, invest, value, eveningChecks }
 }
 
 export function getPerfectCount() {

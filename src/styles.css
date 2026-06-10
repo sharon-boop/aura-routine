@@ -1605,10 +1605,38 @@ body{
 .effect-pulse{animation:effectPulse 2s ease-in-out infinite;}
 @keyframes effectPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 
-.effect-gold-glow{box-shadow:0 0 24px #FFD70060,0 0 48px #FFD70030;}
-.effect-silver{box-shadow:0 0 20px #C0C0C060,0 0 40px #C0C0C030;}
-.effect-fire-aura{box-shadow:0 0 28px #FF6D0080,0 0 56px #FF6D0040;animation:firePulse 1.5s ease-in-out infinite;}
-.effect-ice-aura{box-shadow:0 0 24px #80DEEA80,0 0 48px #80DEEA40;}
+.effect-gold-glow{
+  box-shadow:0 0 28px #FFD700, 0 0 56px rgba(255,215,0,0.5) !important;
+  border-color:#FFD700 !important;
+  animation:goldPulse 2s ease-in-out infinite;
+}
+@keyframes goldPulse{
+  0%,100%{box-shadow:0 0 28px #FFD700,0 0 56px rgba(255,215,0,0.4);}
+  50%{box-shadow:0 0 40px #FFD700,0 0 80px rgba(255,215,0,0.7);}
+}
+.effect-silver{
+  box-shadow:0 0 24px #C0C0C0,0 0 48px rgba(192,192,192,0.4) !important;
+  border-color:#E0E0E0 !important;
+  animation:silverPulse 2.5s ease-in-out infinite;
+}
+@keyframes silverPulse{
+  0%,100%{box-shadow:0 0 24px #C0C0C0,0 0 48px rgba(192,192,192,0.3);}
+  50%{box-shadow:0 0 36px #E0E0E0,0 0 72px rgba(192,192,192,0.6);}
+}
+.effect-fire-aura{
+  box-shadow:0 0 32px #FF6D00, 0 0 64px rgba(255,87,0,0.6) !important;
+  border-color:#FF6D00 !important;
+  animation:firePulse 1.5s ease-in-out infinite;
+}
+.effect-ice-aura{
+  box-shadow:0 0 28px #00E5FF, 0 0 60px rgba(0,229,255,0.6), 0 0 100px rgba(0,188,212,0.3) !important;
+  border-color:#00E5FF !important;
+  animation:iceAuraPulse 2s ease-in-out infinite;
+}
+@keyframes iceAuraPulse{
+  0%,100%{box-shadow:0 0 28px #00E5FF, 0 0 60px rgba(0,229,255,0.5);filter:brightness(1) hue-rotate(0deg);}
+  50%{box-shadow:0 0 45px #00E5FF, 0 0 90px rgba(0,229,255,0.8), 0 0 140px rgba(0,188,212,0.4);filter:brightness(1.1) hue-rotate(10deg);}
+}
 .effect-rainbow{animation:rainbowGlow 3s ease-in-out infinite;}
 @keyframes rainbowGlow{
   0%{box-shadow:0 0 20px #FF000060}
@@ -1835,6 +1863,161 @@ body{
 @keyframes pgFlash{
   0%{opacity:1;}
   100%{opacity:0;}
+}
+
+/* ─── サイドバー仕切り ─── */
+.sb-divider{
+  height:1px;background:rgba(255,255,255,0.08);
+  margin:8px 16px;
+}
+
+/* ═══════════════════════════════════════════
+   3D ポケボール
+═══════════════════════════════════════════ */
+.pb3d-scene{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  perspective:900px;
+  perspective-origin:center 30%;
+  padding:20px 0;
+}
+
+.pb3d-ball{
+  width:130px;height:130px;
+  border-radius:50%;
+  position:relative;
+  overflow:hidden;
+  border:4px solid #111;
+  transform-style:preserve-3d;
+  /* realistic depth shadow */
+  box-shadow:
+    0 30px 70px rgba(0,0,0,0.8),
+    0 10px 20px rgba(0,0,0,0.5),
+    inset 0 -20px 30px rgba(0,0,0,0.25);
+  /* initial rest state */
+  transform:perspective(900px) rotateX(12deg);
+}
+
+/* ── 上半球 */
+.pb3d-top{
+  position:absolute;top:0;left:0;right:0;
+  height:50%;
+  background:radial-gradient(circle at 38% 35%,
+    color-mix(in srgb, var(--ball-top) 70%, #fff 30%) 0%,
+    var(--ball-top) 45%,
+    var(--ball-top2) 100%);
+  border-radius:130px 130px 0 0;
+  transition:transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
+}
+.pb3d-top.pb3d-top-open{
+  transform:translateY(-52px) rotateX(-80deg);
+  opacity:0;
+}
+
+/* ── 下半球 */
+.pb3d-bot{
+  position:absolute;bottom:0;left:0;right:0;
+  height:50%;
+  background:radial-gradient(circle at 40% 65%, #fff 0%, #e8e8e8 40%, #cccccc 100%);
+  border-radius:0 0 130px 130px;
+}
+
+/* ── 中央ライン */
+.pb3d-seam{
+  position:absolute;top:50%;left:0;right:0;
+  height:9px;
+  transform:translateY(-50%);
+  background:#111;
+  z-index:5;
+  display:flex;align-items:center;justify-content:center;
+}
+.pb3d-btn{
+  width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff 0%, #e0e0e0 45%, #bdbdbd 100%);
+  border:3.5px solid #111;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.9);
+  display:flex;align-items:center;justify-content:center;
+  z-index:6;
+}
+.pb3d-btn-inner{
+  width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%, rgba(255,255,255,0.9), rgba(180,180,180,0.4));
+}
+
+/* ── 光沢反射 */
+.pb3d-gloss{
+  position:absolute;
+  top:9%;left:18%;
+  width:44%;height:30%;
+  border-radius:50%;
+  background:radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, transparent 75%);
+  transform:rotate(-30deg);
+  z-index:4;
+  pointer-events:none;
+}
+
+/* ── 内側の影（球体感） */
+.pb3d-inner-shadow{
+  position:absolute;inset:0;
+  border-radius:50%;
+  background:radial-gradient(circle at 70% 75%, rgba(0,0,0,0.18) 0%, transparent 55%);
+  z-index:3;
+  pointer-events:none;
+}
+
+/* ── 地面の影 */
+.pb3d-shadow{
+  width:90px;height:18px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.45);
+  filter:blur(8px);
+  transition:transform 0.3s,opacity 0.3s;
+}
+.pb3d-shadow.phase-dropping{ transform:scaleX(0.5);opacity:0; }
+.pb3d-shadow.phase-shaking{  transform:scaleX(1.1);opacity:0.6; }
+
+/* ── ドロップアニメーション */
+.pb3d-ball.phase-dropping{
+  animation:pb3dDrop 0.85s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+@keyframes pb3dDrop{
+  0%{
+    transform:perspective(900px) translateY(-300px) rotateX(50deg) rotateZ(200deg) scale(0.3);
+    opacity:0;
+    box-shadow:none;
+  }
+  60%{
+    transform:perspective(900px) translateY(14px) rotateX(-6deg) rotateZ(-10deg) scale(1.06);
+    opacity:1;
+  }
+  78%{
+    transform:perspective(900px) translateY(-7px) rotateX(4deg) rotateZ(4deg) scale(0.97);
+  }
+  100%{
+    transform:perspective(900px) translateY(0) rotateX(12deg) rotateZ(0deg) scale(1);
+    opacity:1;
+  }
+}
+
+/* ── シェイクアニメーション（3D回転） */
+.pb3d-ball.phase-shaking{
+  animation:pb3dShake 0.38s ease-in-out 3;
+}
+@keyframes pb3dShake{
+  0%,100%{transform:perspective(900px) rotateX(12deg) rotateY(0deg) rotateZ(0deg) translateX(0);}
+  20%{transform:perspective(900px) rotateX(8deg) rotateY(-25deg) rotateZ(-18deg) translateX(-9px);}
+  40%{transform:perspective(900px) rotateX(16deg) rotateY(25deg) rotateZ(18deg) translateX(9px);}
+  60%{transform:perspective(900px) rotateX(10deg) rotateY(-18deg) rotateZ(-12deg) translateX(-6px);}
+  80%{transform:perspective(900px) rotateX(14deg) rotateY(18deg) rotateZ(12deg) translateX(6px);}
+}
+
+/* ── 開くアニメーション */
+.pb3d-ball.phase-opening{
+  animation:pb3dOpen 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes pb3dOpen{
+  0%{transform:perspective(900px) rotateX(12deg);}
+  40%{transform:perspective(900px) rotateX(20deg) scale(1.06);}
+  100%{transform:perspective(900px) rotateX(12deg) scale(1);}
 }
 
 /* Home画面プレミアムガチャバナー */

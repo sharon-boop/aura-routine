@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 
-const TOAST_STREAK_KEY = 'rewardLastStreak'
+const TOAST_STREAK_KEY  = 'rewardLastStreak'
+const TOAST_PERFECT_KEY = 'rewardLastPerfect'
 import {
   POKEMON_REWARDS, FRAME_REWARDS, ACCESSORY_REWARDS,
   BG_REWARDS, TITLE_REWARDS, EFFECT_REWARDS, STAMP_REWARDS,
@@ -187,19 +188,20 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
     }
   }, [streak])
 
-  // Detect perfect unlocks — 1日1回のみ
+  // Detect perfect unlocks — localStorage基準（ページ再読み込みで再表示しない）
   useEffect(() => {
-    const prev = prevPerfectRef.current
-    if (perfect > prev) {
+    const lastShown = parseInt(localStorage.getItem(TOAST_PERFECT_KEY) || '0')
+    if (perfect > lastShown) {
       const unlocked = []
-      PERFECT_POKEMON.filter(r => r.perfectReq <= perfect && r.perfectReq > prev)
+      PERFECT_POKEMON.filter(r => r.perfectReq <= perfect && r.perfectReq > lastShown)
         .forEach(r => unlocked.push(r))
-      TITLE_REWARDS.filter(r => r.perfectReq && r.perfectReq <= perfect && r.perfectReq > prev)
+      TITLE_REWARDS.filter(r => r.perfectReq && r.perfectReq <= perfect && r.perfectReq > lastShown)
         .forEach(r => unlocked.push(r))
       // PERFECT_DAY_REWARDS (50 items)
-      PERFECT_DAY_REWARDS.filter(r => r.perfectCount <= perfect && r.perfectCount > prev)
+      PERFECT_DAY_REWARDS.filter(r => r.perfectCount <= perfect && r.perfectCount > lastShown)
         .forEach(r => unlocked.push(r))
       if (unlocked.length) { setNewRewards(u => [...u, ...unlocked]); setShowToast(true) }
+      localStorage.setItem(TOAST_PERFECT_KEY, String(perfect))
       prevPerfectRef.current = perfect
     }
   }, [perfect])

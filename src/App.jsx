@@ -12,6 +12,7 @@ import Records from './components/Records'
 import WeeklyMonthly from './components/WeeklyMonthly'
 import WeeklyReview from './components/WeeklyReview'
 import Settings from './components/Settings'
+import PremiumGacha from './components/PremiumGacha'
 import { Toast, useToast } from './components/Toast'
 import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS } from './utils/storage'
 
@@ -23,7 +24,7 @@ const NAV = [
   { id:'log',     icon:'▦', label:'Log' },
 ]
 
-const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }, { id:'challenge', label:'チャレンジ' }, { id:'settings', label:'設定' }]
+const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }, { id:'challenge', label:'チャレンジ' }]
 const WORLD_TABS    = [{ id:'summary', label:'要約' }, { id:'funny', label:'話術' }]
 const INVEST_TABS   = [{ id:'investment', label:'90分投資' }, { id:'todo', label:'ToDo' }]
 const LOG_TABS      = [{ id:'records', label:'カレンダー' }, { id:'weekly', label:'週次レビュー' }]
@@ -55,6 +56,15 @@ function Sidebar({ nav, setNav, streak, open, onClose }) {
             {item.label}
           </button>
         ))}
+        <div className="sb-divider" />
+        <button className={`sb-item ${nav === 'gacha' ? 'active' : ''}`} onClick={() => { setNav('gacha'); onClose(); }}>
+          <span className="sb-icon">🎰</span>
+          プレミアムガチャ
+        </button>
+        <button className={`sb-item ${nav === 'settings' ? 'active' : ''}`} onClick={() => { setNav('settings'); onClose(); }}>
+          <span className="sb-icon">⚙</span>
+          設定
+        </button>
         <div className="sb-footer">
           <div className="sb-streak">
             <span>🔥</span>
@@ -108,7 +118,6 @@ function AchievementToast({ ids, onClose }) {
 
 export default function App() {
   const [nav, setNav] = useState('home')
-  const [showSettings, setShowSettings] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [newAchievements, setNewAchievements] = useState([])
   const [routineTab,  setRoutineTab]  = useState('morning')
@@ -130,7 +139,6 @@ export default function App() {
   }, [])
 
   const handleNavigate = (section, sub) => {
-    setShowSettings(false)
     setNav(section)
     if (sub) {
       if (section === 'routine') setRoutineTab(sub)
@@ -149,15 +157,15 @@ export default function App() {
   }
 
   const renderPage = () => {
-    if (showSettings) return <Settings onBack={() => setShowSettings(false)} />
-    if (nav === 'home') return <Home onNavigate={handleNavigate} onSettings={() => setShowSettings(true)} />
+    if (nav === 'settings') return <Settings onBack={() => setNav('home')} />
+    if (nav === 'gacha')    return <PremiumGacha asPage onClose={() => setNav('home')} />
+    if (nav === 'home') return <Home onNavigate={handleNavigate} onSettings={() => setNav('settings')} />
 
     if (nav === 'routine') {
       if (routineTab === 'morning')   return <Morning />
       if (routineTab === 'value')     return <ValueProvision />
       if (routineTab === 'evening')   return <Evening />
       if (routineTab === 'challenge') return <WeeklyMonthly />
-      if (routineTab === 'settings')  return <Settings onBack={() => setRoutineTab('morning')} />
     }
     if (nav === 'world') {
       if (worldTab === 'summary') return <Summary />
@@ -176,8 +184,8 @@ export default function App() {
   return (
     <div className="app-shell">
       <Sidebar
-        nav={showSettings ? 'settings' : nav}
-        setNav={(n) => { setShowSettings(false); setNav(n) }}
+        nav={nav}
+        setNav={setNav}
         streak={streak}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -193,8 +201,8 @@ export default function App() {
       </div>
 
       <div className="main-area">
-        <div className="page-content slide-up" key={`${nav}-${routineTab}-${worldTab}-${investTab}-${logTab}-${showSettings}`}>
-          {!showSettings && nav !== 'home' && renderSubNav()}
+        <div className="page-content slide-up" key={`${nav}-${routineTab}-${worldTab}-${investTab}-${logTab}`}>
+          {nav !== 'home' && nav !== 'settings' && nav !== 'gacha' && renderSubNav()}
           {renderPage()}
         </div>
       </div>
