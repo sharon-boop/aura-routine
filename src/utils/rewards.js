@@ -10,76 +10,135 @@
 
 /* ─────────────────────────────────────────────────────────────
    ポケモン定義
-   ・序盤ボーナス  : day 0（スタート）+ day 1〜10（毎日1体）
-   ・メイン進行   : day 20, 30, 40 … 360（10日ごと）
-   ・perfect専用  : 別枠
-   各地方・最新作まで幅広く
+   ・スタート    : day 0（ピチュー）
+   ・序盤ボーナス: day 1〜10（毎日1体・各地方）
+   ・7日サイクル : day 17, 24, 31, 38 … 360（7日ごと）
+   ・節目ボーナス: day 30,50,70,100,120,150,180,200,250,300,350
+                  （7日サイクルとは別・伝説・レア）
+   ・perfect専用 : 別枠
 ───────────────────────────────────────────────────────────── */
 
 // [id, pokeId, name, day]
-const POKE_STARTER = ['pichu', 172, 'ピチュー', 0]   // day 0
+const POKE_STARTER = ['pichu', 172, 'ピチュー', 0]
 
-// 序盤ボーナス：day 1〜10 (毎日もらえる / 各地方から人気どころ)
+// ── 序盤ボーナス（day 1〜10 / 毎日・各地方スターター系）
 const POKE_EARLY = [
-  ['togepi',     175, 'タマゴラス',   1],  // ジョウト
-  ['marill',     183, 'マリル',       2],  // ジョウト
-  ['mudkip',     258, 'ミズゴロウ',   3],  // ホウエン
-  ['piplup',     393, 'ポッチャマ',   4],  // シンオウ
-  ['oshawott',   501, 'ミジュマル',   5],  // イッシュ
-  ['fennekin',   653, 'フォッコ',     6],  // カロス
-  ['rowlet',     722, 'モクロー',     7],  // アローラ
-  ['sobble',     816, 'メッソン',     8],  // ガラル
-  ['sprigatito', 906, 'ニャオハ',     9],  // パルデア(最新)
-  ['mimikyu',    778, 'ミミッキュ',  10],  // アローラ(人気)
+  ['togepi',     175, 'タマゴラス',  1],  // ジョウト
+  ['marill',     183, 'マリル',      2],  // ジョウト
+  ['mudkip',     258, 'ミズゴロウ',  3],  // ホウエン
+  ['piplup',     393, 'ポッチャマ',  4],  // シンオウ
+  ['oshawott',   501, 'ミジュマル',  5],  // イッシュ
+  ['fennekin',   653, 'フォッコ',    6],  // カロス
+  ['rowlet',     722, 'モクロー',    7],  // アローラ
+  ['sobble',     816, 'メッソン',    8],  // ガラル
+  ['sprigatito', 906, 'ニャオハ',    9],  // パルデア
+  ['mimikyu',    778, 'ミミッキュ', 10],  // アローラ（人気）
 ]
 
-// メイン進行：day 20〜360（10日ごと / 各地方の強・人気ポケモン）
-const POKE_MAIN = [
-  ['pikachu',    25,  'ピカチュウ',  20],  // カントー
-  ['gengar',     94,  'ゲンガー',    30],  // カントー
-  ['eevee',     133,  'イーブイ',    40],  // カントー
-  ['snorlax',   143,  'カビゴン',    50],  // カントー
-  ['dragonite', 149,  'カイリュー',  60],  // カントー
-  ['mewtwo',    150,  'ミュウツー',  70],  // カントー
-  ['charizard',   6,  'リザードン',  80],  // カントー
-  ['ampharos',  181,  'デンリュウ',  90],  // ジョウト
-  ['scizor',    212,  'ハッサム',   100],  // ジョウト
-  ['tyranitar', 248,  'バンギラス', 110],  // ジョウト
-  ['lugia',     249,  'ルギア',     120],  // ジョウト
-  ['ho_oh',     250,  'ホウオウ',   130],  // ジョウト
-  ['blaziken',  257,  'バシャーモ', 140],  // ホウエン
-  ['gardevoir', 282,  'サーナイト', 150],  // ホウエン
-  ['metagross', 376,  'メタグロス', 160],  // ホウエン
-  ['rayquaza',  384,  'レックウザ', 170],  // ホウエン
-  ['lucario',   448,  'ルカリオ',   180],  // シンオウ
-  ['garchomp',  445,  'ガブリアス', 190],  // シンオウ
-  ['giratina',  487,  'ギラティナ', 200],  // シンオウ
-  ['arceus',    493,  'アルセウス', 210],  // シンオウ
-  ['zoroark',   571,  'ゾロアーク', 220],  // イッシュ
-  ['hydreigon', 635,  'サザンドラ', 230],  // イッシュ
-  ['zekrom',    644,  'ゼクロム',   240],  // イッシュ
-  ['greninja',  658,  'ゲッコウガ', 250],  // カロス
-  ['aegislash', 681,  'ギルガルド', 260],  // カロス
-  ['sylveon',   700,  'ニンフィア', 270],  // カロス
-  ['decidueye', 724,  'ジュナイパー',280], // アローラ
-  ['lycanroc',  745,  'ルガルガン', 290],  // アローラ
-  ['toxtricity',849,  'ストリンダー',300], // ガラル
-  ['dragapult', 887,  'ドラパルト', 310],  // ガラル
-  ['zacian',    888,  'ザシアン',   320],  // ガラル
-  ['meowscarada',908, 'マスカーニャ',330], // パルデア(最新)
-  ['skeledirge',911,  'ラウドボーン',340], // パルデア(最新)
-  ['quaquaval', 914,  'ウェーニバル',350], // パルデア(最新)
-  ['koraidon',  1007, 'コライドン', 360],  // パルデア(最新・伝説)
+// ── 節目ボーナス（特別な日・伝説系 / 7日サイクルとは独立）
+const POKE_MILESTONE = [
+  ['eevee',     133, 'イーブイ',     30],  // 1ヶ月（進化の可能性）
+  ['charizard',   6, 'リザードン',   50],  // 50日（カントーエース）
+  ['mewtwo',    150, 'ミュウツー',   70],  // 70日（伝説）
+  ['lugia',     249, 'ルギア',      100],  // 100日（伝説）
+  ['ho_oh',     250, 'ホウオウ',    120],  // 120日（伝説）
+  ['rayquaza',  384, 'レックウザ',  150],  // 150日（伝説）
+  ['arceus',    493, 'アルセウス',  180],  // 180日（神）
+  ['zacian',    888, 'ザシアン',    200],  // 200日（ガラル伝説）
+  ['koraidon', 1007, 'コライドン',  250],  // 250日（パルデア伝説）
+  ['miraidon', 1008, 'ミライドン',  300],  // 300日（パルデア伝説）
+  ['dialga',    483, 'ディアルガ',  350],  // 350日（時の神）
 ]
 
+// ── 7日サイクル（day 17, 24, 31 … / 節目と重なる日はスキップ）
+// 節目の日セット
+const _milestoneDays = new Set([30,50,70,100,120,150,180,200,250,300,350])
+// day 17 から7日ごと、365日以内・節目除外 → 対象日を計算
+const _sevenDays = (() => {
+  const days = []
+  for (let d = 17; d <= 365; d += 7) {
+    if (!_milestoneDays.has(d)) days.push(d)
+  }
+  return days
+})()
+// _sevenDays の長さ分のポケモンを各地方から配置
+const POKE_7DAY_LIST = [
+  // カントー
+  ['pikachu',    25,  'ピカチュウ' ],
+  ['raichu',     26,  'ライチュウ' ],
+  ['gengar',     94,  'ゲンガー'   ],
+  ['alakazam',   65,  'フーディン' ],
+  ['gyarados',  130,  'ギャラドス' ],
+  ['snorlax',   143,  'カビゴン'   ],
+  ['dragonite', 149,  'カイリュー' ],
+  ['vaporeon',  134,  'シャワーズ' ],
+  ['jolteon',   135,  'サンダース' ],
+  ['flareon',   136,  'ブースター' ],
+  // ジョウト
+  ['ampharos',  181,  'デンリュウ' ],
+  ['espeon',    196,  'エーフィ'   ],
+  ['umbreon',   197,  'ブラッキー' ],
+  ['scizor',    212,  'ハッサム'   ],
+  ['heracross', 214,  'ヘラクロス' ],
+  ['tyranitar', 248,  'バンギラス' ],
+  // ホウエン
+  ['blaziken',  257,  'バシャーモ' ],
+  ['gardevoir', 282,  'サーナイト' ],
+  ['absol',     359,  'アブソル'   ],
+  ['metagross', 376,  'メタグロス' ],
+  // シンオウ
+  ['lucario',   448,  'ルカリオ'   ],
+  ['garchomp',  445,  'ガブリアス' ],
+  ['leafeon',   470,  'リーフィア' ],
+  ['glaceon',   471,  'グレイシア' ],
+  ['giratina',  487,  'ギラティナ' ],
+  ['rotom',     479,  'ロトム'     ],
+  // イッシュ
+  ['zoroark',   571,  'ゾロアーク' ],
+  ['hydreigon', 635,  'サザンドラ' ],
+  ['zekrom',    644,  'ゼクロム'   ],
+  ['reshiram',  643,  'レシラム'   ],
+  // カロス
+  ['greninja',  658,  'ゲッコウガ' ],
+  ['aegislash', 681,  'ギルガルド' ],
+  ['sylveon',   700,  'ニンフィア' ],
+  ['goodra',    706,  'ヌメルゴン' ],
+  // アローラ
+  ['decidueye', 724,  'ジュナイパー'],
+  ['incineroar',727,  'ガオガエン'  ],
+  ['primarina', 730,  'アシレーヌ'  ],
+  ['lycanroc',  745,  'ルガルガン'  ],
+  // ガラル
+  ['toxtricity',849,  'ストリンダー'],
+  ['dragapult', 887,  'ドラパルト'  ],
+  ['zamazenta', 889,  'ザマゼンタ'  ],
+  ['calyrex',   898,  'バドレックス' ],
+  // パルデア（最新）
+  ['meowscarada',908, 'マスカーニャ' ],
+  ['skeledirge', 911, 'ラウドボーン' ],
+  ['quaquaval',  914, 'ウェーニバル' ],
+  ['tinkaton',   959, 'デカヌチャン' ],
+  ['palafin',    964, 'イルカマン'   ],
+  ['kingambit',  983, 'セグレイブ'   ],  // (#983はセグレイブ)
+  ['gholdengo', 1000, 'サーフゴー'   ],
+  ['iron_valiant',1006,'アイアンバンデ'],
+  ['roaring_moon',1005,'スコヴィラン' ], // Roaring Moon = 1005
+]
+// 7日サイクルにポケモンを割り当て（日付付き）
+const POKE_7DAY = _sevenDays.map((day, i) => [
+  POKE_7DAY_LIST[i % POKE_7DAY_LIST.length][0],
+  POKE_7DAY_LIST[i % POKE_7DAY_LIST.length][1],
+  POKE_7DAY_LIST[i % POKE_7DAY_LIST.length][2],
+  day,
+])
+
+// ── perfect専用
 const POKE_PERFECT = [
-  // perfect専用（達成日数で解放）
-  ['espeon',   196, 'エーフィ',    3 ],   // ジョウト
-  ['umbreon',  197, 'ブラッキー',  7 ],   // ジョウト
-  ['celebi',   251, 'セレビィ',    15],   // ジョウト
-  ['jirachi',  385, 'ジラーチ',    30],   // ホウエン
-  ['mew',      151, 'ミュウ',      50],   // カントー
-  ['miraidon', 1008,'ミライドン',  100],  // パルデア(最新・伝説)
+  ['celebi',   251, 'セレビィ',    5 ],  // ジョウト幻
+  ['jirachi',  385, 'ジラーチ',   10 ],  // ホウエン幻
+  ['mew',      151, 'ミュウ',      20 ],  // カントー幻
+  ['victini',  494, 'ビクティニ',  30 ],  // イッシュ幻
+  ['zarude',   893, 'ザルード',    50 ],  // ガラル幻
 ]
 
 /* ─────────────────────────────────────────────────────────────
@@ -383,7 +442,7 @@ const PERFECT_TITLES = [
    TIMELINE 自動生成
 ═══════════════════════════════════════════════════════════════ */
 
-// 変換ヘルパー
+// ─── 変換ヘルパー ───
 const toTitles  = () => TITLES_RAW.map(([id,label,color]) => ({ id, label, color, type:'title' }))
 const toBgs     = () => BGS_RAW.map(([id,label,bg]) => ({ id, label, bg, type:'bg' }))
 const toFrames  = () => FRAMES_RAW.map(([id,label,border,shadow,cssClass]) => ({
@@ -393,7 +452,9 @@ const toFrames  = () => FRAMES_RAW.map(([id,label,border,shadow,cssClass]) => ({
 const toAccs    = () => ACCS_RAW.map(([id,label,emoji,posKey]) => ({ id, label, emoji, pos: ACC_POS[posKey]||{}, type:'acc' }))
 const toStamps  = () => STAMPS_RAW.map(([id,label,emoji,bg]) => ({ id, label, emoji, stampBg:bg, type:'stamp' }))
 const toEffects = () => EFFECTS.map(([id,label,cssClass]) => ({ id, label, cssClass, type:'effect' }))
-const mkPoke    = ([id,pokeId,name,day]) => ({ id, pokeId, name, type:'pokemon', day })
+// isBonus: 節目ボーナスポケモンのフラグ
+const mkPoke = ([id,pokeId,name,day], isBonus=false) =>
+  ({ id, pokeId, name, type:'pokemon', day, isBonus })
 
 function buildTimeline() {
   const titles  = toTitles()
@@ -403,22 +464,25 @@ function buildTimeline() {
   const stamps  = toStamps()
   const effects = toEffects()
 
-  // ポケモンが存在する日のセット
+  // ポケモンが存在する全日セット（通常 or ボーナス両方）
   const pokeDays = new Set([
     0,
-    ...POKE_EARLY.map(p => p[3]),   // 1〜10
-    ...POKE_MAIN.map(p => p[3]),    // 20,30,40...360
+    ...POKE_EARLY.map(p => p[3]),
+    ...POKE_7DAY.map(p => p[3]),
+    ...POKE_MILESTONE.map(p => p[3]),
   ])
 
   const timeline = []
-  // Day 0: スターター
+  // day 0: スターター
   timeline.push(mkPoke(POKE_STARTER))
-  // Day 1〜10: 序盤ボーナスポケモン
+  // day 1〜10: 序盤ボーナス
   POKE_EARLY.forEach(p => timeline.push(mkPoke(p)))
-  // Day 20〜360: メイン進行ポケモン
-  POKE_MAIN.forEach(p => timeline.push(mkPoke(p)))
+  // 7日サイクル
+  POKE_7DAY.forEach(p => timeline.push(mkPoke(p)))
+  // 節目ボーナス（isBonus=true）
+  POKE_MILESTONE.forEach(p => timeline.push(mkPoke(p, true)))
 
-  // 残りの日（ポケモン以外）をサイクルで埋める
+  // 残り日（非ポケモン）をサイクルで埋める
   // サイクル: [title, bg, frame, acc, stamp] × 6 + effect = 31
   const cycle = []
   for (let i = 0; i < 6; i++) cycle.push('title','bg','frame','acc','stamp')
@@ -427,7 +491,7 @@ function buildTimeline() {
   let cyclePos = 0
 
   for (let day = 1; day <= 365; day++) {
-    if (pokeDays.has(day)) continue  // ポケモンの日はスキップ
+    if (pokeDays.has(day)) continue
     const type = cycle[cyclePos % cycle.length]
     cyclePos++
     const arr = { title:titles, bg:bgs, frame:frames, acc:accs, stamp:stamps, effect:effects }[type] || titles
@@ -436,7 +500,7 @@ function buildTimeline() {
     timeline.push({ day, ...item })
   }
 
-  return timeline.sort((a,b) => a.day - b.day)
+  return timeline.sort((a, b) => a.day - b.day)
 }
 
 export const TIMELINE = buildTimeline()
@@ -459,8 +523,9 @@ function listFor(type) {
 
 export const POKEMON_REWARDS = [
   mkPoke(POKE_STARTER),
-  ...POKE_EARLY.map(mkPoke),
-  ...POKE_MAIN.map(mkPoke),
+  ...POKE_EARLY.map(p => mkPoke(p)),
+  ...POKE_7DAY.map(p => mkPoke(p)),
+  ...POKE_MILESTONE.map(p => mkPoke(p, true)),
 ]
 export const FRAME_REWARDS     = listFor('frame')
 export const ACCESSORY_REWARDS = listFor('acc')

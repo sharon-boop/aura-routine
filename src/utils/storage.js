@@ -346,9 +346,32 @@ export function getStreak() {
   return streak
 }
 
+/**
+ * 完璧の日の定義：
+ *   1. 朝の儀式（モーニングチェックリスト）全て完了
+ *   2. 振り返り（夜の日記）記入済み
+ *   3. 自己投資90分タイマー完了
+ *   4. 価値提供3人 全員完了
+ */
+export function isPerfectDay(record) {
+  if (!record) return false
+  // 1. 朝の儀式：チェックが1つ以上あり、全てtrue
+  const mc = Object.values(record.morning?.checks || {})
+  if (mc.length === 0 || !mc.every(Boolean)) return false
+  // 2. 振り返り：日記が書かれている
+  if (!record.evening?.diary?.trim()) return false
+  // 3. 自己投資90分完了
+  if (!record.investment?.timerDone) return false
+  // 4. 価値提供3人：3人以上いて全員done
+  const vp = record.morning?.valuePeople || []
+  if (vp.length < 3) return false
+  if (!vp.slice(0, 3).every(p => p.done)) return false
+  return true
+}
+
 export function getPerfectCount() {
   const records = getAllRecords()
-  return Object.values(records).filter(r => calcDayProgress(r) >= 100).length
+  return Object.values(records).filter(r => isPerfectDay(r)).length
 }
 
 export function calcDayProgress(record) {
