@@ -1233,6 +1233,96 @@ body{
 }
 
 /* ═══════════════════════════════════════════
+   DIARY
+═══════════════════════════════════════════ */
+.diary-card {
+  background: #FFFDF7;
+  border-radius: 16px;
+  border: 1px solid #E8E0D0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+  overflow: hidden;
+  position: relative;
+}
+/* ノートの罫線装飾バー */
+.diary-card::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, #F2994A, #6C63FF, #84A98C, #F2994A);
+  background-size: 300% 100%;
+  animation: diaryGradient 6s ease infinite;
+}
+@keyframes diaryGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.diary-date-line {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  padding: 14px 20px 6px;
+  text-transform: uppercase;
+}
+.diary-title-wrap {
+  padding: 4px 20px 6px;
+}
+.diary-title-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--main);
+  letter-spacing: -0.5px;
+  outline: none;
+  padding: 4px 0;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.diary-title-input::placeholder {
+  color: #CCBFA8;
+  font-weight: 600;
+  font-size: 18px;
+}
+.diary-divider {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, #E0D8CC 0 8px, transparent 8px 14px);
+  margin: 4px 20px 12px;
+}
+.diary-body {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  line-height: 1.9;
+  color: #333;
+  outline: none;
+  resize: none;
+  padding: 0 20px 4px;
+  font-family: inherit;
+  box-sizing: border-box;
+  /* 薄い横罫線 */
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent calc(1.9em - 1px),
+    #EDE8DF calc(1.9em - 1px),
+    #EDE8DF 1.9em
+  );
+}
+.diary-body::placeholder {
+  color: #CCBFA8;
+  background-image: none;
+}
+.diary-count {
+  text-align: right;
+  font-size: 11px;
+  color: #BBA890;
+  padding: 8px 20px 14px;
+}
+
+/* ═══════════════════════════════════════════
    SPARKLE EFFECTS
 ═══════════════════════════════════════════ */
 .sparkle-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;}

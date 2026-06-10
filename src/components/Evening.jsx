@@ -118,10 +118,33 @@ export default function Evening() {
         </div>
       </div>
 
+      {/* ── 日記 ── */}
       <div className="sec">
-        <div className="sec-title">今日の一言</div>
-        <div className="card static">
-          <textarea value={ev.diary||''} onChange={e=>setEv({diary:e.target.value})} placeholder="今日の自分を、一言で。" rows={4} style={{ fontSize:16,lineHeight:1.7 }} />
+        <div className="sec-title">今日の日記</div>
+        <div className="diary-card">
+          <div className="diary-date-line">
+            {new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}
+          </div>
+          <div className="diary-title-wrap">
+            <input
+              className="diary-title-input"
+              value={ev.diaryTitle || ''}
+              onChange={e => setEv({ diaryTitle: e.target.value })}
+              placeholder="題名（任意）"
+              maxLength={60}
+            />
+          </div>
+          <div className="diary-divider" />
+          <textarea
+            className="diary-body"
+            value={ev.diary || ''}
+            onChange={e => setEv({ diary: e.target.value })}
+            placeholder={`今日あったことを自由に書こう。\n\n何を感じた？何を学んだ？\n明日の自分へのメッセージでもいい。`}
+            rows={10}
+          />
+          <div className="diary-count">
+            {(ev.diary || '').length} 文字
+          </div>
         </div>
       </div>
 
