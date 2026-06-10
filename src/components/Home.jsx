@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   getTodayRecord, updateTodayRecord, calcDayProgress, getStreak, getPerfectCount,
+  getPerfectDayStatus,
   formatDate, getToday, getQuotes, getDailyQuote, saveQuotes,
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
 } from '../utils/storage'
@@ -311,6 +312,7 @@ export default function Home({ onNavigate, onSettings }) {
   const [progress, setProgress] = useState(0)
   const [streak, setStreak] = useState(0)
   const [perfect, setPerfect] = useState(0)
+  const [perfectStatus, setPerfectStatus] = useState(null)
 
   useEffect(() => {
     const r = getTodayRecord()
@@ -318,6 +320,7 @@ export default function Home({ onNavigate, onSettings }) {
     setProgress(calcDayProgress(r))
     setStreak(getStreak())
     setPerfect(getPerfectCount())
+    setPerfectStatus(getPerfectDayStatus(r))
   }, [])
 
   const setArikata = (val) => {
@@ -405,6 +408,44 @@ export default function Home({ onNavigate, onSettings }) {
         <div className="sec-title">今日の歩み</div>
         <RoutineCards record={record} onNavigate={onNavigate} />
       </div>
+
+      {/* ─── 完璧な日 インジケーター ─── */}
+      {perfectStatus && (
+        <div className="sec" style={{ paddingTop:0 }}>
+          <div className="sec-title">今日の完璧チェック</div>
+          <div className="card static" style={{ padding:'14px 16px' }}>
+            {[
+              { key:'checks', label:'☀️ 朝の儀式（全チェック）' },
+              { key:'diary',  label:'📔 夜の日記（題名 or 本文）' },
+              { key:'invest', label:'⚡ 自己投資90分' },
+              { key:'value',  label:'💫 価値提供1人以上' },
+            ].map(({ key, label }) => (
+              <div key={key} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', borderBottom:'1px solid #F5F2ED' }}>
+                <div style={{
+                  width:22, height:22, borderRadius:6, flexShrink:0,
+                  background: perfectStatus[key] ? 'var(--success)' : '#F0EDE7',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:11, fontWeight:900,
+                  color: perfectStatus[key] ? '#fff' : '#CCC',
+                }}>
+                  {perfectStatus[key] ? '✓' : '○'}
+                </div>
+                <span style={{ fontSize:13, fontWeight:600, color: perfectStatus[key] ? 'var(--ink)' : 'var(--muted)' }}>
+                  {label}
+                </span>
+              </div>
+            ))}
+            <div style={{ paddingTop:10, textAlign:'center' }}>
+              {Object.values(perfectStatus).every(Boolean)
+                ? <div style={{ fontSize:13, fontWeight:900, color:'var(--success)' }}>🌟 完璧な日 達成！</div>
+                : <div style={{ fontSize:12, color:'var(--muted)' }}>
+                    あと {4 - Object.values(perfectStatus).filter(Boolean).length} 項目で完璧な日
+                  </div>
+              }
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── 価値提供 ─── */}
       <div className="sec">

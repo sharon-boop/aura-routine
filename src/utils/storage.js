@@ -357,9 +357,11 @@ export function isPerfectDay(record) {
   if (!record) return false
   // 1. 朝の儀式：チェックが1つ以上あり、全てtrue
   const mc = Object.values(record.morning?.checks || {})
-  if (mc.length === 0 || !mc.every(Boolean)) return false
-  // 2. 振り返り：日記が書かれている
-  if (!record.evening?.diary?.trim()) return false
+  const checkedCount = mc.filter(Boolean).length
+  if (mc.length === 0 || checkedCount < mc.length) return false
+  // 2. 振り返り：日記の題名または本文が書かれている
+  const hasDiary = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
+  if (!hasDiary) return false
   // 3. 自己投資90分完了（タイマーまたは手動入力）
   const timerOk  = record.investment?.timerDone === true
   const manualOk = (record.investment?.manualMinutes || 0) >= 90
@@ -368,6 +370,17 @@ export function isPerfectDay(record) {
   const vp = record.morning?.valuePeople || []
   if (!vp.some(p => p.done)) return false
   return true
+}
+
+// 完璧な日の各条件チェック（デバッグ/表示用）
+export function getPerfectDayStatus(record) {
+  if (!record) return { checks: false, diary: false, invest: false, value: false }
+  const mc = Object.values(record.morning?.checks || {})
+  const checks = mc.length > 0 && mc.every(Boolean)
+  const diary  = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
+  const invest = record.investment?.timerDone === true || (record.investment?.manualMinutes || 0) >= 90
+  const value  = (record.morning?.valuePeople || []).some(p => p.done)
+  return { checks, diary, invest, value }
 }
 
 export function getPerfectCount() {

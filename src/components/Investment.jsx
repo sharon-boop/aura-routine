@@ -55,226 +55,200 @@ function Stars({ value, onChange }) {
   )
 }
 
+/* ─── キレイな上限値を計算 ─── */
+function niceMax(raw) {
+  if (raw <= 0) return 90
+  const steps = [30,60,90,120,150,180,240,300,360,420,480,600]
+  return steps.find(s => s >= raw) || Math.ceil(raw / 60) * 60
+}
+function niceGridLines(maxVal) {
+  // 30分刻みか60分刻みかを判断
+  const step = maxVal <= 120 ? 30 : maxVal <= 300 ? 60 : 120
+  const lines = []
+  for (let v = step; v <= maxVal; v += step) lines.push(v)
+  return lines
+}
+
 /* ═══════════════════════════════════════════
    投資グラフ
 ═══════════════════════════════════════════ */
 function InvestChart() {
-  const [mode, setMode] = useState('week')   // 'day' | 'week' | 'month'
-  const [offset, setOffset] = useState(0)    // 0=現在, -1=前, +1=次
+  const [mode, setMode]     = useState('day')
+  const [offset, setOffset] = useState(0)
   const [allRec, setAllRec] = useState({})
 
-  useEffect(() => {
-    setAllRec(getAllRecords())
-  }, [])
+  useEffect(() => { setAllRec(getAllRecords()) }, [])
 
-  // ── データ構築 ──
-  const today = new Date()
-  today.setHours(0,0,0,0)
+  const today = new Date(); today.setHours(0,0,0,0)
 
-  // 日モード: offset週分ずらした7日間
   function getDayBars() {
-    const bars = []
     const base = new Date(today)
     base.setDate(base.getDate() + offset * 7)
-    // その週の月曜始まり7日
     const dow = base.getDay()
     const monday = new Date(base)
     monday.setDate(monday.getDate() - ((dow+6)%7))
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday)
-      d.setDate(d.getDate() + i)
+    const bars = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday); d.setDate(d.getDate() + i)
       const key = toDateStr(d)
       const inv = allRec[key]?.investment
-      const mins = getInvMins(inv)
-      bars.push({
-        label: `${d.getMonth()+1}/${d.getDate()}`,
-        sub: DAY_JP[d.getDay()],
-        mins,
-        theme: inv?.theme || null,
-        key,
-      })
-    }
-    const start = bars[0], end = bars[6]
-    const title = `${start.key.slice(0,4)}年${parseInt(start.key.slice(5,7))}月${parseInt(start.key.slice(8,10))}日〜${parseInt(end.key.slice(8,10))}日`
-    return { bars, title }
+      return { label:`${d.getMonth()+1}/${d.getDate()}`, sub: DAY_JP[d.getDay()], mins: getInvMins(inv), theme: inv?.theme||null, key }
+    })
+    const s = bars[0].key, e = bars[6].key
+    return { bars, title:`${s.slice(0,4)}年${parseInt(s.slice(5,7))}月${parseInt(s.slice(8,10))}日〜${parseInt(e.slice(8,10))}日` }
   }
 
-  // 週モード: offset月分ずらした月の週ごと集計
   function getWeekBars() {
     const base = new Date(today.getFullYear(), today.getMonth() + offset, 1)
     const year = base.getFullYear(), month = base.getMonth()
-    // その月の全日
     const daysInMonth = new Date(year, month+1, 0).getDate()
-    // 週ごとにグループ
-    const weeks = []
-    let wStart = 1
-    while (wStart <= daysInMonth) {
-      const wEnd = Math.min(wStart + 6, daysInMonth)
+    const bars = []
+    for (let wStart = 1; wStart <= daysInMonth; wStart += 7) {
+      const wEnd = Math.min(wStart+6, daysInMonth)
       let mins = 0
-      for (let d = wStart; d <= wEnd; d++) {
-        const key = `${year}-${pad(month+1)}-${pad(d)}`
-        mins += getInvMins(allRec[key]?.investment)
-      }
-      weeks.push({
-        label: `${wStart}〜${wEnd}日`,
-        sub: `${month+1}月`,
-        mins,
-        theme: null,
-        key: `${year}-${pad(month+1)}-${pad(wStart)}`,
-      })
-      wStart += 7
+      for (let d = wStart; d <= wEnd; d++) mins += getInvMins(allRec[`${year}-${pad(month+1)}-${pad(d)}`]?.investment)
+      bars.push({ label:`${wStart}〜${wEnd}日`, sub:`${month+1}月`, mins, theme:null, key:`${year}-${pad(month+1)}-${pad(wStart)}` })
     }
-    const title = `${year}年${month+1}月`
-    return { bars: weeks, title }
+    return { bars, title:`${year}年${month+1}月` }
   }
 
-  // 月モード: offset年分ずらした1〜12月
   function getMonthBars() {
     const year = today.getFullYear() + offset
-    const bars = []
-    for (let m = 0; m < 12; m++) {
-      let mins = 0
+    const bars = Array.from({ length: 12 }, (_, m) => {
       const daysInMonth = new Date(year, m+1, 0).getDate()
-      for (let d = 1; d <= daysInMonth; d++) {
-        const key = `${year}-${pad(m+1)}-${pad(d)}`
-        mins += getInvMins(allRec[key]?.investment)
-      }
-      bars.push({ label: `${m+1}月`, sub: '', mins, theme: null, key: `${year}-${pad(m+1)}-01` })
-    }
-    return { bars, title: `${year}年` }
+      let mins = 0
+      for (let d = 1; d <= daysInMonth; d++) mins += getInvMins(allRec[`${year}-${pad(m+1)}-${pad(d)}`]?.investment)
+      return { label:`${m+1}月`, sub:'', mins, theme:null, key:`${year}-${pad(m+1)}-01` }
+    })
+    return { bars, title:`${year}年` }
   }
 
-  const { bars, title } = mode==='day' ? getDayBars()
-    : mode==='week' ? getWeekBars()
-    : getMonthBars()
+  const { bars, title } = mode==='day' ? getDayBars() : mode==='week' ? getWeekBars() : getMonthBars()
 
-  const maxMins = Math.max(...bars.map(b => b.mins), 90)
+  const rawMax    = Math.max(...bars.map(b => b.mins), 1)
+  const maxVal    = niceMax(rawMax)
+  const gridLines = niceGridLines(maxVal)
   const totalMins = bars.reduce((s, b) => s + b.mins, 0)
   const activeDays = bars.filter(b => b.mins > 0).length
-
-  const BAR_H = 160  // SVG chart height
-  const BAR_W = 28
-  const barCount = bars.length
-  const SVG_W = Math.max(barCount * 44 + 20, 300)
+  const CHART_H = 180
 
   return (
     <div className="sec">
       <div className="sec-title">投資グラフ</div>
-      <div className="card static" style={{ padding: '16px 0 8px', overflow: 'hidden' }}>
+      <div className="card static" style={{ padding:'16px 0 8px' }}>
 
         {/* タブ */}
-        <div style={{ display:'flex', gap:0, margin:'0 16px 14px', background:'#F0EDE7', borderRadius:10, padding:3 }}>
+        <div style={{ display:'flex', margin:'0 16px 14px', background:'#F0EDE7', borderRadius:10, padding:3 }}>
           {[['day','日'],['week','週'],['month','月']].map(([v,l]) => (
-            <button key={v}
-              onClick={() => { setMode(v); setOffset(0) }}
-              style={{
-                flex:1, padding:'8px 0', border:'none', borderRadius:8,
-                background: mode===v ? '#fff' : 'transparent',
-                fontFamily:'var(--font)', fontSize:13, fontWeight:700,
-                color: mode===v ? 'var(--main)' : 'var(--muted)',
-                boxShadow: mode===v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-                cursor:'pointer', transition:'all 0.2s',
-              }}
-            >{l}</button>
+            <button key={v} onClick={() => { setMode(v); setOffset(0) }} style={{
+              flex:1, padding:'8px 0', border:'none', borderRadius:8,
+              background: mode===v ? '#fff' : 'transparent',
+              fontFamily:'var(--font)', fontSize:13, fontWeight:700,
+              color: mode===v ? 'var(--main)' : 'var(--muted)',
+              boxShadow: mode===v ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+              cursor:'pointer', transition:'all 0.2s',
+            }}>{l}</button>
           ))}
         </div>
 
         {/* ナビゲーション */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px 12px' }}>
-          <button onClick={() => setOffset(o => o-1)}
-            style={{ background:'none', border:'1.5px solid var(--border)', borderRadius:8, width:32, height:32, cursor:'pointer', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            ‹
-          </button>
-          <div style={{ fontSize:12, fontWeight:800, color:'var(--ink2)', letterSpacing:0.3 }}>{title}</div>
-          <button onClick={() => setOffset(o => o+1)}
-            disabled={offset >= 0}
-            style={{ background:'none', border:'1.5px solid var(--border)', borderRadius:8, width:32, height:32, cursor: offset>=0?'default':'pointer', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', opacity: offset>=0?0.3:1 }}>
-            ›
-          </button>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px 16px' }}>
+          <button onClick={() => setOffset(o => o-1)} style={{ background:'none', border:'1.5px solid var(--border)', borderRadius:8, width:34, height:34, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>‹</button>
+          <div style={{ fontSize:13, fontWeight:800, color:'var(--ink2)', textAlign:'center' }}>{title}</div>
+          <button onClick={() => setOffset(o => o+1)} disabled={offset>=0} style={{ background:'none', border:'1.5px solid var(--border)', borderRadius:8, width:34, height:34, fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, opacity:offset>=0?0.25:1, cursor:offset>=0?'default':'pointer' }}>›</button>
         </div>
 
-        {/* 棒グラフ（横スクロール） */}
-        <div style={{ overflowX:'auto', paddingBottom:4 }}>
-          <svg width={SVG_W} height={BAR_H + 52} style={{ display:'block', minWidth:'100%' }}>
-            {/* Y軸ガイドライン */}
-            {[1,2,3,4].map(i => {
-              const y = BAR_H - (i / 4) * BAR_H
-              const label = fmtMins(Math.round((maxMins * i / 4)))
-              return (
-                <g key={i}>
-                  <line x1={0} y1={y} x2={SVG_W} y2={y} stroke="#EDE8DF" strokeWidth={1} />
-                  <text x={6} y={y-3} fontSize={8} fill="#BBB" fontFamily="sans-serif">{label}</text>
-                </g>
-              )
-            })}
-            {/* 棒グラフ */}
-            {bars.map((b, i) => {
-              const barH = maxMins > 0 ? Math.max((b.mins / maxMins) * BAR_H, b.mins > 0 ? 4 : 0) : 0
-              const x = 20 + i * (SVG_W - 20) / barCount + (SVG_W - 20) / barCount / 2 - BAR_W / 2
-              const y = BAR_H - barH
-              const color = THEME_COLORS[b.theme] || DEFAULT_COLOR
-              const isToday = b.key === toDateStr(today)
-              return (
-                <g key={b.key}>
-                  {/* 棒 */}
-                  <rect
-                    x={x} y={y} width={BAR_W} height={barH}
-                    rx={5} ry={5}
-                    fill={b.mins > 0 ? color : '#EDE8DF'}
-                    opacity={isToday ? 1 : 0.85}
-                  />
-                  {/* 達成ライン（90分）*/}
-                  {b.mins > 0 && (
-                    <text x={x + BAR_W/2} y={y-5} textAnchor="middle" fontSize={9} fill={color} fontFamily="sans-serif" fontWeight="bold">
+        {/* グラフ本体 — 左にY軸ラベル, 右に棒グラフ */}
+        <div style={{ display:'flex', paddingLeft:4, paddingRight:16 }}>
+
+          {/* Y軸ラベル */}
+          <div style={{ position:'relative', width:42, flexShrink:0, height: CHART_H + 36 }}>
+            {gridLines.map(v => (
+              <div key={v} style={{
+                position:'absolute',
+                bottom: `${(v / maxVal) * CHART_H}px`,
+                right:4,
+                fontSize:9, fontWeight:700, color:'#BBAA99',
+                whiteSpace:'nowrap', lineHeight:1,
+              }}>{fmtMins(v)}</div>
+            ))}
+          </div>
+
+          {/* 棒グラフエリア */}
+          <div style={{ flex:1, position:'relative', height: CHART_H + 36 }}>
+            {/* グリッドライン */}
+            {gridLines.map(v => (
+              <div key={v} style={{
+                position:'absolute',
+                bottom: `${(v / maxVal) * CHART_H}px`,
+                left:0, right:0,
+                borderTop: v === 90 ? '1.5px dashed #F2994A' : '1px solid #EDE8DF',
+                zIndex:0,
+              }} />
+            ))}
+            {/* 90分ラベル */}
+            {maxVal >= 90 && (
+              <div style={{
+                position:'absolute',
+                bottom: `${(90 / maxVal) * CHART_H + 3}px`,
+                right:0, fontSize:8, color:'#F2994A', fontWeight:800,
+              }}>90分</div>
+            )}
+            {/* 棒グラフ群 */}
+            <div style={{ display:'flex', alignItems:'flex-end', height: CHART_H, position:'relative', zIndex:1 }}>
+              {bars.map(b => {
+                const barH = b.mins > 0 ? Math.max((b.mins / maxVal) * CHART_H, 4) : 0
+                const color = THEME_COLORS[b.theme] || DEFAULT_COLOR
+                const isToday = b.key === toDateStr(today)
+                return (
+                  <div key={b.key} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:0 }}>
+                    {/* 棒上の時間ラベル */}
+                    <div style={{ fontSize:8, fontWeight:800, color: b.mins>0 ? color : 'transparent', marginBottom:2, whiteSpace:'nowrap' }}>
                       {fmtMins(b.mins)}
-                    </text>
-                  )}
-                  {/* X軸ラベル */}
-                  <text x={x + BAR_W/2} y={BAR_H+14} textAnchor="middle" fontSize={10} fill={isToday?'var(--orange)':'#888'} fontFamily="sans-serif" fontWeight={isToday?'bold':'normal'}>
-                    {b.label}
-                  </text>
-                  {b.sub && (
-                    <text x={x + BAR_W/2} y={BAR_H+26} textAnchor="middle" fontSize={9} fill={isToday?'var(--orange)':'#AAA'} fontFamily="sans-serif">
-                      {b.sub}
-                    </text>
-                  )}
-                </g>
-              )
-            })}
-            {/* 90分基準線 */}
-            {maxMins >= 60 && (() => {
-              const y90 = BAR_H - (90 / maxMins) * BAR_H
-              if (y90 < 0) return null
-              return (
-                <g>
-                  <line x1={0} y1={y90} x2={SVG_W} y2={y90} stroke="#F2994A" strokeWidth={1} strokeDasharray="4 3" />
-                  <text x={SVG_W - 4} y={y90 - 3} textAnchor="end" fontSize={8} fill="#F2994A" fontFamily="sans-serif">90分</text>
-                </g>
-              )
-            })()}
-          </svg>
+                    </div>
+                    {/* 棒 */}
+                    <div style={{
+                      width:'70%', height: barH,
+                      background: b.mins>0 ? color : '#EDE8DF',
+                      borderRadius:'4px 4px 2px 2px',
+                      opacity: isToday ? 1 : 0.8,
+                      boxShadow: isToday && b.mins>0 ? `0 2px 8px ${color}55` : 'none',
+                      transition:'height 0.4s ease',
+                    }} />
+                  </div>
+                )
+              })}
+            </div>
+            {/* X軸ラベル */}
+            <div style={{ display:'flex', height:36, borderTop:'1px solid #EDE8DF', marginTop:0 }}>
+              {bars.map(b => {
+                const isToday = b.key === toDateStr(today)
+                return (
+                  <div key={b.key} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:1 }}>
+                    <div style={{ fontSize:10, fontWeight: isToday?800:600, color: isToday?'var(--orange)':'#888' }}>{b.label}</div>
+                    {b.sub && <div style={{ fontSize:9, color: isToday?'var(--orange)':'#BBB', fontWeight:600 }}>{b.sub}</div>}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         {/* 期間サマリー */}
-        <div style={{ display:'flex', gap:10, padding:'10px 16px 6px', borderTop:'1px solid #F0EDE7' }}>
-          <div style={{ flex:1, textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:900, color:'var(--main)' }}>{fmtMins(totalMins)}</div>
-            <div style={{ fontSize:10, color:'var(--muted)', fontWeight:700, marginTop:1 }}>合計</div>
-          </div>
-          <div style={{ flex:1, textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:900, color:'var(--orange)' }}>{activeDays}日</div>
-            <div style={{ fontSize:10, color:'var(--muted)', fontWeight:700, marginTop:1 }}>投資した日</div>
-          </div>
-          <div style={{ flex:1, textAlign:'center' }}>
-            <div style={{ fontSize:18, fontWeight:900, color:'var(--purple)' }}>
-              {activeDays > 0 ? fmtMins(Math.round(totalMins / activeDays)) : '—'}
+        <div style={{ display:'flex', gap:0, padding:'12px 16px 6px', borderTop:'1px solid #F0EDE7', marginTop:4 }}>
+          {[
+            { val: fmtMins(totalMins), lbl:'合計', color:'var(--main)' },
+            { val: `${activeDays}日`, lbl:'投資した日', color:'var(--orange)' },
+            { val: activeDays>0 ? fmtMins(Math.round(totalMins/activeDays)) : '—', lbl:'平均/日', color:'var(--purple)' },
+          ].map(({ val, lbl, color }) => (
+            <div key={lbl} style={{ flex:1, textAlign:'center' }}>
+              <div style={{ fontSize:18, fontWeight:900, color }}>{val}</div>
+              <div style={{ fontSize:10, color:'var(--muted)', fontWeight:700, marginTop:1 }}>{lbl}</div>
             </div>
-            <div style={{ fontSize:10, color:'var(--muted)', fontWeight:700, marginTop:1 }}>平均/日</div>
-          </div>
+          ))}
         </div>
 
         {/* テーマ凡例 */}
-        <div style={{ display:'flex', flexWrap:'wrap', gap:6, padding:'8px 16px 4px' }}>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'4px 10px', padding:'8px 16px 4px' }}>
           {THEMES.map(t => (
             <div key={t} style={{ display:'flex', alignItems:'center', gap:4 }}>
               <div style={{ width:8, height:8, borderRadius:2, background:THEME_COLORS[t] }} />
