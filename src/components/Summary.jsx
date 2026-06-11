@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getSummaries, saveSummary, deleteSummary } from '../utils/storage'
+import { getSummaries, saveSummary, deleteSummary, addGachaTickets, wasTicketAwarded, markTicketAwarded } from '../utils/storage'
 import { toast } from './Toast'
 
 const TYPES = ['アニメ', '映画', 'YouTube', '本', '音楽', 'その他']
@@ -29,7 +29,13 @@ export default function Summary() {
     if (!form.title.trim()) { toast('タイトルを入力してください'); return }
     saveSummary(editing ? { ...form, id: editing } : form)
     refresh(); setShowForm(false)
-    toast('自分の世界が1%深まった')
+    const key = `world_summary_${new Date().toISOString().slice(0,10)}`
+    if (!wasTicketAwarded(key)) {
+      addGachaTickets(1); markTicketAwarded(key)
+      toast('自分の世界が1%深まった 🎟️ +1チケット')
+    } else {
+      toast('自分の世界が1%深まった')
+    }
   }
 
   const handleDelete = (id) => { deleteSummary(id); refresh(); toast('削除しました') }

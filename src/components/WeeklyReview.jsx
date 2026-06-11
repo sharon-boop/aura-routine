@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import {
   getAllRecords, getWeekKey, getWeeklyReview, saveWeeklyReview,
   addGachaTickets, wasTicketAwarded, markTicketAwarded,
+  getChecklistTemplate, saveChecklistTemplate,
 } from '../utils/storage'
 import { toast } from './Toast'
 
@@ -29,11 +30,62 @@ function getScoreColor(s) {
   return '#9E9E9E'
 }
 
+/* ─── チェックリスト並び替えコンポーネント ─── */
+function SortableChecklist({ items, checks, onToggle, onAdd, onRemove, onMove }) {
+  const [addOpen, setAddOpen] = useState(false)
+  const [addVal, setAddVal]   = useState('')
+  const done = items.filter(c => checks[c.key]).length
+
+  const handleAdd = () => {
+    if (!addVal.trim()) return
+    onAdd(addVal.trim()); setAddVal(''); setAddOpen(false)
+  }
+
+  return (
+    <div className="card static">
+      {items.length === 0 && (
+        <div style={{ fontSize:13, color:'var(--muted)', padding:'8px 0', marginBottom:8 }}>
+          チェック項目を追加してください
+        </div>
+      )}
+      {items.map((c, idx) => (
+        <div key={c.key} style={{ display:'flex', alignItems:'center', gap:6, borderBottom: idx < items.length-1 ? '1px solid #F5F2ED' : 'none', padding:'4px 0' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+            <button onClick={() => onMove(idx, -1)} disabled={idx===0}
+              style={{ background:'none', border:'none', fontSize:10, cursor:idx===0?'default':'pointer', color:idx===0?'#DDD':'var(--muted)', padding:'1px 4px', lineHeight:1 }}>▲</button>
+            <button onClick={() => onMove(idx, 1)} disabled={idx===items.length-1}
+              style={{ background:'none', border:'none', fontSize:10, cursor:idx===items.length-1?'default':'pointer', color:idx===items.length-1?'#DDD':'var(--muted)', padding:'1px 4px', lineHeight:1 }}>▼</button>
+          </div>
+          <div className="ck-item" style={{ flex:1, borderBottom:'none', padding:'8px 0' }} onClick={() => onToggle(c.key)}>
+            <div className={`ck-box ${checks[c.key] ? 'on' : ''}`} />
+            <span className={`ck-label ${checks[c.key] ? 'done' : ''}`}>{c.label}</span>
+          </div>
+          <button onClick={() => onRemove(c.key)}
+            style={{ background:'none', border:'none', fontSize:13, color:'#CCC', cursor:'pointer', padding:'4px 6px', flexShrink:0 }}>×</button>
+        </div>
+      ))}
+      {addOpen ? (
+        <div style={{ display:'flex', gap:8, marginTop:8 }}>
+          <input value={addVal} onChange={e=>setAddVal(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&handleAdd()}
+            placeholder="新しいチェック項目" autoFocus
+            style={{ flex:1, padding:'10px 14px', borderRadius:'var(--r-sm)', border:'1.5px solid var(--border)', background:'#FDFBF8', fontFamily:'var(--font)', fontSize:13, outline:'none' }} />
+          <button className="btn btn-sm btn-main" style={{width:'auto'}} onClick={handleAdd}>追加</button>
+          <button className="btn btn-sm btn-ghost" style={{width:'auto'}} onClick={()=>{setAddOpen(false);setAddVal('')}}>×</button>
+        </div>
+      ) : (
+        <button className="add-item-btn" style={{ marginTop:8 }} onClick={()=>setAddOpen(true)}>＋ 項目を追加する</button>
+      )}
+    </div>
+  )
+}
+
 export default function WeeklyReview() {
   const [weekOffset, setWeekOffset] = useState(0)
   const [review, setReview] = useState(null)
   const [stats, setStats] = useState(null)
   const [newPlan, setNewPlan] = useState('')
+  const [wkChecks, setWkChecks] = useState(() => getChecklistTemplate('weekly'))
 
   useEffect(() => {
     const dates   = getWeekDates(weekOffset)
@@ -86,6 +138,32 @@ export default function WeeklyReview() {
   }
 
   const setPlans = (plans) => setReviewField('plans', plans)
+
+  // 週次チェックリスト操作
+  const toggleWkCheck = (key) => {
+    const next = { ...(review.checks || {}), [key]: !(review.checks || {})[key] }
+    setReviewField('checks', next)
+    if (!( review.checks || {})[key]) toast('✓')
+  }
+  const addWkCheck = (label) => {
+    const key = `wk_c_${Date.now()}`
+    const next = [...wkChecks, { key, label }]
+    setWkChecks(next); saveChecklistTemplate('weekly', next)
+    toast('追加しました')
+  }
+  const removeWkCheck = (key) => {
+    const next = wkChecks.filter(c => c.key !== key)
+    setWkChecks(next); saveChecklistTemplate('weekly', next)
+    const nc = { ...(review.checks || {}) }; delete nc[key]
+    setReviewField('checks', nc)
+  }
+  const moveWkCheck = (idx, dir) => {
+    const next = [...wkChecks]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    setWkChecks(next); saveChecklistTemplate('weekly', next)
+  }
 
   const addPlan = () => {
     if (!newPlan.trim()) return
@@ -224,6 +302,26 @@ export default function WeeklyReview() {
             <button className="btn btn-main" style={{ width:60, padding:'11px 0', flexShrink:0 }} onClick={addPlan}>追加</button>
           </div>
         </div>
+      </div>
+
+      {/* 週次チェックリスト */}
+      <div className="sec">
+        <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span>週次チェックリスト</span>
+          {wkChecks.length > 0 && (
+            <span style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>
+              {wkChecks.filter(c=>(review.checks||{})[c.key]).length}/{wkChecks.length}
+            </span>
+          )}
+        </div>
+        <SortableChecklist
+          items={wkChecks}
+          checks={review.checks || {}}
+          onToggle={toggleWkCheck}
+          onAdd={addWkCheck}
+          onRemove={removeWkCheck}
+          onMove={moveWkCheck}
+        />
       </div>
 
       {/* 保存確認 */}

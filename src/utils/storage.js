@@ -155,6 +155,15 @@ export const DEFAULT_CHECKLISTS = {
     { key:'selfMood',  label:'自分の機嫌を自分で取った' },
     { key:'noReturn',  label:'価値提供に見返りを求めなかった' },
   ],
+  weekly: [
+    { key:'wk_review',   label:'今週の記録を振り返った' },
+    { key:'wk_score',    label:'平均スコアを確認した' },
+    { key:'wk_emotion',  label:'今週の感情パターンに気づいた' },
+    { key:'wk_learn',    label:'今週の学びを3行でまとめた' },
+    { key:'wk_proud',    label:'自分を褒める場面が1つあった' },
+    { key:'wk_improve',  label:'来週の改善点を1つ決めた' },
+    { key:'wk_plan',     label:'来週の方針を書いた' },
+  ],
 }
 
 export function getChecklistTemplate(cat) {

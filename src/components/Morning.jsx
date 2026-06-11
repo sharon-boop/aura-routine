@@ -121,9 +121,23 @@ function AttitudeSection({ value, onChange }) {
 /* ─── OptionSection (言葉テーマ / 守ること) ── */
 function OptionSection({ eyebrow, placeholder, value, onChange, options, favKey }) {
   const displayVal = value?.trim()
+
+  const pickRandom = () => {
+    if (!options.length) return
+    const pick = options[Math.floor(Math.random() * options.length)]
+    onChange(pick)
+    toast(`🎲 「${pick}」`)
+  }
+
   return (
     <div className="card static">
-      <div className="option-eyebrow">{eyebrow}</div>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+        <div className="option-eyebrow" style={{ marginBottom:0 }}>{eyebrow}</div>
+        <button
+          onClick={pickRandom}
+          style={{ background:'var(--main)', border:'none', borderRadius:20, padding:'4px 10px', fontSize:10, fontWeight:800, color:'#fff', cursor:'pointer', letterSpacing:0.5, fontFamily:'var(--font)' }}
+        >🎲 ランダム</button>
+      </div>
       <div className={`option-selected ${!displayVal ? 'placeholder' : ''}`}>
         {displayVal || placeholder}
       </div>
@@ -211,6 +225,14 @@ export default function Morning() {
     setChecks(next); saveChecklistTemplate('morning', next)
     const nc = { ...data.morning.checks }; delete nc[key]
     setMorning({ checks: nc })
+  }
+
+  const moveItem = (idx, dir) => {
+    const next = [...checks]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    setChecks(next); saveChecklistTemplate('morning', next)
   }
 
   const handleSave = () => {
@@ -305,18 +327,21 @@ export default function Morning() {
       <div className="sec">
         <div className="sec-title">朝の儀式</div>
         <div className="card static">
-          {checks.map(c => {
-            const isCustom = c.key.startsWith('mc_')
-            return (
-              <div key={c.key} className="ck-item" onClick={() => toggleCheck(c.key)}>
+          {checks.map((c, idx) => (
+            <div key={c.key} style={{ display:'flex', alignItems:'center', gap:4, borderBottom: idx < checks.length-1 ? '1px solid #F5F2ED' : 'none' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+                <button onClick={e=>{e.stopPropagation();moveItem(idx,-1)}} disabled={idx===0}
+                  style={{ background:'none', border:'none', fontSize:9, cursor:idx===0?'default':'pointer', color:idx===0?'#DDD':'var(--muted)', padding:'1px 3px', lineHeight:1 }}>▲</button>
+                <button onClick={e=>{e.stopPropagation();moveItem(idx,1)}} disabled={idx===checks.length-1}
+                  style={{ background:'none', border:'none', fontSize:9, cursor:idx===checks.length-1?'default':'pointer', color:idx===checks.length-1?'#DDD':'var(--muted)', padding:'1px 3px', lineHeight:1 }}>▼</button>
+              </div>
+              <div className="ck-item" style={{ flex:1, borderBottom:'none' }} onClick={() => toggleCheck(c.key)}>
                 <div className={`ck-box ${dc[c.key] ? 'on' : ''} ${anim[c.key] ? 'ck-pop' : ''}`} />
                 <span className={`ck-label ${dc[c.key] ? 'done' : ''}`}>{c.label}</span>
-                {isCustom && (
-                  <button className="ck-del" onClick={e => { e.stopPropagation(); removeItem(c.key) }}>×</button>
-                )}
               </div>
-            )
-          })}
+              <button className="ck-del" onClick={e=>{e.stopPropagation();removeItem(c.key)}}>×</button>
+            </div>
+          ))}
           <AddItemInput onAdd={addItem} />
         </div>
       </div>

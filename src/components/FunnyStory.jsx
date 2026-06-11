@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getFunnyStories, saveFunnyStory, save } from '../utils/storage'
+import { getFunnyStories, saveFunnyStory, save, addGachaTickets, wasTicketAwarded, markTicketAwarded } from '../utils/storage'
 import { toast } from './Toast'
 
 const TARGETS = ['一人で練習', '友達', '家族', 'バイト先', '部活', 'その他']
@@ -27,7 +27,13 @@ export default function FunnyStory() {
     if (!form.event.trim()) { toast('出来事を入力してください'); return }
     saveFunnyStory(editing ? { ...form, id: editing } : form)
     refresh(); setShowForm(false)
-    toast('話が面白い人になってる')
+    const key = `world_funny_${new Date().toISOString().slice(0,10)}`
+    if (!wasTicketAwarded(key)) {
+      addGachaTickets(1); markTicketAwarded(key)
+      toast('話が面白い人になってる 🎟️ +1チケット')
+    } else {
+      toast('話が面白い人になってる')
+    }
   }
 
   const del = (id) => {

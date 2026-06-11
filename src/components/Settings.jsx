@@ -247,12 +247,21 @@ function ChecklistEditor({ category, label }) {
     persist(items.map(i => i.key === key ? { ...i, label: newLabel } : i))
   }
 
+  const move = (idx, dir) => {
+    const next = [...items]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    persist(next)
+  }
+
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 10 }}>{label}</div>
       <div className="card static">
         {items.map((item, i) => (
-          <CheckItem key={item.key} item={item} onRename={rename} onRemove={remove} isLast={i === items.length - 1} />
+          <CheckItem key={item.key} item={item} idx={i} total={items.length}
+            onRename={rename} onRemove={remove} onMove={move} />
         ))}
         <div style={{ display: 'flex', gap: 8, marginTop: items.length ? 10 : 0 }}>
           <input
@@ -274,7 +283,7 @@ function ChecklistEditor({ category, label }) {
   )
 }
 
-function CheckItem({ item, onRename, onRemove, isLast }) {
+function CheckItem({ item, idx, total, onRename, onRemove, onMove }) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(item.label)
 
@@ -283,8 +292,17 @@ function CheckItem({ item, onRename, onRemove, isLast }) {
     setEditing(false)
   }
 
+  const isLast = idx === total - 1
+
   return (
-    <div className="edit-list-item" style={{ borderBottom: isLast ? 'none' : '1px solid #F5F2ED' }}>
+    <div className="edit-list-item" style={{ borderBottom: isLast ? 'none' : '1px solid #F5F2ED', gap: 4 }}>
+      {/* 並び替えボタン */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, flexShrink: 0 }}>
+        <button onClick={() => onMove(idx, -1)} disabled={idx === 0}
+          style={{ background: 'none', border: 'none', fontSize: 9, cursor: idx===0?'default':'pointer', color: idx===0?'#DDD':'var(--muted)', padding: '1px 3px', lineHeight: 1 }}>▲</button>
+        <button onClick={() => onMove(idx, 1)} disabled={idx === total-1}
+          style={{ background: 'none', border: 'none', fontSize: 9, cursor: idx===total-1?'default':'pointer', color: idx===total-1?'#DDD':'var(--muted)', padding: '1px 3px', lineHeight: 1 }}>▼</button>
+      </div>
       {editing ? (
         <>
           <input
@@ -427,8 +445,9 @@ export default function Settings({ onBack }) {
         {tab === 'quotes'    && <QuoteSection />}
         {tab === 'checklist' && (
           <div>
-            <ChecklistEditor category="morning"   label="☀️ 朝のチェックリスト" />
-            <ChecklistEditor category="afternoon" label="🌤 昼のチェックリスト" />
+            <ChecklistEditor category="morning" label="☀️ 朝のチェックリスト" />
+            <ChecklistEditor category="evening" label="🌙 夜のチェックリスト" />
+            <ChecklistEditor category="weekly"  label="📋 週次レビューのチェックリスト" />
           </div>
         )}
         {tab === 'logideas'  && <LogIdeasSection />}

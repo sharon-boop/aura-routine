@@ -160,6 +160,14 @@ export default function Evening() {
     setEv({ checks })
   }
 
+  const moveEvItem = (idx, dir) => {
+    const next = [...evChecks]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    setEvChecks(next); saveChecklistTemplate('evening', next)
+  }
+
   const handleSave = () => {
     updateTodayRecord({ evening: data.evening })
 
@@ -357,18 +365,21 @@ export default function Evening() {
               チェック項目を追加して夜のルーティンを作ろう
             </div>
           )}
-          {evChecks.map(c => {
-            const isCustom = c.key.startsWith('ec_')
-            return (
-              <div key={c.key} className="ck-item" onClick={() => toggleEvCheck(c.key)}>
+          {evChecks.map((c, idx) => (
+            <div key={c.key} style={{ display:'flex', alignItems:'center', gap:4, borderBottom: idx < evChecks.length-1 ? '1px solid #F5F2ED' : 'none' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+                <button onClick={() => moveEvItem(idx, -1)} disabled={idx===0}
+                  style={{ background:'none', border:'none', fontSize:9, cursor:idx===0?'default':'pointer', color:idx===0?'#DDD':'var(--muted)', padding:'1px 3px', lineHeight:1 }}>▲</button>
+                <button onClick={() => moveEvItem(idx, 1)} disabled={idx===evChecks.length-1}
+                  style={{ background:'none', border:'none', fontSize:9, cursor:idx===evChecks.length-1?'default':'pointer', color:idx===evChecks.length-1?'#DDD':'var(--muted)', padding:'1px 3px', lineHeight:1 }}>▼</button>
+              </div>
+              <div className="ck-item" style={{ flex:1, borderBottom:'none' }} onClick={() => toggleEvCheck(c.key)}>
                 <div className={`ck-box ${evCheckState[c.key] ? 'on' : ''}`} />
                 <span className={`ck-label ${evCheckState[c.key] ? 'done' : ''}`}>{c.label}</span>
-                {isCustom && (
-                  <button className="ck-del" onClick={e => { e.stopPropagation(); removeEvItem(c.key) }}>×</button>
-                )}
               </div>
-            )
-          })}
+              <button className="ck-del" onClick={e => { e.stopPropagation(); removeEvItem(c.key) }}>×</button>
+            </div>
+          ))}
           <AddItemInput onAdd={addEvItem} />
         </div>
       </div>
