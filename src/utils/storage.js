@@ -141,17 +141,6 @@ export const DEFAULT_CHECKLISTS = {
     { key:'ev_eq',      label:'感情ログを記録した' },
     { key:'ev_learn',   label:'今日の学びをメモした' },
     { key:'ev_tomorrow',label:'明日やることを1つ決めた' },
-    { key:'greet',      label:'目を見て挨拶した' },
-    { key:'name',       label:'名前を呼んだ' },
-    { key:'impression', label:'会った瞬間の印象を取った' },
-    { key:'praise',     label:'1人以上を具体的に褒めた' },
-    { key:'summarize',  label:'相手の話を要約した' },
-    { key:'include',    label:'話に入れていない人を拾った' },
-    { key:'improve',    label:'場を1%良くする行動をした' },
-    { key:'stopBully',  label:'いじりが強い時に自然に止めた' },
-    { key:'emotion',    label:'感情を豊かに出した' },
-    { key:'selfMood',   label:'自分の機嫌を自分で取った' },
-    { key:'noReturn',   label:'価値提供に見返りを求めなかった' },
   ],
   afternoon: [
     { key:'greet',     label:'目を見て挨拶した' },
@@ -188,24 +177,11 @@ export function saveChecklistTemplate(cat, items) {
 }
 
 /**
- * 夜のチェックリストに昼の項目が未登録なら追加するマイグレーション
- * アプリ起動時に呼ぶ
+ * 夜チェックリストマイグレーション（昼11項目は今日の振り返りへ移動のため無効化）
  */
-const AFTERNOON_KEYS_IN_EVENING = [
-  'greet','name','impression','praise','summarize',
-  'include','improve','stopBully','emotion','selfMood','noReturn',
-]
 export function migrateEveningChecklist() {
-  const all = load('checklistTemplates') || {}
-  if (!all['evening']) return // デフォルトを使っているので移行不要
-  const current = all['evening']
-  const existingKeys = new Set(current.map(c => c.key))
-  const toAdd = DEFAULT_CHECKLISTS.evening.filter(
-    c => AFTERNOON_KEYS_IN_EVENING.includes(c.key) && !existingKeys.has(c.key)
-  )
-  if (toAdd.length === 0) return
-  all['evening'] = [...current, ...toAdd]
-  save('checklistTemplates', all)
+  // 昼11項目は「今日の振り返り」チェックリストに移動したため、夜チェックへの追加は行わない
+  // 既存ユーザーが夜チェックに昼の項目を持っている場合はそのまま保持する
 }
 
 /* ═══════════════════════════════════════════
