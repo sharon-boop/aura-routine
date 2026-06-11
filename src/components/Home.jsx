@@ -4,6 +4,7 @@ import {
   getPerfectDayStatus, getGachaTickets,
   formatDate, getToday, getQuotes, getDailyQuote, saveQuotes,
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
+  shouldShowWeeklyReminder, markWeeklyReminderShown,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -307,6 +308,36 @@ function RoutineCards({ record, onNavigate }) {
   )
 }
 
+/* ─── 週次レビューリマインダーバナー ─── */
+function WeeklyReviewBanner({ onNavigate, onDismiss }) {
+  return (
+    <div style={{
+      margin:'0 0 16px',
+      background:'linear-gradient(135deg,#2F4858 0%,#1a2f3e 100%)',
+      borderRadius:14, padding:'16px 18px',
+      display:'flex', alignItems:'center', gap:14,
+      boxShadow:'0 4px 20px rgba(47,72,88,0.25)',
+    }}>
+      <div style={{ fontSize:32, flexShrink:0 }}>📋</div>
+      <div style={{ flex:1 }}>
+        <div style={{ fontSize:12, fontWeight:900, color:'rgba(255,255,255,0.6)', letterSpacing:2, textTransform:'uppercase', marginBottom:3 }}>Weekly Review</div>
+        <div style={{ fontSize:14, fontWeight:800, color:'#fff', lineHeight:1.4 }}>今日は日曜日！今週を振り返ろう</div>
+        <div style={{ fontSize:11, color:'rgba(255,255,255,0.5)', marginTop:3 }}>チェックリストを全て完了すると +3チケット🎟️</div>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:6, flexShrink:0 }}>
+        <button
+          onClick={() => { onNavigate('log', 'weekly'); onDismiss() }}
+          style={{ background:'#F2994A', border:'none', borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:800, color:'#fff', cursor:'pointer', fontFamily:'var(--font)', whiteSpace:'nowrap' }}
+        >振り返る →</button>
+        <button
+          onClick={onDismiss}
+          style={{ background:'rgba(255,255,255,0.1)', border:'none', borderRadius:8, padding:'5px 14px', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.5)', cursor:'pointer', fontFamily:'var(--font)' }}
+        >後で</button>
+      </div>
+    </div>
+  )
+}
+
 /* ─── MAIN HOME ─── */
 export default function Home({ onNavigate, onSettings }) {
   const [record, setRecord] = useState(null)
@@ -316,6 +347,7 @@ export default function Home({ onNavigate, onSettings }) {
   const [perfectStatus, setPerfectStatus] = useState(null)
   const [tickets, setTickets] = useState(0)
   const [showGacha, setShowGacha] = useState(false)
+  const [showWeeklyBanner, setShowWeeklyBanner] = useState(false)
 
   useEffect(() => {
     const r = getTodayRecord()
@@ -325,6 +357,11 @@ export default function Home({ onNavigate, onSettings }) {
     setPerfect(getPerfectCount())
     setPerfectStatus(getPerfectDayStatus(r))
     setTickets(getGachaTickets())
+    // 週次レビューリマインダー（日曜日・初回のみ）
+    if (shouldShowWeeklyReminder()) {
+      setShowWeeklyBanner(true)
+      markWeeklyReminderShown()
+    }
   }, [])
 
   const setArikata = (val) => {
@@ -357,6 +394,16 @@ export default function Home({ onNavigate, onSettings }) {
           </button>
         </div>
       </div>
+
+      {/* ─── 週次レビューリマインダーバナー ─── */}
+      {showWeeklyBanner && (
+        <div className="sec" style={{ paddingTop:0 }}>
+          <WeeklyReviewBanner
+            onNavigate={onNavigate}
+            onDismiss={() => setShowWeeklyBanner(false)}
+          />
+        </div>
+      )}
 
       {/* ─── 今日の決意 ─── */}
       {(record?.morning?.arikata || record?.morning?.wordTheme || record?.morning?.rule) && (

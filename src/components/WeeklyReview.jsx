@@ -326,15 +326,31 @@ export default function WeeklyReview() {
 
       {/* 保存確認 */}
       <div className="sec">
+        {/* チェック状況の表示 */}
+        {wkChecks.length > 0 && (() => {
+          const done = wkChecks.filter(c => (review.checks||{})[c.key]).length
+          const allDone = done === wkChecks.length
+          const ticketKey = `weekly_${weekKey}`
+          const alreadyGot = wasTicketAwarded(ticketKey)
+          if (!allDone && !alreadyGot) return (
+            <div style={{ fontSize:12, color:'var(--muted)', textAlign:'center', padding:'10px 0 14px', fontWeight:600 }}>
+              🎟️ チェックリストを全て完了すると保存時に <strong>+3チケット</strong> もらえます（{done}/{wkChecks.length} 完了）
+            </div>
+          )
+          return null
+        })()}
         <button className="btn btn-main" onClick={() => {
           saveWeeklyReview(weekKey, review)
-          // チケット付与（週1回）
+          // チケット付与：週次チェックリストが全て完了の場合のみ（週1回）
           const ticketKey = `weekly_${weekKey}`
-          if (!wasTicketAwarded(ticketKey)) {
+          const allChecked = wkChecks.length > 0 && wkChecks.every(c => (review.checks||{})[c.key])
+          if (allChecked && !wasTicketAwarded(ticketKey)) {
             addGachaTickets(3); markTicketAwarded(ticketKey)
-            toast('週次レビューを保存しました ✓ +3チケット🎟️')
-          } else {
+            toast('週次レビューを保存しました ✓ チェック全完了！ +3チケット🎟️')
+          } else if (wasTicketAwarded(ticketKey)) {
             toast('週次レビューを保存しました ✓')
+          } else {
+            toast('保存しました。チェックリストを全て完了するとチケットがもらえます🎟️')
           }
         }}>
           週次レビューを保存する

@@ -351,6 +351,25 @@ export function saveWeeklyReview(weekKey, data) {
   save('weeklyReviews', all)
 }
 
+/**
+ * 週次レビューリマインダー通知
+ * 日曜日（または設定で土曜日）に1回だけ表示する
+ * フラグキー: weeklyReminderShown_YYYY-WNN
+ */
+export function shouldShowWeeklyReminder() {
+  const today = new Date()
+  const dow = today.getDay() // 0=日, 6=土
+  if (dow !== 0) return false  // 日曜日のみ
+  const weekKey = getWeekKey(today)
+  const flagKey = `weeklyReminderShown_${weekKey}`
+  return !load(flagKey)
+}
+
+export function markWeeklyReminderShown() {
+  const weekKey = getWeekKey(new Date())
+  save(`weeklyReminderShown_${weekKey}`, true)
+}
+
 // ガチャ回数カウント（シークレット報酬用）
 export function getGachaCount() { return load('gachaCount') || 0 }
 export function incrementGachaCount() {
