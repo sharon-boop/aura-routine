@@ -4,15 +4,15 @@ import { PREMIUM_GACHA_POOL, addPremiumUnlocked, getEquipped, saveEquipped } fro
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 
-const SPRITE = (id) =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
+const SPRITE = (id, shiny = false) =>
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${shiny ? 'shiny/' : ''}${id}.png`
 
-// ボールタイプ定義
+// ボールタイプ定義 (排出率: ノーマル65% / スーパー20% / ハイパー10% / マスター5%)
 const BALLS = [
-  { id:'normal',  label:'モンスターボール', color:'#CC0000', color2:'#880000', mid:'#111', accent:'#fff',    rarity:'common',   weight:60 },
-  { id:'great',   label:'スーパーボール',   color:'#1565C0', color2:'#0D47A1', mid:'#111', accent:'#FFD700', rarity:'uncommon', weight:25 },
-  { id:'ultra',   label:'ハイパーボール',   color:'#E8A000', color2:'#5D2E00', mid:'#111', accent:'#fff',    rarity:'rare',     weight:12 },
-  { id:'master',  label:'マスターボール',   color:'#6A1B9A', color2:'#38006B', mid:'#111', accent:'#FFD700', rarity:'ultra',    weight:3  },
+  { id:'normal',  label:'モンスターボール', color:'#CC0000', color2:'#880000', mid:'#111', accent:'#fff',    rarity:'common',   weight:65 },
+  { id:'great',   label:'スーパーボール',   color:'#1565C0', color2:'#0D47A1', mid:'#111', accent:'#FFD700', rarity:'uncommon', weight:20 },
+  { id:'ultra',   label:'ハイパーボール',   color:'#E8A000', color2:'#5D2E00', mid:'#111', accent:'#fff',    rarity:'rare',     weight:10 },
+  { id:'master',  label:'マスターボール',   color:'#6A1B9A', color2:'#38006B', mid:'#111', accent:'#FFD700', rarity:'ultra',    weight:5  },
 ]
 
 function pickBall() {
@@ -22,10 +22,20 @@ function pickBall() {
   return BALLS[0]
 }
 
-function pickReward(rarity) {
+// ポケモン20% / その他80% で排出。
+// ポケモンの場合はボールのrarity完全一致。その他はrarity以上を対象とする。
+function pickReward(ball) {
   const rarityOrder = ['common','uncommon','rare','ultra']
-  const minIdx = rarityOrder.indexOf(rarity)
-  const pool = PREMIUM_GACHA_POOL.filter(r => rarityOrder.indexOf(r.rarity) >= minIdx)
+  const ballIdx = rarityOrder.indexOf(ball.rarity)
+  const isPoke = Math.random() < 0.2
+  let pool
+  if (isPoke) {
+    pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && r.rarity === ball.rarity)
+    if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && rarityOrder.indexOf(r.rarity) >= ballIdx)
+  } else {
+    pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && rarityOrder.indexOf(r.rarity) >= ballIdx)
+    if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon')
+  }
   if (!pool.length) return PREMIUM_GACHA_POOL[0]
   return pool[Math.floor(Math.random() * pool.length)]
 }
@@ -76,10 +86,19 @@ function RewardCard({ reward }) {
     <div className="pg-reward-card slide-up" style={{ boxShadow: rarityGlow[reward.rarity] }}>
       <div style={{ fontSize:10, fontWeight:900, letterSpacing:3, color: rarityColor[reward.rarity] || '#6C63FF', textTransform:'uppercase', marginBottom:8 }}>
         {rarityLabel[reward.rarity] || 'REWARD'} ✦ {typeLabel[reward.type] || reward.type}
+        {reward.shiny && <span style={{ marginLeft:6, color:'#00E5FF' }}>★ 色違い</span>}
       </div>
       {reward.type === 'pokemon' && reward.pokeId && (
-        <img src={SPRITE(reward.pokeId)} alt={reward.name}
-          style={{ width:120, height:120, objectFit:'contain', marginBottom:8, filter: reward.rarity === 'ultra' ? 'drop-shadow(0 0 12px gold)' : reward.rarity === 'rare' ? 'drop-shadow(0 0 8px #9b59b6)' : 'none' }} />
+        <div style={{ position:'relative', display:'inline-block' }}>
+          <img src={SPRITE(reward.pokeId, reward.shiny)} alt={reward.name}
+            style={{ width:120, height:120, objectFit:'contain', marginBottom:8,
+              filter: reward.shiny ? 'drop-shadow(0 0 16px #00E5FF) drop-shadow(0 0 8px #fff)' :
+                reward.rarity === 'ultra' ? 'drop-shadow(0 0 12px gold)' :
+                reward.rarity === 'rare' ? 'drop-shadow(0 0 8px #9b59b6)' : 'none' }} />
+          {reward.shiny && (
+            <div style={{ position:'absolute', top:-4, right:-4, background:'linear-gradient(135deg,#00E5FF,#7B2FFF)', borderRadius:8, fontSize:9, fontWeight:900, color:'#fff', padding:'2px 6px', letterSpacing:1 }}>✨ SHINY</div>
+          )}
+        </div>
       )}
       {reward.type === 'stamp' && (
         <div style={{ width:80, height:80, borderRadius:16, background:reward.stampBg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:40, marginBottom:8 }}>
@@ -114,7 +133,7 @@ export default function PremiumGacha({ onClose, asPage = false }) {
     setTickets(t => t - 1)
 
     const chosenBall   = pickBall()
-    const chosenReward = pickReward(chosenBall.rarity)
+    const chosenReward = pickReward(chosenBall)
     setBall(chosenBall)
 
     setPhase('dropping')
@@ -135,7 +154,8 @@ export default function PremiumGacha({ onClose, asPage = false }) {
         confetti({ particleCount:50, spread:60, origin:{y:0.6}, colors:['#3B82F6','#fff','#84A98C'] })
       }
       const rarityMsg = { common:'', uncommon:'✦ アンコモン！', rare:'✦✦ レア！', ultra:'✦✦✦ ウルトラレア！！' }
-      toast(`${rarityMsg[chosenReward.rarity] || ''} ${chosenReward.name}`)
+      const shinyMsg = chosenReward.shiny ? '✨ 色違い！！ ' : ''
+      toast(`${shinyMsg}${rarityMsg[chosenReward.rarity] || ''} ${chosenReward.name}`)
     }, 3200)
     addTimer(() => setPhase('done'), 3600)
   }
@@ -164,6 +184,22 @@ export default function PremiumGacha({ onClose, asPage = false }) {
         <span className="pg-ticket-label">チケット</span>
       </div>
 
+      {/* 排出率表示 */}
+      {phase === 'idle' && (
+        <div style={{ display:'flex', gap:6, justifyContent:'center', marginBottom:12, flexWrap:'wrap' }}>
+          {[
+            { label:'ノーマル', pct:'65%', color:'#CC0000' },
+            { label:'スーパー', pct:'20%', color:'#1565C0' },
+            { label:'ハイパー', pct:'10%', color:'#E8A000' },
+            { label:'マスター', pct:'5%',  color:'#6A1B9A' },
+          ].map(b => (
+            <div key={b.label} style={{ background:'rgba(255,255,255,0.06)', borderRadius:8, padding:'4px 10px', fontSize:10, fontWeight:700, color:b.color, border:`1px solid ${b.color}44` }}>
+              {b.label} {b.pct}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ボール演出エリア */}
       <div className="pg-stage">
         {(phase === 'idle' || phase === 'done') ? (
@@ -175,7 +211,7 @@ export default function PremiumGacha({ onClose, asPage = false }) {
               }} title={b.label} />
             ))}
             <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', marginTop:8, textAlign:'center', fontWeight:700 }}>
-              4種類のボールからランダムに出現
+              ポケモン20% / アイテム80%
             </div>
           </div>
         ) : phase === 'flash' ? (
@@ -211,7 +247,7 @@ export default function PremiumGacha({ onClose, asPage = false }) {
         )}
       </div>
 
-      {/* エフェクト説明 */}
+      {/* チケット獲得ヒント */}
       {phase === 'idle' && (
         <div className="pg-hint">
           <div style={{ fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.4)', marginBottom:6 }}>チケットの獲得方法</div>
