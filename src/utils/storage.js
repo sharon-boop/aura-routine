@@ -141,6 +141,17 @@ export const DEFAULT_CHECKLISTS = {
     { key:'ev_eq',      label:'感情ログを記録した' },
     { key:'ev_learn',   label:'今日の学びをメモした' },
     { key:'ev_tomorrow',label:'明日やることを1つ決めた' },
+    { key:'greet',      label:'目を見て挨拶した' },
+    { key:'name',       label:'名前を呼んだ' },
+    { key:'impression', label:'会った瞬間の印象を取った' },
+    { key:'praise',     label:'1人以上を具体的に褒めた' },
+    { key:'summarize',  label:'相手の話を要約した' },
+    { key:'include',    label:'話に入れていない人を拾った' },
+    { key:'improve',    label:'場を1%良くする行動をした' },
+    { key:'stopBully',  label:'いじりが強い時に自然に止めた' },
+    { key:'emotion',    label:'感情を豊かに出した' },
+    { key:'selfMood',   label:'自分の機嫌を自分で取った' },
+    { key:'noReturn',   label:'価値提供に見返りを求めなかった' },
   ],
   afternoon: [
     { key:'greet',     label:'目を見て挨拶した' },
@@ -173,6 +184,27 @@ export function getChecklistTemplate(cat) {
 export function saveChecklistTemplate(cat, items) {
   const all = load('checklistTemplates') || {}
   all[cat] = items
+  save('checklistTemplates', all)
+}
+
+/**
+ * 夜のチェックリストに昼の項目が未登録なら追加するマイグレーション
+ * アプリ起動時に呼ぶ
+ */
+const AFTERNOON_KEYS_IN_EVENING = [
+  'greet','name','impression','praise','summarize',
+  'include','improve','stopBully','emotion','selfMood','noReturn',
+]
+export function migrateEveningChecklist() {
+  const all = load('checklistTemplates') || {}
+  if (!all['evening']) return // デフォルトを使っているので移行不要
+  const current = all['evening']
+  const existingKeys = new Set(current.map(c => c.key))
+  const toAdd = DEFAULT_CHECKLISTS.evening.filter(
+    c => AFTERNOON_KEYS_IN_EVENING.includes(c.key) && !existingKeys.has(c.key)
+  )
+  if (toAdd.length === 0) return
+  all['evening'] = [...current, ...toAdd]
   save('checklistTemplates', all)
 }
 
@@ -433,9 +465,9 @@ export function getStreak() {
 /**
  * 完璧の日の定義：
  *   1. 朝の儀式（モーニングチェックリスト）全て完了
- *   2. 振り返り（夜の日記）記入済み
+ *   2. 夜のチェックリスト全て完了（日記・感情ログ等を含む）
  *   3. 自己投資90分タイマー完了
- *   4. 価値提供3人 全員完了
+ *   4. 価値提供1人以上完了
  */
 // 朝の儀式完了判定：現在のテンプレート項目が全てチェック済みかどうか
 function isMorningChecksDone(record) {
@@ -445,13 +477,20 @@ function isMorningChecksDone(record) {
   return template.every(c => checks[c.key] === true)
 }
 
+// 夜のチェックリスト完了判定
+function isEveningChecksDone(record) {
+  const template = getChecklistTemplate('evening')
+  if (template.length === 0) return false
+  const checks = record.evening?.checks || {}
+  return template.every(c => checks[c.key] === true)
+}
+
 export function isPerfectDay(record) {
   if (!record) return false
   // 1. 朝の儀式：現在のテンプレート全項目チェック済み
   if (!isMorningChecksDone(record)) return false
-  // 2. 振り返り：日記の題名または本文が書かれている
-  const hasDiary = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
-  if (!hasDiary) return false
+  // 2. 夜のチェックリスト全完了
+  if (!isEveningChecksDone(record)) return false
   // 3. 自己投資90分完了（タイマーまたは手動入力）
   const timerOk  = record.investment?.timerDone === true
   const manualOk = (record.investment?.manualMinutes || 0) >= 90
@@ -459,25 +498,19 @@ export function isPerfectDay(record) {
   // 4. 価値提供1人以上：1人以上いてdone
   const vp = record.morning?.valuePeople || []
   if (!vp.some(p => p.done)) return false
-  // 5. 夜のチェックリスト全達成（テンプレートに項目がある場合）
-  const eveningTemplate = getChecklistTemplate('evening')
-  if (eveningTemplate.length > 0) {
-    const evChecks = record.evening?.checks || {}
-    if (!eveningTemplate.every(c => evChecks[c.key] === true)) return false
-  }
   return true
 }
 
 // 完璧な日の各条件チェック（表示用）
 export function getPerfectDayStatus(record) {
-  if (!record) return { checks: false, diary: false, invest: false, value: false, eveningChecks: false }
-  const checks = isMorningChecksDone(record)
-  const diary  = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
-  const invest = record.investment?.timerDone === true || (record.investment?.manualMinutes || 0) >= 90
-  const value  = (record.morning?.valuePeople || []).some(p => p.done)
-  const eveningTemplate = getChecklistTemplate('evening')
-  const eveningChecks = eveningTemplate.length === 0 || eveningTemplate.every(c => (record.evening?.checks || {})[c.key] === true)
-  return { checks, diary, invest, value, eveningChecks }
+  if (!record) return { checks: false, eveningChecks: false, invest: false, value: false }
+  const checks       = isMorningChecksDone(record)
+  const eveningChecks = isEveningChecksDone(record)
+  const invest       = record.investment?.timerDone === true || (record.investment?.manualMinutes || 0) >= 90
+  const value        = (record.morning?.valuePeople || []).some(p => p.done)
+  // 後方互換のため diary フィールドも残す
+  const diary = !!(record.evening?.diary?.trim() || record.evening?.diaryTitle?.trim())
+  return { checks, eveningChecks, invest, value, diary }
 }
 
 export function getPerfectCount() {

@@ -419,10 +419,10 @@ export default function Home({ onNavigate, onSettings }) {
           <div className="sec-title">今日の完璧チェック</div>
           <div className="card static" style={{ padding:'14px 16px' }}>
             {[
-              { key:'checks', label:'☀️ 朝の儀式（全チェック）' },
-              { key:'diary',  label:'📔 夜の日記（題名 or 本文）' },
-              { key:'invest', label:'⚡ 自己投資90分' },
-              { key:'value',  label:'💫 価値提供1人以上' },
+              { key:'checks',       label:'☀️ 朝の儀式（全チェック完了）' },
+              { key:'eveningChecks',label:'🌙 夜のチェックリスト（全完了）' },
+              { key:'invest',       label:'⚡ 自己投資90分' },
+              { key:'value',        label:'💫 価値提供1人以上' },
             ].map(({ key, label }) => (
               <div key={key} style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', borderBottom:'1px solid #F5F2ED' }}>
                 <div style={{
@@ -440,10 +440,10 @@ export default function Home({ onNavigate, onSettings }) {
               </div>
             ))}
             <div style={{ paddingTop:10, textAlign:'center' }}>
-              {Object.values(perfectStatus).every(Boolean)
+              {['checks','eveningChecks','invest','value'].every(k => perfectStatus[k])
                 ? <div style={{ fontSize:13, fontWeight:900, color:'var(--success)' }}>🌟 完璧な日 達成！</div>
                 : <div style={{ fontSize:12, color:'var(--muted)' }}>
-                    あと {4 - Object.values(perfectStatus).filter(Boolean).length} 項目で完璧な日
+                    あと {4 - ['checks','eveningChecks','invest','value'].filter(k => perfectStatus[k]).length} 項目で完璧な日
                   </div>
               }
             </div>

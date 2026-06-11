@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   getTodayRecord, updateTodayRecord, getDailyQuote,
-  getChecklistTemplate, saveChecklistTemplate,
+  getChecklistTemplate, saveChecklistTemplate, migrateEveningChecklist,
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
 } from '../utils/storage'
 import { toast } from './Toast'
@@ -123,6 +123,7 @@ export default function Evening() {
   const quote = getDailyQuote()
 
   useEffect(() => {
+    migrateEveningChecklist()          // 昼の項目を夜チェックリストへ移行
     setData(getTodayRecord())
     setEvChecks(getChecklistTemplate('evening'))
   }, [])
@@ -386,7 +387,14 @@ export default function Evening() {
 
       {/* ── 日記 ── */}
       <div className="sec">
-        <div className="sec-title">今日の日記</div>
+        <div className="sec-title" style={{ display:'flex', alignItems:'center', gap:8 }}>
+          今日の日記
+          {!wasTicketAwarded('diary') && (
+            <span style={{ fontSize:10, fontWeight:800, background:'linear-gradient(135deg,#6C63FF,#F2994A)', color:'#fff', borderRadius:20, padding:'2px 8px', letterSpacing:0.5 }}>
+              🎟️ 書くと+1チケット
+            </span>
+          )}
+        </div>
         <div className="diary-card">
           <div className="diary-date-line">
             {new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}
