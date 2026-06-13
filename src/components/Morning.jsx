@@ -7,9 +7,81 @@ import {
   getFavorites, saveFavorites,
   getUnlockedAttitudes,
   incrementGachaCount,
+  getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
+  getWeeklySleepTotal, getWeekKey,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
+
+/* ─── 睡眠時間入力 ─── */
+function SleepInput({ value, onChange }) {
+  const hours = value || 0
+  const weekTotal = getWeeklySleepTotal()
+  const pct = Math.min(100, (weekTotal / 49) * 100)
+  const achieved = weekTotal >= 49
+
+  const quickVals = [5, 6, 7, 8, 9]
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #00BCD4 0%, #0097A7 100%)',
+      borderRadius: 18, padding: '18px 20px', color: '#fff',
+      boxShadow: '0 4px 16px rgba(0,188,212,0.3)',
+    }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+        <div>
+          <div style={{ fontSize:10, fontWeight:800, letterSpacing:'0.15em', opacity:0.85, marginBottom:3 }}>😴 LAST NIGHT SLEEP</div>
+          <div style={{ fontSize:11, opacity:0.75 }}>昨夜の睡眠時間</div>
+        </div>
+        <div style={{ textAlign:'center' }}>
+          <div style={{ fontSize:42, fontWeight:900, lineHeight:1, letterSpacing:-2 }}>{hours.toFixed(1)}</div>
+          <div style={{ fontSize:11, opacity:0.8, fontWeight:700 }}>時間</div>
+        </div>
+      </div>
+
+      {/* スライダー */}
+      <input type="range" min={0} max={12} step={0.5} value={hours}
+        onChange={e => onChange(Number(e.target.value))}
+        style={{ width:'100%', accentColor:'#fff', marginBottom:12 }} />
+
+      {/* クイックボタン */}
+      <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+        {quickVals.map(v => (
+          <button key={v} onClick={() => onChange(v)} style={{
+            flex:1, padding:'7px 0', borderRadius:10,
+            background: hours === v ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)',
+            border: hours === v ? '1.5px solid #fff' : '1.5px solid rgba(255,255,255,0.3)',
+            color:'#fff', fontSize:12, fontWeight:800, cursor:'pointer', fontFamily:'var(--font)',
+            transition:'all 0.2s',
+          }}>{v}h</button>
+        ))}
+      </div>
+
+      {/* 週の合計 */}
+      <div style={{ background:'rgba(0,0,0,0.15)', borderRadius:10, padding:'10px 14px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+          <div style={{ fontSize:11, fontWeight:700, opacity:0.9 }}>📊 今週の睡眠合計</div>
+          <div style={{ fontSize:13, fontWeight:900 }}>
+            {weekTotal.toFixed(1)} <span style={{ fontSize:10, opacity:0.8 }}>/ 49時間</span>
+          </div>
+        </div>
+        <div style={{ height:6, background:'rgba(255,255,255,0.2)', borderRadius:3, overflow:'hidden' }}>
+          <div style={{ height:'100%', width:`${pct}%`, background: achieved ? '#FFD700' : '#fff', borderRadius:3, transition:'width 0.5s' }} />
+        </div>
+        {achieved && (
+          <div style={{ marginTop:8, fontSize:11, fontWeight:800, color:'#FFD700', textAlign:'center' }}>
+            🎉 49時間達成！保存すると +2チケット🎟️
+          </div>
+        )}
+        {!achieved && (
+          <div style={{ marginTop:6, fontSize:10, opacity:0.75, textAlign:'right' }}>
+            あと {(49 - weekTotal).toFixed(1)}時間で達成
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const MOODS = ['🔥', '😌', '😆', '😢', '😳', '😐']
 
@@ -236,6 +308,21 @@ export default function Morning() {
   }
 
   const handleSave = () => {
+    // 週間睡眠チェック
+    const weekKey = getWeekKey()
+    const sleepTicketKey = `sleep_ticket_${weekKey}`
+    if (!wasTicketAwarded(sleepTicketKey)) {
+      const total = getWeeklySleepTotal()
+      if (total >= 49) {
+        addGachaTickets(2)
+        markTicketAwarded(sleepTicketKey)
+        const totalTickets = getGachaTickets()
+        setTimeout(() => {
+          confetti({ particleCount:80, spread:70, origin:{y:0.6}, colors:['#00BCD4','#FFD700','#fff'] })
+          toast(`😴 週間睡眠 ${total.toFixed(1)}時間達成！ +2チケット🎟️（合計 ${totalTickets}枚）`)
+        }, 500)
+      }
+    }
     setSaved(true)
     toast('今日の雰囲気は、自分で作れる。')
     setTimeout(() => setSaved(false), 3500)
@@ -321,6 +408,15 @@ export default function Morning() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* ── 睡眠時間 ── */}
+      <div className="sec">
+        <div className="sec-title">昨夜の睡眠</div>
+        <SleepInput
+          value={data.morning?.sleepHours}
+          onChange={v => setMorning({ sleepHours: v })}
+        />
       </div>
 
       {/* ── チェックリスト ── */}

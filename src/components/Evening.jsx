@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
-  getTodayRecord, updateTodayRecord, getDailyQuote,
-  getChecklistTemplate, saveChecklistTemplate, migrateEveningChecklist,
+  getToday, getEveningDate, getRecord, updateRecord,
+  getDailyQuote, getChecklistTemplate, saveChecklistTemplate, migrateEveningChecklist,
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
 } from '../utils/storage'
 import { toast } from './Toast'
@@ -66,6 +66,44 @@ function ScoreInput({ value, onChange }) {
   )
 }
 
+/* ─── 日付ピッカー ─── */
+function DatePicker({ selectedDate, onChange }) {
+  const DOW = ['日','月','火','水','木','金','土']
+  const today = getToday()
+  const dates = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    dates.push({ str, month: d.getMonth()+1, day: d.getDate(), dow: DOW[d.getDay()], isToday: str === today })
+  }
+  return (
+    <div>
+      <div style={{ fontSize:11, fontWeight:700, color:'var(--muted)', letterSpacing:'0.06em', marginBottom:8 }}>日付を選択（過去7日間）</div>
+      <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
+        {dates.map(({ str, month, day, dow, isToday }) => {
+          const isSelected = str === selectedDate
+          return (
+            <button key={str} onClick={() => onChange(str)}
+              style={{
+                flexShrink:0, padding:'8px 10px', borderRadius:12, textAlign:'center',
+                border: `1.5px solid ${isSelected ? 'var(--main)' : 'var(--border)'}`,
+                background: isSelected ? 'var(--main)' : isToday ? 'var(--cream)' : '#fff',
+                color: isSelected ? '#fff' : 'var(--ink)',
+                fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'var(--font)',
+                transition:'all 0.2s', minWidth:48,
+              }}>
+              <div style={{ fontSize:9, marginBottom:2, opacity:0.8 }}>{month}/{day}</div>
+              <div style={{ fontSize:13 }}>{dow}</div>
+              {isToday && <div style={{ fontSize:8, marginTop:2, opacity:0.7 }}>今日</div>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* ─── AddItemInput ─── */
 function AddItemInput({ onAdd }) {
   const [open, setOpen] = useState(false)
@@ -87,7 +125,7 @@ function AddItemInput({ onAdd }) {
   )
 }
 
-/* ─── SortableChecklist（共通チェックリストUI） ─── */
+/* ─── SortableChecklist ─── */
 function SortableChecklist({ items, checkState, onToggle, onAdd, onRemove, onMove }) {
   return (
     <div className="card static">
@@ -116,7 +154,7 @@ function SortableChecklist({ items, checkState, onToggle, onAdd, onRemove, onMov
   )
 }
 
-/* ─── EQ感情ログ（コンパクト版） ─── */
+/* ─── EQ感情ログ ─── */
 function EqSection({ ev, setEv }) {
   const [open, setOpen] = useState(false)
   return (
@@ -148,7 +186,7 @@ function EqSection({ ev, setEv }) {
   )
 }
 
-/* ─── IQ学びログ（コンパクト版） ─── */
+/* ─── IQ学びログ ─── */
 function IqSection({ ev, setEv }) {
   const [open, setOpen] = useState(false)
   return (
@@ -187,22 +225,26 @@ const EV_FIELDS = [
 ]
 
 export default function Evening() {
+  const [selectedDate, setSelectedDate] = useState(() => getEveningDate())
   const [data, setData]       = useState(null)
-  const [evChecks, setEvChecks]   = useState([])   // 夜のルーティンチェック
-  const [afChecks, setAfChecks]   = useState([])   // 振り返り用の昼チェック
+  const [evChecks, setEvChecks]   = useState([])
+  const [afChecks, setAfChecks]   = useState([])
   const [saved, setSaved]     = useState(false)
   const [ticketMsg, setTicketMsg] = useState('')
   const quote = getDailyQuote()
 
   useEffect(() => {
     migrateEveningChecklist()
-    setData(getTodayRecord())
     setEvChecks(getChecklistTemplate('evening'))
     setAfChecks(getChecklistTemplate('afternoon'))
   }, [])
 
+  useEffect(() => {
+    setData(getRecord(selectedDate))
+  }, [selectedDate])
+
   const setEv = (partial) => {
-    const updated = updateTodayRecord({ evening: { ...data.evening, ...partial } })
+    const updated = updateRecord(selectedDate, { evening: { ...(data?.evening || {}), ...partial } })
     setData(updated)
   }
 
@@ -261,26 +303,19 @@ export default function Evening() {
   }
 
   const handleSave = () => {
-    updateTodayRecord({ evening: data.evening })
+    updateRecord(selectedDate, { evening: data.evening })
 
-    const ev = data.evening || {}
-    let ticketsEarned = 0
-    if (!wasTicketAwarded('diary') && (ev.diary?.trim() || ev.diaryTitle?.trim())) {
-      addGachaTickets(1); markTicketAwarded('diary'); ticketsEarned++
-    }
-    if (!wasTicketAwarded('eq') && ev.eqEmotion?.trim()) {
-      addGachaTickets(1); markTicketAwarded('eq'); ticketsEarned++
-    }
-    if (!wasTicketAwarded('iq') && ev.iqSummary?.trim()) {
-      addGachaTickets(1); markTicketAwarded('iq'); ticketsEarned++
+    // チケット：当日分のみ1枚（深夜は前日扱いの selectedDate を使用）
+    const ticketKey = `evening_save_${selectedDate}`
+    if (!wasTicketAwarded(ticketKey)) {
+      addGachaTickets(1)
+      markTicketAwarded(ticketKey)
+      const total = getGachaTickets()
+      setTicketMsg(`🎟️ 夜の記録完了！ +1チケット（合計 ${total}枚）`)
+      setTimeout(() => setTicketMsg(''), 5000)
     }
 
     setSaved(true)
-    if (ticketsEarned > 0) {
-      const total = getGachaTickets()
-      setTicketMsg(`🎟️ ガチャチケット +${ticketsEarned}枚（合計 ${total}枚）`)
-      setTimeout(() => setTicketMsg(''), 5000)
-    }
     toast('今日も少し、人と自分を前に進めた 🌙')
     setTimeout(() => confetti({ particleCount:55, spread:55, origin:{y:0.7}, colors:['#2F4858','#F2994A','#6C63FF','#84A98C'] }), 300)
     setTimeout(() => setSaved(false), 4000)
@@ -295,12 +330,27 @@ export default function Evening() {
   const evCheckDone   = evChecks.filter(c => evCheckState[c.key]).length
   const afCheckDone   = afChecks.filter(c => afCheckState[c.key]).length
 
+  const todayDate = getToday()
+  const isPastDate = selectedDate !== todayDate && selectedDate !== getEveningDate()
+  const ticketKey = `evening_save_${selectedDate}`
+  const alreadyAwarded = wasTicketAwarded(ticketKey)
+
   return (
     <div className="slide-up" style={{ paddingBottom:'40px' }}>
       <div className="ph">
         <div className="ph-eyebrow">Routine — Evening</div>
         <div className="ph-title">今日を成長に変える</div>
         <div className="ph-sub">一日を振り返り、明日の自分を決める</div>
+      </div>
+
+      {/* ── 日付ピッカー ── */}
+      <div className="sec">
+        <DatePicker selectedDate={selectedDate} onChange={date => { setSelectedDate(date); setSaved(false); setTicketMsg('') }} />
+        {isPastDate && (
+          <div style={{ marginTop:8, padding:'8px 14px', borderRadius:10, background:'#FFF3CD', border:'1px solid #F0C040', fontSize:12, color:'#856404', fontWeight:600 }}>
+            📅 過去の記録を編集しています（{selectedDate}）
+          </div>
+        )}
       </div>
 
       {/* 今日の名言 */}
@@ -338,27 +388,22 @@ export default function Evening() {
         </div>
       </div>
 
-      {/* ── 今日の振り返り（テキスト + EQ/IQ + 行動チェック） ── */}
+      {/* ── 今日の振り返り ── */}
       <div className="sec">
         <div className="sec-title">今日の振り返り</div>
         <div className="card static">
-          {/* テキスト振り返り */}
           {EV_FIELDS.map((f, i) => (
             <div className="f" key={f.key} style={{ marginBottom: i < EV_FIELDS.length-1 ? 16 : 0 }}>
               <label className="fl">{f.label}</label>
               <textarea value={ev[f.key]||''} onChange={e=>setEv({[f.key]:e.target.value})} placeholder={f.ph} rows={2} />
             </div>
           ))}
-
-          {/* EQ感情ログ */}
           <EqSection ev={ev} setEv={setEv} />
-
-          {/* IQ学びログ */}
           <IqSection ev={ev} setEv={setEv} />
         </div>
       </div>
 
-      {/* ── 今日の行動チェック（昼の11項目） ── */}
+      {/* ── 今日の行動チェック ── */}
       <div className="sec">
         <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span>今日の行動チェック</span>
@@ -376,7 +421,7 @@ export default function Evening() {
         />
       </div>
 
-      {/* ── 夜のルーティンチェックリスト ── */}
+      {/* ── 夜のチェックリスト ── */}
       <div className="sec">
         <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span>夜のチェックリスト</span>
@@ -397,16 +442,16 @@ export default function Evening() {
       {/* 日記 */}
       <div className="sec">
         <div className="sec-title" style={{ display:'flex', alignItems:'center', gap:8 }}>
-          今日の日記
-          {!wasTicketAwarded('diary') && (
+          日記
+          {!alreadyAwarded && (
             <span style={{ fontSize:10, fontWeight:800, background:'linear-gradient(135deg,#6C63FF,#F2994A)', color:'#fff', borderRadius:20, padding:'2px 8px', letterSpacing:0.5 }}>
-              🎟️ 書くと+1チケット
+              🎟️ 保存で+1チケット
             </span>
           )}
         </div>
         <div className="diary-card">
           <div className="diary-date-line">
-            {new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}
+            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}
           </div>
           <div className="diary-title-wrap">
             <input className="diary-title-input" value={ev.diaryTitle||''}

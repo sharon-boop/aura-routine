@@ -252,6 +252,57 @@ export function updateTodayRecord(partial) {
 
 export function getAllRecords() { return load('dailyRecords') || {} }
 
+// 深夜（4時前）は前日として扱う（夜更かし対応）
+export function getEveningDate() {
+  const now = new Date()
+  if (now.getHours() < 4) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - 1)
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  }
+  return getToday()
+}
+
+// 特定日のレコードを取得
+export function getRecord(date) {
+  const records = load('dailyRecords') || {}
+  return records[date] || createEmptyDayRecord(date)
+}
+
+// 特定日のレコードを更新
+export function updateRecord(date, partial) {
+  const records = load('dailyRecords') || {}
+  if (!records[date]) records[date] = createEmptyDayRecord(date)
+  // evening など object はマージ
+  const next = { ...records[date], updatedAt: Date.now() }
+  for (const k of Object.keys(partial)) {
+    if (partial[k] && typeof partial[k] === 'object' && !Array.isArray(partial[k])) {
+      next[k] = { ...(records[date][k] || {}), ...partial[k] }
+    } else {
+      next[k] = partial[k]
+    }
+  }
+  records[date] = next
+  save('dailyRecords', records)
+  return records[date]
+}
+
+// 週の睡眠時間合計（月〜日）
+export function getWeeklySleepTotal() {
+  const today = new Date(); today.setHours(0,0,0,0)
+  const dow = (today.getDay() + 6) % 7
+  const monday = new Date(today); monday.setDate(today.getDate() - dow)
+  const records = load('dailyRecords') || {}
+  let total = 0
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate() + i)
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    const rec = records[key]
+    if (rec?.morning?.sleepHours) total += Number(rec.morning.sleepHours)
+  }
+  return total
+}
+
 /* ═══════════════════════════════════════════
    TODOS
 ═══════════════════════════════════════════ */
