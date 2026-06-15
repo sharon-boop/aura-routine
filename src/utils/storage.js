@@ -837,3 +837,150 @@ export function checkAchievements() {
   if (newUnlocks.length) saveAchievements([...current, ...newUnlocks])
   return newUnlocks
 }
+
+/* ═══════════════════════════════════════════
+   AURA XP & LEVEL SYSTEM
+═══════════════════════════════════════════ */
+export function getAuraProfile() {
+  return load('auraProfile') || { xp: 0, level: 1, totalDays: 0, createdAt: Date.now() }
+}
+export function saveAuraProfile(p) { save('auraProfile', p) }
+
+export const AURA_LEVELS = [
+  { lv: 1, label: 'ルーキー',      min: 0,    color: '#9E9E9E', next: 100  },
+  { lv: 2, label: 'ライジング',    min: 100,  color: '#64B5F6', next: 300  },
+  { lv: 3, label: 'ソリッド',     min: 300,  color: '#66BB6A', next: 700  },
+  { lv: 4, label: 'エクスパート', min: 700,  color: '#FFA726', next: 1400 },
+  { lv: 5, label: 'マスター',     min: 1400, color: '#AB47BC', next: 2500 },
+  { lv: 6, label: 'レジェンド',   min: 2500, color: '#FFD700', next: null },
+]
+
+export function getAuraLevel(xp) {
+  let lv = AURA_LEVELS[0]
+  for (const l of AURA_LEVELS) { if (xp >= l.min) lv = l; else break }
+  return lv
+}
+
+export function addAuraXp(amount) {
+  const p = getAuraProfile()
+  const prevLevel = getAuraLevel(p.xp)
+  p.xp = (p.xp || 0) + amount
+  const newLevel = getAuraLevel(p.xp)
+  saveAuraProfile(p)
+  if (newLevel.lv > prevLevel.lv) return { levelUp: true, level: newLevel }
+  return { levelUp: false }
+}
+
+/* ═══════════════════════════════════════════
+   AURA FEED (self-only timeline)
+═══════════════════════════════════════════ */
+export function getAuraFeed() { return load('auraFeed') || [] }
+
+export function addFeedEntry(entry) {
+  const feed = getAuraFeed()
+  feed.unshift({ ...entry, id: Date.now(), ts: Date.now() })
+  if (feed.length > 60) feed.length = 60
+  save('auraFeed', feed)
+}
+
+/* ═══════════════════════════════════════════
+   COMEBACK & FAILURE RECOVERY
+═══════════════════════════════════════════ */
+export function checkNeedsComeback() {
+  const records = load('dailyRecords') || {}
+  const allKeys = Object.keys(records).sort()
+  if (allKeys.length === 0) return false
+  const today = getToday()
+  const d = new Date(); d.setDate(d.getDate() - 1)
+  const yesterday = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const hasYesterday = !!(records[yesterday]?.morning?.savedAt || records[yesterday]?.evening?.savedAt)
+  const lastKey = allKeys[allKeys.length - 1]
+  const hasHistory = lastKey < today
+  return !hasYesterday && hasHistory
+}
+
+const COMEBACK_MSGS = [
+  { title: '戻ってきたね。', sub: '離れていた時間も、あなたの一部だ。また始まった。それで十分。' },
+  { title: 'ここに戻ることが、強さだ。', sub: '完璧にやり続けた人より、何度も立ち上がった人の方が本当にすごい。' },
+  { title: '休憩は失敗じゃない。', sub: 'リセットして戻れる人間は、そう多くない。あなたはそういう人間だ。' },
+  { title: '昨日は昨日のこと。', sub: '今日の積み上げが、また未来を変えていく。今この瞬間、再起動した。' },
+  { title: '60点でいい。続けることが全てだ。', sub: '完璧を求めすぎると、続かない。戻ってきただけで今日は合格点だ。' },
+]
+export function getComebackMessage() {
+  return COMEBACK_MSGS[Math.floor(Math.random() * COMEBACK_MSGS.length)]
+}
+
+/* ═══════════════════════════════════════════
+   APPROVAL ENGINE
+═══════════════════════════════════════════ */
+const APPROVAL_POOL = {
+  morning: [
+    {
+      observe: '今日も朝のルーティンをやり切った。',
+      meaning: 'それは、感情に流されずに行動した証拠だ。',
+      identity: 'あなたは「気分に頼らず、行動で自分を作る人間」だ。',
+      next: '今日1つ、意識してゆっくり話してみよう。',
+    },
+    {
+      observe: '記録した。チェックした。保存した。',
+      meaning: '小さいけど、それが現実を変える唯一の方法だ。',
+      identity: 'あなたには「毎日少しずつ着実に進む力」がある。',
+      next: '今日出会う1人に、本当に興味を持って話しかけてみよう。',
+    },
+    {
+      observe: '朝の習慣を積み上げた。',
+      meaning: 'これが、あなたの一日の土台になっている。',
+      identity: 'あなたは「自分の機嫌を自分で整えられる人間」になっている。',
+      next: '今日の観察テーマを1つ決めてみよう。',
+    },
+    {
+      observe: '今日もここに来た。それだけで十分だ。',
+      meaning: '来なかった人との差は、今日もまた広がった。',
+      identity: 'あなたは「続けることを選んでいる人間」だ。',
+      next: '今日誰かを、理由なく1回褒めてみよう。',
+    },
+    {
+      observe: '朝の自分を整えた。',
+      meaning: '「自分の状態を管理できる人」は少ない。あなたはその一人だ。',
+      identity: 'あなたは「発想と観察で伸びていく人間」だ。',
+      next: '今日1つ、人間観察してみよう。',
+    },
+  ],
+  evening: [
+    {
+      observe: '今日を振り返り、記録した。',
+      meaning: '気づきを言語化できる人間は、成長が速い。',
+      identity: 'あなたは「自分の人生を観察する力を持つ人間」だ。',
+      next: '今日の気づきを明日1つ試してみよう。',
+    },
+    {
+      observe: '一日の終わりに自分と向き合った。',
+      meaning: '多くの人が流してしまう時間を、あなたは資産に変えている。',
+      identity: 'あなたは「感情ではなく、洞察で動ける人間」になっている。',
+      next: '今日の自分に、一言ねぎらいを。それだけでいい。',
+    },
+    {
+      observe: '今日の記録が完成した。',
+      meaning: '何かが変わらなかった日も、記録した日は0ではない。',
+      identity: 'あなたは「60点でも前に進む人間」だ。それは本物の強さ。',
+      next: '明日の朝、少しだけ早く起きてみよう。',
+    },
+    {
+      observe: '夜の振り返りをやりきった。',
+      meaning: 'この習慣が、あなたの判断の精度を上げていく。',
+      identity: 'あなたは「人間観察と自己観察で成長し続ける人間」だ。',
+      next: '今日誰かを観察して気づいたことを1行書いておこう。',
+    },
+    {
+      observe: '今日も日記を書いた。',
+      meaning: '自分の感情と向き合える人間は、ブレにくい。',
+      identity: 'あなたは「自分の内側をちゃんと知っている人間」だ。',
+      next: '明日、誰かの話を最後まで遮らずに聞いてみよう。',
+    },
+  ],
+}
+
+export function generateApprovalMessage(type) {
+  const pool = APPROVAL_POOL[type] || APPROVAL_POOL.morning
+  return pool[Math.floor(Math.random() * pool.length)]
+}

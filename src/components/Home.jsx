@@ -5,11 +5,13 @@ import {
   formatDate, getToday, getQuotes, getDailyQuote, saveQuotes,
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
   shouldShowWeeklyReminder, markWeeklyReminderShown,
+  getAuraProfile, getAuraLevel, AURA_LEVELS,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 import AuraCharacter from './AuraCharacter'
 import PremiumGacha from './PremiumGacha'
+import AuraFeed from './AuraFeed'
 
 /* ─── Quote Banner ─── */
 function QuoteBanner() {
@@ -573,6 +575,11 @@ export default function Home({ onNavigate, onSettings }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ─── AURA FEED ─── */}
+      <div className="sec">
+        <AuraFeed />
       </div>
     </div>
   )

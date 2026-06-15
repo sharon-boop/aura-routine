@@ -4,9 +4,11 @@ import {
   getDailyQuote, getChecklistTemplate, saveChecklistTemplate, migrateEveningChecklist,
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
   addPartnerExp, getPartner,
+  addAuraXp, addFeedEntry, generateApprovalMessage,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
+import ApprovalCard from './ApprovalCard'
 
 /* ─── スコアピッカー ─── */
 const SCORE_CRITERIA = [
@@ -232,6 +234,7 @@ export default function Evening() {
   const [afChecks, setAfChecks]   = useState([])
   const [saved, setSaved]     = useState(false)
   const [ticketMsg, setTicketMsg] = useState('')
+  const [approvalData, setApprovalData] = useState(null)
   const quote = getDailyQuote()
 
   useEffect(() => {
@@ -321,6 +324,17 @@ export default function Evening() {
       setTimeout(() => setTicketMsg(''), 5000)
     }
 
+    // AURA XP & Feed (当日分のみ)
+    if (selectedDate === getToday() || selectedDate === getEveningDate()) {
+      const xpResult = addAuraXp(15)
+      const msg = generateApprovalMessage('evening')
+      addFeedEntry({ type: 'evening_complete', message: '今日を振り返り、記録した', sub: msg.identity })
+      if (xpResult.levelUp) {
+        addFeedEntry({ type: 'level_up', message: `Lv.${xpResult.level.lv} ${xpResult.level.label} に到達した` })
+      }
+      setApprovalData({ msg, xpResult })
+    }
+
     setSaved(true)
     toast('今日も少し、人と自分を前に進めた 🌙')
     setTimeout(() => confetti({ particleCount:55, spread:55, origin:{y:0.7}, colors:['#2F4858','#F2994A','#6C63FF','#84A98C'] }), 300)
@@ -343,6 +357,13 @@ export default function Evening() {
 
   return (
     <div className="slide-up" style={{ paddingBottom:'40px' }}>
+      {approvalData && (
+        <ApprovalCard
+          msg={approvalData.msg}
+          xpResult={approvalData.xpResult}
+          onClose={() => setApprovalData(null)}
+        />
+      )}
       <div className="ph">
         <div className="ph-eyebrow">Routine — Evening</div>
         <div className="ph-title">今日を成長に変える</div>

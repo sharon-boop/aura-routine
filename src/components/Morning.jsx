@@ -10,9 +10,11 @@ import {
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
   getWeeklySleepTotal, getWeekKey,
   addPartnerExp, getPartner,
+  addAuraXp, addFeedEntry, generateApprovalMessage, checkNeedsComeback, getComebackMessage,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
+import ApprovalCard from './ApprovalCard'
 
 /* ─── 睡眠時間入力 ─── */
 function SleepInput({ value, onChange }) {
@@ -266,6 +268,7 @@ export default function Morning() {
   const [wordThemeOpts]     = useState(getWordThemeOptions)
   const [mustKeepOpts]      = useState(getMustKeepOptions)
   const [saved, setSaved]   = useState(false)
+  const [approvalData, setApprovalData] = useState(null)
 
   useEffect(() => {
     setData(getTodayRecord())
@@ -326,8 +329,21 @@ export default function Morning() {
         }, 500)
       }
     }
+    // AURA XP & Feed
+    const xpResult = addAuraXp(15)
+    const msg = generateApprovalMessage('morning')
+    const isComeback = checkNeedsComeback()
+    const comeback = isComeback ? getComebackMessage() : null
+    addFeedEntry({
+      type: 'morning_complete',
+      message: '朝のルーティンを完了した',
+      sub: msg.identity,
+    })
+    if (xpResult.levelUp) {
+      addFeedEntry({ type: 'level_up', message: `Lv.${xpResult.level.lv} ${xpResult.level.label} に到達した` })
+    }
     setSaved(true)
-    toast('今日の雰囲気は、自分で作れる。')
+    setApprovalData({ msg, comeback, xpResult })
     setTimeout(() => setSaved(false), 3500)
   }
 
@@ -338,6 +354,14 @@ export default function Morning() {
 
   return (
     <div className="slide-up" style={{ paddingBottom: '40px' }}>
+      {approvalData && (
+        <ApprovalCard
+          msg={approvalData.msg}
+          comeback={approvalData.comeback}
+          xpResult={approvalData.xpResult}
+          onClose={() => setApprovalData(null)}
+        />
+      )}
 
       {/* ── Header ── */}
       <div className="ph">
