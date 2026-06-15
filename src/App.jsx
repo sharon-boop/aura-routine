@@ -13,6 +13,8 @@ import WeeklyMonthly from './components/WeeklyMonthly'
 import WeeklyReview from './components/WeeklyReview'
 import Settings from './components/Settings'
 import PremiumGacha from './components/PremiumGacha'
+import TikTokMemo from './components/TikTokMemo'
+import PokemonPartner from './components/PokemonPartner'
 import { Toast, useToast } from './components/Toast'
 import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS } from './utils/storage'
 
@@ -25,7 +27,7 @@ const NAV = [
 ]
 
 const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }, { id:'challenge', label:'チャレンジ' }]
-const WORLD_TABS    = [{ id:'summary', label:'要約' }, { id:'funny', label:'話術' }]
+const WORLD_TABS    = [{ id:'summary', label:'要約' }, { id:'funny', label:'話術' }, { id:'tiktok', label:'台本📱' }]
 const INVEST_TABS   = [{ id:'investment', label:'90分投資' }, { id:'todo', label:'ToDo' }]
 const LOG_TABS      = [{ id:'records', label:'カレンダー' }, { id:'weekly', label:'週次レビュー' }]
 
@@ -60,6 +62,10 @@ function Sidebar({ nav, setNav, streak, open, onClose }) {
         <button className={`sb-item ${nav === 'gacha' ? 'active' : ''}`} onClick={() => { setNav('gacha'); onClose(); }}>
           <span className="sb-icon">🎰</span>
           プレミアムガチャ
+        </button>
+        <button className={`sb-item ${nav === 'partner' ? 'active' : ''}`} onClick={() => { setNav('partner'); onClose(); }}>
+          <span className="sb-icon">🥚</span>
+          ポケモン育成
         </button>
         <button className={`sb-item ${nav === 'settings' ? 'active' : ''}`} onClick={() => { setNav('settings'); onClose(); }}>
           <span className="sb-icon">⚙</span>
@@ -159,6 +165,7 @@ export default function App() {
   const renderPage = () => {
     if (nav === 'settings') return <Settings onBack={() => setNav('home')} />
     if (nav === 'gacha')    return <PremiumGacha asPage onClose={() => setNav('home')} />
+    if (nav === 'partner')  return <PokemonPartner />
     if (nav === 'home') return <Home onNavigate={handleNavigate} onSettings={() => setNav('settings')} />
 
     if (nav === 'routine') {
@@ -170,6 +177,7 @@ export default function App() {
     if (nav === 'world') {
       if (worldTab === 'summary') return <Summary />
       if (worldTab === 'funny')   return <FunnyStory />
+      if (worldTab === 'tiktok')  return <TikTokMemo />
     }
     if (nav === 'invest') {
       if (investTab === 'investment') return <Investment />

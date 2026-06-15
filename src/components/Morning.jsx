@@ -9,6 +9,7 @@ import {
   incrementGachaCount,
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
   getWeeklySleepTotal, getWeekKey,
+  addPartnerExp, getPartner,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -308,6 +309,8 @@ export default function Morning() {
   }
 
   const handleSave = () => {
+    // パートナーにEXP付与
+    if (getPartner()) addPartnerExp(25)
     // 週間睡眠チェック
     const weekKey = getWeekKey()
     const sleepTicketKey = `sleep_ticket_${weekKey}`

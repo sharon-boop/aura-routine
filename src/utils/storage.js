@@ -304,6 +304,137 @@ export function getWeeklySleepTotal() {
 }
 
 /* ═══════════════════════════════════════════
+   TIKTOK MEMOS
+═══════════════════════════════════════════ */
+export function getTikTokMemos() { return load('tiktokMemos') || [] }
+export function saveTikTokMemo(item) {
+  const list = getTikTokMemos()
+  if (item.id) {
+    const idx = list.findIndex(m => m.id === item.id)
+    if (idx >= 0) list[idx] = { ...item, updatedAt: Date.now() }
+    else list.unshift({ ...item, updatedAt: Date.now() })
+  } else {
+    list.unshift({ ...item, id: Date.now(), createdAt: getToday(), updatedAt: Date.now() })
+  }
+  save('tiktokMemos', list)
+}
+export function deleteTikTokMemo(id) { save('tiktokMemos', getTikTokMemos().filter(m => m.id !== id)) }
+
+/* ═══════════════════════════════════════════
+   POKEMON PARTNER (育成)
+═══════════════════════════════════════════ */
+export const PARTNER_EVO_TREE = {
+  1:  { name:'フシギダネ', type:'grass',  color:'#4CAF50', evoLv:16, evosTo:2  },
+  2:  { name:'フシギソウ', type:'grass',  color:'#388E3C', evoLv:32, evosTo:3  },
+  3:  { name:'フシギバナ', type:'grass',  color:'#2E7D32'                        },
+  4:  { name:'ヒトカゲ',   type:'fire',   color:'#FF5722', evoLv:16, evosTo:5  },
+  5:  { name:'リザード',   type:'fire',   color:'#E64A19', evoLv:36, evosTo:6  },
+  6:  { name:'リザードン', type:'fire',   color:'#BF360C'                        },
+  7:  { name:'ゼニガメ',   type:'water',  color:'#2196F3', evoLv:16, evosTo:8  },
+  8:  { name:'カメール',   type:'water',  color:'#1565C0', evoLv:36, evosTo:9  },
+  9:  { name:'カメックス', type:'water',  color:'#0D47A1'                        },
+  25: { name:'ピカチュウ', type:'electric',color:'#FFC107',evoLv:30, evosTo:26 },
+  26: { name:'ライチュウ', type:'electric',color:'#FF8F00'                       },
+  133:{ name:'イーブイ',   type:'normal', color:'#8D6E63', evoLv:25, evosTo:196 },
+  196:{ name:'エーフィ',   type:'psychic',color:'#9C27B0'                       },
+}
+
+export const PARTNER_EXP_FOR_LEVEL = (lv) => lv * 12 + 25
+
+export function getPartner() { return load('pokemonPartner') }
+
+export function createPartner(basePokeId) {
+  const info = PARTNER_EVO_TREE[basePokeId]
+  const data = {
+    stage: 'egg',
+    basePokeId,
+    currentPokeId: basePokeId,
+    currentName: info?.name || '???',
+    level: 0, exp: 0,
+    hp: 80, maxHp: 80,
+    happiness: 40,
+    hatchProgress: 0, hatchThreshold: 120,
+    lastCaredDate: null,
+    lastPettedDate: null,
+    lastTalkedDate: null,
+    lastFedDate: null,
+    totalCareDays: 0,
+    pendingEvolveId: null,
+    nickname: '',
+    createdAt: getToday(),
+  }
+  save('pokemonPartner', data)
+  return data
+}
+
+export function savePartner(data) { save('pokemonPartner', data) }
+
+export function addPartnerExp(amount) {
+  const partner = getPartner()
+  if (!partner) return null
+  const today = getToday()
+  const p = { ...partner }
+
+  if (p.stage === 'egg') {
+    p.hatchProgress = (p.hatchProgress || 0) + amount
+    if (p.hatchProgress >= p.hatchThreshold) {
+      p.stage = 'alive'; p.level = 1; p.exp = 0
+      p.hp = p.maxHp = 80
+    }
+    p.lastCaredDate = today
+    save('pokemonPartner', p)
+    return { partner: p, hatched: p.stage === 'alive', leveledUp: false, evolving: false }
+  }
+
+  const isNewDay = p.lastCaredDate !== today
+  if (isNewDay) { p.totalCareDays = (p.totalCareDays || 0) + 1; p.lastCaredDate = today }
+  p.hp = Math.min(p.maxHp, (p.hp || 80) + 8)
+  p.happiness = Math.min(100, (p.happiness || 50) + 3)
+  p.exp = (p.exp || 0) + amount
+
+  let leveledUp = false
+  while (true) {
+    const needed = PARTNER_EXP_FOR_LEVEL(p.level)
+    if (p.exp < needed) break
+    p.exp -= needed; p.level++
+    p.maxHp = 80 + p.level * 5; p.hp = p.maxHp
+    p.happiness = Math.min(100, p.happiness + 8)
+    leveledUp = true
+    const evoData = PARTNER_EVO_TREE[p.currentPokeId]
+    if (evoData?.evosTo && p.level >= evoData.evoLv && !p.pendingEvolveId) {
+      p.pendingEvolveId = evoData.evosTo
+    }
+  }
+  save('pokemonPartner', p)
+  return { partner: p, hatched: false, leveledUp, evolving: !!p.pendingEvolveId }
+}
+
+export function confirmPartnerEvolution() {
+  const p = getPartner()
+  if (!p?.pendingEvolveId) return null
+  const newId = p.pendingEvolveId
+  const info = PARTNER_EVO_TREE[newId]
+  p.currentPokeId = newId
+  p.currentName = info?.name || p.currentName
+  p.pendingEvolveId = null
+  save('pokemonPartner', p)
+  return p
+}
+
+export function applyPartnerDecay() {
+  const p = getPartner()
+  if (!p || p.stage === 'egg' || !p.lastCaredDate) return
+  const today = getToday()
+  if (p.lastCaredDate === today) return
+  const diff = Math.floor((new Date(today + 'T00:00:00') - new Date(p.lastCaredDate + 'T00:00:00')) / 86400000)
+  if (diff >= 1) {
+    p.hp = Math.max(0, p.hp - diff * 12)
+    p.happiness = Math.max(0, p.happiness - diff * 4)
+    save('pokemonPartner', p)
+  }
+}
+
+/* ═══════════════════════════════════════════
    TODOS
 ═══════════════════════════════════════════ */
 export function getTodos() { return load('todos') || [] }

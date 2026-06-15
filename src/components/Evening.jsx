@@ -3,6 +3,7 @@ import {
   getToday, getEveningDate, getRecord, updateRecord,
   getDailyQuote, getChecklistTemplate, saveChecklistTemplate, migrateEveningChecklist,
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
+  addPartnerExp, getPartner,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -304,6 +305,11 @@ export default function Evening() {
 
   const handleSave = () => {
     updateRecord(selectedDate, { evening: data.evening })
+
+    // パートナーにEXP付与（当日分のみ）
+    if (selectedDate === getToday() || selectedDate === getEveningDate()) {
+      if (getPartner()) addPartnerExp(25)
+    }
 
     // チケット：当日分のみ1枚（深夜は前日扱いの selectedDate を使用）
     const ticketKey = `evening_save_${selectedDate}`
