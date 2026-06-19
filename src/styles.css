@@ -1168,7 +1168,7 @@ body{
 .next-reward-name{font-size:12px;font-weight:600;color:var(--ink2);}
 
 /* ─── Collection tab ─── */
-.aura-collection{padding:16px;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
+.aura-collection{padding:16px;border-radius:0 0 var(--r) var(--r);overflow:visible;}
 .coll-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
 .coll-cat-btn{
   padding:7px 12px;border-radius:50px;border:1.5px solid var(--border);

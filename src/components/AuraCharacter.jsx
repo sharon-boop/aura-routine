@@ -282,11 +282,16 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   ]
 
   const showSparkles = ['effect-sparkle','effect-legendary','effect-rainbow','effect-lightning'].includes(effect.cssClass)
-  const frameStyle = frame.style || {}
   const frameClass = frame.cssClass || ''
+  // Destructure glow (boxShadow) from frame style so we can apply it on the
+  // OUTER wrapper — box-shadow on a scroll-container descendant gets clipped on
+  // mobile Safari, but on the outer wrapper it escapes that clip boundary.
+  const { boxShadow: frameGlow, ...frameBorderStyle } = frame.style || {}
 
   return (
-    <div className="aura-char-outer">
+    <div className="aura-char-outer"
+      style={frameGlow ? { boxShadow: `0 2px 12px rgba(0,0,0,0.08), ${frameGlow}` } : undefined}
+    >
       {/* Tab bar */}
       <div className="aura-char-tabs">
         <button className={`aura-char-tab ${tab==='home'?'active':''}`} onClick={()=>setTab('home')}>
@@ -302,7 +307,7 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
         <div className="aura-char-home">
           <div
             className={`aura-char-card ${frameClass} ${effect.cssClass}`}
-            style={{ background: bg.bg, ...frameStyle }}
+            style={{ background: bg.bg, ...frameBorderStyle }}
           >
             {showSparkles && <Sparkles count={8} />}
             {acc.emoji && (
