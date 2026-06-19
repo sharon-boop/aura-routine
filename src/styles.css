@@ -1112,12 +1112,14 @@ body{
   border-radius:var(--r);
   border:1px solid var(--border);
   box-shadow:var(--sh);
-  overflow:hidden;
+  overflow:visible;
   margin-bottom:0;
 }
 
 /* Tab bar */
 .aura-char-tabs{
+  border-radius:var(--r) var(--r) 0 0;
+  overflow:hidden;
   display:flex;border-bottom:1px solid var(--border);
 }
 .aura-char-tab{
@@ -1166,7 +1168,7 @@ body{
 .next-reward-name{font-size:12px;font-weight:600;color:var(--ink2);}
 
 /* ─── Collection tab ─── */
-.aura-collection{padding:16px;}
+.aura-collection{padding:16px;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
 .coll-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
 .coll-cat-btn{
   padding:7px 12px;border-radius:50px;border:1.5px solid var(--border);
