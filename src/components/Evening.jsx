@@ -380,6 +380,37 @@ export default function Evening() {
         )}
       </div>
 
+      {/* ── 今朝の決意（朝に決めたこと振り返り）── */}
+      {(data.morning?.arikata || data.morning?.wordTheme || data.morning?.rule) && (
+        <div className="sec">
+          <div className="sec-title">今朝、決めたこと</div>
+          <div style={{
+            background: 'linear-gradient(135deg,#0d1225 0%,#1a2040 100%)',
+            borderRadius: 16, overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            {data.morning.arikata && (
+              <div style={{ padding:'13px 18px', borderBottom: (data.morning.wordTheme || data.morning.rule) ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:4 }}>今日の在り方</div>
+                <div style={{ fontSize:16, fontWeight:900, color:'#fff', letterSpacing:'-0.02em' }}>{data.morning.arikata}</div>
+              </div>
+            )}
+            {data.morning.wordTheme && (
+              <div style={{ padding:'11px 18px', borderBottom: data.morning.rule ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:3 }}>言葉テーマ</div>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{data.morning.wordTheme}</div>
+              </div>
+            )}
+            {data.morning.rule && (
+              <div style={{ padding:'11px 18px' }}>
+                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:3 }}>今日の誓い</div>
+                <div style={{ fontSize:14, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{data.morning.rule}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 今日の名言 */}
       <div className="sec">
         <div style={{ padding:'16px 18px', background:'var(--cream)', borderRadius:'var(--r-sm)', borderLeft:'3px solid var(--orange)' }}>

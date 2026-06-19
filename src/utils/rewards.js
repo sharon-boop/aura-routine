@@ -1371,6 +1371,104 @@ export const PREMIUM_GACHA_POOL = [
   { id:'pg_ac19',  type:'accessory', name:'光の護符',       cssClass:'ac-light-charm',  rarity:'uncommon', premiumGacha:true },
   { id:'pg_ac20',  type:'accessory', name:'伝説のボール',   cssClass:'ac-legend-ball',  rarity:'ultra',    premiumGacha:true },
   { id:'pg_ac21',  type:'accessory', name:'マスタークラウン',cssClass:'ac-master-crown', rarity:'ultra',   premiumGacha:true },
+
+  // ── ポケモン追加（カントー進化系 / common〜ultra）
+  { id:'pg_p_bulba',   type:'pokemon', pokeId:1,   name:'フシギダネ',  rarity:'common',   premiumGacha:true },
+  { id:'pg_p_char',    type:'pokemon', pokeId:4,   name:'ヒトカゲ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_squirt',  type:'pokemon', pokeId:7,   name:'ゼニガメ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_pika',    type:'pokemon', pokeId:25,  name:'ピカチュウ',  rarity:'common',   premiumGacha:true },
+  { id:'pg_p_eevee',   type:'pokemon', pokeId:133, name:'イーブイ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_vapor',   type:'pokemon', pokeId:134, name:'シャワーズ',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_jolt',    type:'pokemon', pokeId:135, name:'サンダース',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_flare',   type:'pokemon', pokeId:136, name:'ブースター',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_gengar',  type:'pokemon', pokeId:94,  name:'ゲンガー',    rarity:'rare',     premiumGacha:true },
+  { id:'pg_p_alakaz',  type:'pokemon', pokeId:65,  name:'フーディン',  rarity:'rare',     premiumGacha:true },
+  { id:'pg_p_drago',   type:'pokemon', pokeId:149, name:'カイリュー',  rarity:'rare',     premiumGacha:true },
+  { id:'pg_p_chariz',  type:'pokemon', pokeId:6,   name:'リザードン',  rarity:'ultra',    premiumGacha:true },
+  { id:'pg_p_blasto',  type:'pokemon', pokeId:9,   name:'カメックス',  rarity:'ultra',    premiumGacha:true },
+  { id:'pg_p_venuse',  type:'pokemon', pokeId:3,   name:'フシギバナ',  rarity:'ultra',    premiumGacha:true },
+  // ジョウト
+  { id:'pg_p_chiko',   type:'pokemon', pokeId:152, name:'チコリータ',  rarity:'common',   premiumGacha:true },
+  { id:'pg_p_cynda',   type:'pokemon', pokeId:155, name:'ヒノアラシ',  rarity:'common',   premiumGacha:true },
+  { id:'pg_p_toto',    type:'pokemon', pokeId:158, name:'ワニノコ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_espeon',  type:'pokemon', pokeId:196, name:'エーフィ',    rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_umbreon', type:'pokemon', pokeId:197, name:'ブラッキー',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_tyran',   type:'pokemon', pokeId:248, name:'バンギラス',  rarity:'ultra',    premiumGacha:true },
+  // ホウエン
+  { id:'pg_p_treeck',  type:'pokemon', pokeId:252, name:'キモリ',      rarity:'common',   premiumGacha:true },
+  { id:'pg_p_torch',   type:'pokemon', pokeId:255, name:'アチャモ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_mud',     type:'pokemon', pokeId:258, name:'ミズゴロウ',  rarity:'common',   premiumGacha:true },
+  { id:'pg_p_gardev',  type:'pokemon', pokeId:282, name:'サーナイト',  rarity:'rare',     premiumGacha:true },
+  { id:'pg_p_blaz',    type:'pokemon', pokeId:257, name:'バシャーモ',  rarity:'ultra',    premiumGacha:true },
+  // シンオウ
+  { id:'pg_p_riolu',   type:'pokemon', pokeId:447, name:'リオル',      rarity:'common',   premiumGacha:true },
+  { id:'pg_p_lucario', type:'pokemon', pokeId:448, name:'ルカリオ',    rarity:'ultra',    premiumGacha:true },
+  { id:'pg_p_gible',   type:'pokemon', pokeId:443, name:'フカマル',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_garchomp',type:'pokemon', pokeId:445, name:'ガブリアス',  rarity:'ultra',    premiumGacha:true },
+  // イーブイ進化（シンオウ以降）
+  { id:'pg_p_leafeon', type:'pokemon', pokeId:470, name:'リーフィア',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_glaceon', type:'pokemon', pokeId:471, name:'グレイシア',  rarity:'uncommon', premiumGacha:true },
+  { id:'pg_p_sylveon', type:'pokemon', pokeId:700, name:'ニンフィア',  rarity:'rare',     premiumGacha:true },
+  // パルデア
+  { id:'pg_p_sprig',   type:'pokemon', pokeId:906, name:'ニャオハ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_fueco',   type:'pokemon', pokeId:909, name:'ホゲータ',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_quax',    type:'pokemon', pokeId:912, name:'クワッス',    rarity:'common',   premiumGacha:true },
+  { id:'pg_p_masca',   type:'pokemon', pokeId:908, name:'マスカーニャ',rarity:'rare',     premiumGacha:true },
+  { id:'pg_p_skeledirge',type:'pokemon',pokeId:911,name:'ラウドボーン', rarity:'rare',    premiumGacha:true },
+  { id:'pg_p_quaqua',  type:'pokemon', pokeId:914, name:'ウェーニバル',rarity:'rare',     premiumGacha:true },
+
+  // ── 新スタンプ（common〜rare）
+  { id:'pg_st_new01', type:'stamp', emoji:'🏅', stampBg:'linear-gradient(135deg,#FFD700,#FFA000)', name:'チャンピオン', label:'チャンピオン', rarity:'rare',     premiumGacha:true },
+  { id:'pg_st_new02', type:'stamp', emoji:'🌙', stampBg:'linear-gradient(135deg,#1A1A2E,#16213E)', name:'ミッドナイト', label:'ミッドナイト', rarity:'common',   premiumGacha:true },
+  { id:'pg_st_new03', type:'stamp', emoji:'🎯', stampBg:'linear-gradient(135deg,#FF416C,#FF4B2B)', name:'直球一本',     label:'直球一本',     rarity:'common',   premiumGacha:true },
+  { id:'pg_st_new04', type:'stamp', emoji:'🧬', stampBg:'linear-gradient(135deg,#00B4DB,#0083B0)', name:'DNA進化',      label:'DNA進化',      rarity:'uncommon', premiumGacha:true },
+  { id:'pg_st_new05', type:'stamp', emoji:'🦋', stampBg:'linear-gradient(135deg,#f093fb,#f5576c)', name:'変態期',       label:'変態期',       rarity:'uncommon', premiumGacha:true },
+  { id:'pg_st_new06', type:'stamp', emoji:'🔑', stampBg:'linear-gradient(135deg,#4776E6,#8E54E9)', name:'鍵解錠',       label:'鍵解錠',       rarity:'rare',     premiumGacha:true },
+  { id:'pg_st_new07', type:'stamp', emoji:'⚙️', stampBg:'linear-gradient(135deg,#485563,#29323c)', name:'精密機械',     label:'精密機械',     rarity:'common',   premiumGacha:true },
+  { id:'pg_st_new08', type:'stamp', emoji:'🌊', stampBg:'linear-gradient(135deg,#003973,#E5E5BE)', name:'大海原',       label:'大海原',       rarity:'uncommon', premiumGacha:true },
+  { id:'pg_st_new09', type:'stamp', emoji:'🏔️', stampBg:'linear-gradient(135deg,#4b6cb7,#182848)', name:'山頂',         label:'山頂',         rarity:'rare',     premiumGacha:true },
+  { id:'pg_st_new10', type:'stamp', emoji:'🎋', stampBg:'linear-gradient(135deg,#56ab2f,#a8e063)', name:'竹林',         label:'竹林',         rarity:'common',   premiumGacha:true },
+
+  // ── 新称号（common〜ultra）
+  { id:'pg_t_new01', type:'title', label:'観察者',     color:'#00BCD4', name:'観察者',     rarity:'common',   premiumGacha:true },
+  { id:'pg_t_new02', type:'title', label:'発信者',     color:'#FF5722', name:'発信者',     rarity:'common',   premiumGacha:true },
+  { id:'pg_t_new03', type:'title', label:'本質を見る者',color:'#9C27B0',name:'本質を見る者',rarity:'uncommon', premiumGacha:true },
+  { id:'pg_t_new04', type:'title', label:'静かな怪物', color:'#212121', name:'静かな怪物', rarity:'rare',     premiumGacha:true },
+  { id:'pg_t_new05', type:'title', label:'磁力の人間', color:'#FFD700', name:'磁力の人間', rarity:'ultra',    premiumGacha:true },
+  { id:'pg_t_new06', type:'title', label:'60点主義者', color:'#4CAF50', name:'60点主義者', rarity:'common',   premiumGacha:true },
+  { id:'pg_t_new07', type:'title', label:'継続の鬼',   color:'#FF9800', name:'継続の鬼',   rarity:'uncommon', premiumGacha:true },
+  { id:'pg_t_new08', type:'title', label:'人間観察家', color:'#00BCD4', name:'人間観察家', rarity:'rare',     premiumGacha:true },
+  { id:'pg_t_new09', type:'title', label:'1%の積み上げ',color:'#2196F3',name:'1%の積み上げ',rarity:'common',  premiumGacha:true },
+  { id:'pg_t_new10', type:'title', label:'習慣の建築家',color:'#8BC34A',name:'習慣の建築家',rarity:'uncommon', premiumGacha:true },
+  { id:'pg_t_new11', type:'title', label:'感情の支配者',color:'#9C27B0',name:'感情の支配者',rarity:'rare',    premiumGacha:true },
+  { id:'pg_t_new12', type:'title', label:'伝説の始まり',color:'#FFD700',name:'伝説の始まり',rarity:'ultra',   premiumGacha:true },
+
+  // ── 新背景（uncommon〜ultra）
+  { id:'pg_bg_new01', type:'bg', bg:'linear-gradient(180deg,#0d1225 0%,#1a2040 100%)',       name:'AURAナイト',   label:'AURAナイト',   rarity:'uncommon', premiumGacha:true },
+  { id:'pg_bg_new02', type:'bg', bg:'linear-gradient(135deg,#1a1a2e 0%,#e94560 100%)',       name:'ベルベットルージュ', label:'ベルベットルージュ', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_bg_new03', type:'bg', bg:'linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)', name:'コスモス', label:'コスモス', rarity:'rare', premiumGacha:true },
+  { id:'pg_bg_new04', type:'bg', bg:'linear-gradient(135deg,#f7971e 0%,#ffd200 100%)',       name:'ゴールデンアワー', label:'ゴールデンアワー', rarity:'rare',     premiumGacha:true },
+  { id:'pg_bg_new05', type:'bg', bg:'linear-gradient(135deg,#11998e 0%,#38ef7d 100%)',       name:'エメラルド',   label:'エメラルド',   rarity:'uncommon', premiumGacha:true },
+  { id:'pg_bg_new06', type:'bg', bg:'linear-gradient(180deg,#000000 0%,#1A0533 50%,#6A0572 100%)', name:'ダークファンタジー', label:'ダークファンタジー', rarity:'ultra', premiumGacha:true },
+  { id:'pg_bg_new07', type:'bg', bg:'linear-gradient(135deg,#373B44 0%,#4286f4 100%)',       name:'ストームクラウド', label:'ストームクラウド', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_bg_new08', type:'bg', bg:'linear-gradient(180deg,#08101f 0%,#0f1a30 50%,#1a2e4a 100%)', name:'ディープシー', label:'ディープシー', rarity:'rare', premiumGacha:true },
+
+  // ── 新フレーム（uncommon〜ultra）
+  { id:'pg_fr_new01', type:'frame', style:{border:'3px solid #FFD700',boxShadow:'0 0 20px rgba(255,215,0,0.8)'},  name:'ゴールデンオーラ', label:'ゴールデンオーラ', rarity:'ultra',    premiumGacha:true },
+  { id:'pg_fr_new02', type:'frame', style:{border:'3px solid #00E5FF',boxShadow:'0 0 16px rgba(0,229,255,0.6)'}, name:'シアンネオン',     label:'シアンネオン',     rarity:'uncommon', premiumGacha:true },
+  { id:'pg_fr_new03', type:'frame', style:{border:'3px solid #E91E63',boxShadow:'0 0 18px rgba(233,30,99,0.7)'}, name:'ホットピンク',     label:'ホットピンク',     rarity:'rare',     premiumGacha:true },
+  { id:'pg_fr_new04', type:'frame', style:{border:'4px solid #C0C0C0',boxShadow:'0 0 22px rgba(192,192,192,0.9)'},name:'プラチナ光',       label:'プラチナ光',       rarity:'ultra',    premiumGacha:true },
+  { id:'pg_fr_new05', type:'frame', style:{border:'3px solid #9C27B0',boxShadow:'0 0 14px rgba(156,39,176,0.5)'},name:'パープルマジック', label:'パープルマジック', rarity:'uncommon', premiumGacha:true },
+
+  // ── 新アクセサリー（common〜ultra）
+  { id:'pg_ac_new01', type:'acc', emoji:'🎖️', pos:ACC_POS.tc, name:'功績バッジ', label:'功績バッジ', rarity:'uncommon', premiumGacha:true },
+  { id:'pg_ac_new02', type:'acc', emoji:'🦋', pos:ACC_POS.tr, name:'蝶のフレーム', label:'蝶のフレーム', rarity:'common',   premiumGacha:true },
+  { id:'pg_ac_new03', type:'acc', emoji:'🌸', pos:ACC_POS.tc, name:'桜吹雪',   label:'桜吹雪',   rarity:'common',   premiumGacha:true },
+  { id:'pg_ac_new04', type:'acc', emoji:'💫', pos:ACC_POS.tr, name:'流れ星',   label:'流れ星',   rarity:'uncommon', premiumGacha:true },
+  { id:'pg_ac_new05', type:'acc', emoji:'🏅', pos:ACC_POS.tc, name:'金メダル', label:'金メダル', rarity:'rare',     premiumGacha:true },
+  { id:'pg_ac_new06', type:'acc', emoji:'🐉', pos:ACC_POS.bl, name:'竜の加護', label:'竜の加護', rarity:'ultra',    premiumGacha:true },
+  { id:'pg_ac_new07', type:'acc', emoji:'👾', pos:ACC_POS.tr, name:'8bitキャラ',label:'8bitキャラ',rarity:'uncommon', premiumGacha:true },
+  { id:'pg_ac_new08', type:'acc', emoji:'🌺', pos:ACC_POS.tc, name:'紅花',     label:'紅花',     rarity:'common',   premiumGacha:true },
 ]
 
 // プレミアムガチャ解放済み管理

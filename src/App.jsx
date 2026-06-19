@@ -16,7 +16,7 @@ import PremiumGacha from './components/PremiumGacha'
 import TikTokMemo from './components/TikTokMemo'
 import PokemonPartner from './components/PokemonPartner'
 import { Toast, useToast } from './components/Toast'
-import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS } from './utils/storage'
+import { initSampleData, getStreak, getSettings, checkAchievements, ACHIEVEMENT_DEFS, checkMilestoneRewards } from './utils/storage'
 
 const NAV = [
   { id:'home',    icon:'⌂', label:'Home' },
@@ -142,6 +142,11 @@ export default function App() {
     }
     const unlocked = checkAchievements()
     if (unlocked.length) setNewAchievements(unlocked)
+    // マイルストーンチケット確認
+    const milestones = checkMilestoneRewards()
+    if (milestones.length) {
+      milestones.forEach((m, i) => setTimeout(() => show(m.msg), i * 3500))
+    }
   }, [])
 
   const handleNavigate = (section, sub) => {

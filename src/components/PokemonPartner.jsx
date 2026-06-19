@@ -17,12 +17,28 @@ const TYPE_BG = {
   electric: 'linear-gradient(135deg,#E65100 0%,#FF8F00 60%,#FFD54F 100%)',
   psychic:  'linear-gradient(135deg,#4A148C 0%,#7B1FA2 60%,#CE93D8 100%)',
   normal:   'linear-gradient(135deg,#4E342E 0%,#795548 60%,#BCAAA4 100%)',
+  dragon:   'linear-gradient(135deg,#0D47A1 0%,#1565C0 60%,#7986CB 100%)',
+  ghost:    'linear-gradient(135deg,#4527A0 0%,#5E35B1 60%,#9575CD 100%)',
+  dark:     'linear-gradient(135deg,#212121 0%,#424242 60%,#757575 100%)',
+  fighting: 'linear-gradient(135deg,#B71C1C 0%,#C62828 60%,#EF5350 100%)',
+  fairy:    'linear-gradient(135deg,#880E4F 0%,#C2185B 60%,#F48FB1 100%)',
+  rock:     'linear-gradient(135deg,#37474F 0%,#546E7A 60%,#90A4AE 100%)',
+  ice:      'linear-gradient(135deg,#006064 0%,#00838F 60%,#80DEEA 100%)',
 }
 
 const STARTER_OPTIONS = [
-  { basePokeId:4,   name:'ヒトカゲ',   type:'fire',   icon:'🔥', desc:'炎タイプ。負けず嫌いで情熱的。行動力で成長するタイプ。' },
-  { basePokeId:7,   name:'ゼニガメ',   type:'water',  icon:'💧', desc:'水タイプ。冷静で分析力が高い。継続力で力をつけるタイプ。' },
-  { basePokeId:1,   name:'フシギダネ', type:'grass',  icon:'🌿', desc:'草タイプ。柔軟で創造力がある。仕組みで伸びるタイプ。' },
+  { basePokeId:4,   name:'ヒトカゲ',   type:'fire',     icon:'🔥', desc:'炎タイプ。負けず嫌いで情熱的。行動力で成長するタイプ。' },
+  { basePokeId:7,   name:'ゼニガメ',   type:'water',    icon:'💧', desc:'水タイプ。冷静で分析力が高い。継続力で力をつけるタイプ。' },
+  { basePokeId:1,   name:'フシギダネ', type:'grass',    icon:'🌿', desc:'草タイプ。柔軟で創造力がある。仕組みで伸びるタイプ。' },
+  { basePokeId:25,  name:'ピカチュウ', type:'electric', icon:'⚡', desc:'でんきタイプ。明るくエネルギッシュ。人を惹きつける力がある。' },
+  { basePokeId:133, name:'イーブイ',   type:'normal',   icon:'🌟', desc:'ノーマルタイプ。可能性が無限大。8種類に進化できる特別な存在。' },
+  { basePokeId:147, name:'ミニリュウ', type:'dragon',   icon:'🐉', desc:'ドラゴンタイプ。成長が遅いが最終的に最強。根気強さが武器。' },
+  { basePokeId:152, name:'チコリータ', type:'grass',    icon:'🌿', desc:'草タイプ。穏やかで芯が強い。マイペースで着実に伸びるタイプ。' },
+  { basePokeId:155, name:'ヒノアラシ', type:'fire',     icon:'🔥', desc:'炎タイプ。内に秘めた情熱がある。じっくり温めて爆発する力。' },
+  { basePokeId:158, name:'ワニノコ',   type:'water',    icon:'💧', desc:'水タイプ。行動力と適応力が高い。どんな環境でも強くなれる。' },
+  { basePokeId:447, name:'リオル',     type:'fighting', icon:'👊', desc:'かくとうタイプ。努力家で芯が強い。修行で真のルカリオへ。' },
+  { basePokeId:906, name:'ニャオハ',   type:'grass',    icon:'🌿', desc:'草タイプ。観察眼と独自センスがある。個性で勝負するタイプ。' },
+  { basePokeId:909, name:'ホゲータ',   type:'fire',     icon:'🔥', desc:'炎タイプ。大らかで堂々としている。存在感で周りを動かす力。' },
 ]
 
 const TALK_MESSAGES = [

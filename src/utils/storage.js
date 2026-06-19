@@ -324,19 +324,82 @@ export function deleteTikTokMemo(id) { save('tiktokMemos', getTikTokMemos().filt
    POKEMON PARTNER (育成)
 ═══════════════════════════════════════════ */
 export const PARTNER_EVO_TREE = {
-  1:  { name:'フシギダネ', type:'grass',  color:'#4CAF50', evoLv:16, evosTo:2  },
-  2:  { name:'フシギソウ', type:'grass',  color:'#388E3C', evoLv:32, evosTo:3  },
-  3:  { name:'フシギバナ', type:'grass',  color:'#2E7D32'                        },
-  4:  { name:'ヒトカゲ',   type:'fire',   color:'#FF5722', evoLv:16, evosTo:5  },
-  5:  { name:'リザード',   type:'fire',   color:'#E64A19', evoLv:36, evosTo:6  },
-  6:  { name:'リザードン', type:'fire',   color:'#BF360C'                        },
-  7:  { name:'ゼニガメ',   type:'water',  color:'#2196F3', evoLv:16, evosTo:8  },
-  8:  { name:'カメール',   type:'water',  color:'#1565C0', evoLv:36, evosTo:9  },
-  9:  { name:'カメックス', type:'water',  color:'#0D47A1'                        },
-  25: { name:'ピカチュウ', type:'electric',color:'#FFC107',evoLv:30, evosTo:26 },
-  26: { name:'ライチュウ', type:'electric',color:'#FF8F00'                       },
-  133:{ name:'イーブイ',   type:'normal', color:'#8D6E63', evoLv:25, evosTo:196 },
-  196:{ name:'エーフィ',   type:'psychic',color:'#9C27B0'                       },
+  // カントー御三家
+  1:  { name:'フシギダネ', type:'grass',    color:'#4CAF50', evoLv:16, evosTo:2   },
+  2:  { name:'フシギソウ', type:'grass',    color:'#388E3C', evoLv:32, evosTo:3   },
+  3:  { name:'フシギバナ', type:'grass',    color:'#2E7D32'                         },
+  4:  { name:'ヒトカゲ',   type:'fire',     color:'#FF5722', evoLv:16, evosTo:5   },
+  5:  { name:'リザード',   type:'fire',     color:'#E64A19', evoLv:36, evosTo:6   },
+  6:  { name:'リザードン', type:'fire',     color:'#BF360C'                         },
+  7:  { name:'ゼニガメ',   type:'water',    color:'#2196F3', evoLv:16, evosTo:8   },
+  8:  { name:'カメール',   type:'water',    color:'#1565C0', evoLv:36, evosTo:9   },
+  9:  { name:'カメックス', type:'water',    color:'#0D47A1'                         },
+  // カントー人気
+  25: { name:'ピカチュウ', type:'electric', color:'#FFC107', evoLv:30, evosTo:26  },
+  26: { name:'ライチュウ', type:'electric', color:'#FF8F00'                         },
+  63: { name:'ケーシィ',   type:'psychic',  color:'#CE93D8', evoLv:16, evosTo:64  },
+  64: { name:'ユンゲラー', type:'psychic',  color:'#BA68C8', evoLv:36, evosTo:65  },
+  65: { name:'フーディン', type:'psychic',  color:'#9C27B0'                         },
+  92: { name:'ゴース',     type:'ghost',    color:'#7E57C2', evoLv:25, evosTo:93  },
+  93: { name:'ゴースト',   type:'ghost',    color:'#5E35B1', evoLv:36, evosTo:94  },
+  94: { name:'ゲンガー',   type:'ghost',    color:'#4527A0'                         },
+  147:{ name:'ミニリュウ', type:'dragon',   color:'#42A5F5', evoLv:30, evosTo:148 },
+  148:{ name:'ハクリュー', type:'dragon',   color:'#1E88E5', evoLv:55, evosTo:149 },
+  149:{ name:'カイリュー', type:'dragon',   color:'#1565C0'                         },
+  // イーブイ進化系
+  133:{ name:'イーブイ',   type:'normal',   color:'#8D6E63', evoLv:25, evosTo:196 },
+  134:{ name:'シャワーズ', type:'water',    color:'#42A5F5'                         },
+  135:{ name:'サンダース', type:'electric', color:'#FDD835'                         },
+  136:{ name:'ブースター', type:'fire',     color:'#EF6C00'                         },
+  196:{ name:'エーフィ',   type:'psychic',  color:'#9C27B0'                         },
+  197:{ name:'ブラッキー', type:'dark',     color:'#212121'                         },
+  470:{ name:'リーフィア', type:'grass',    color:'#43A047'                         },
+  471:{ name:'グレイシア', type:'ice',      color:'#80DEEA'                         },
+  700:{ name:'ニンフィア', type:'fairy',    color:'#F48FB1'                         },
+  // ジョウト御三家
+  152:{ name:'チコリータ', type:'grass',    color:'#66BB6A', evoLv:16, evosTo:153 },
+  153:{ name:'ベイリーフ', type:'grass',    color:'#43A047', evoLv:32, evosTo:154 },
+  154:{ name:'メガニウム', type:'grass',    color:'#2E7D32'                         },
+  155:{ name:'ヒノアラシ', type:'fire',     color:'#FF7043', evoLv:14, evosTo:156 },
+  156:{ name:'マグマラシ', type:'fire',     color:'#F4511E', evoLv:36, evosTo:157 },
+  157:{ name:'バクフーン', type:'fire',     color:'#BF360C'                         },
+  158:{ name:'ワニノコ',   type:'water',    color:'#26C6DA', evoLv:18, evosTo:159 },
+  159:{ name:'アリゲイツ', type:'water',    color:'#00ACC1', evoLv:30, evosTo:160 },
+  160:{ name:'オーダイル', type:'water',    color:'#00838F'                         },
+  // ジョウト人気
+  246:{ name:'ヨーギラス', type:'rock',     color:'#78909C', evoLv:30, evosTo:247 },
+  247:{ name:'サナギラス', type:'rock',     color:'#546E7A', evoLv:55, evosTo:248 },
+  248:{ name:'バンギラス', type:'dark',     color:'#37474F'                         },
+  // ホウエン御三家
+  252:{ name:'キモリ',     type:'grass',    color:'#4CAF50', evoLv:16, evosTo:253 },
+  253:{ name:'ジュプトル', type:'grass',    color:'#388E3C', evoLv:36, evosTo:254 },
+  254:{ name:'ジュカイン', type:'grass',    color:'#1B5E20'                         },
+  255:{ name:'アチャモ',   type:'fire',     color:'#FF8A65', evoLv:16, evosTo:256 },
+  256:{ name:'ワカシャモ', type:'fire',     color:'#FF5722', evoLv:36, evosTo:257 },
+  257:{ name:'バシャーモ', type:'fire',     color:'#E64A19'                         },
+  258:{ name:'ミズゴロウ', type:'water',    color:'#64B5F6', evoLv:16, evosTo:259 },
+  259:{ name:'ヌマクロー', type:'water',    color:'#1976D2', evoLv:36, evosTo:260 },
+  260:{ name:'ラグラージ', type:'water',    color:'#0D47A1'                         },
+  // ホウエン人気
+  280:{ name:'ラルトス',   type:'psychic',  color:'#F8BBD9', evoLv:20, evosTo:281 },
+  281:{ name:'キルリア',   type:'psychic',  color:'#F48FB1', evoLv:30, evosTo:282 },
+  282:{ name:'サーナイト', type:'psychic',  color:'#E91E63'                         },
+  // シンオウ人気
+  443:{ name:'フカマル',   type:'dragon',   color:'#64B5F6', evoLv:24, evosTo:444 },
+  444:{ name:'ガバイト',   type:'dragon',   color:'#42A5F5', evoLv:48, evosTo:445 },
+  445:{ name:'ガブリアス', type:'dragon',   color:'#1565C0'                         },
+  447:{ name:'リオル',     type:'fighting', color:'#42A5F5', evoLv:20, evosTo:448 },
+  448:{ name:'ルカリオ',   type:'fighting', color:'#1A237E'                         },
+  // パルデア御三家
+  906:{ name:'ニャオハ',   type:'grass',    color:'#66BB6A', evoLv:16, evosTo:907 },
+  907:{ name:'ニャローテ', type:'grass',    color:'#43A047', evoLv:36, evosTo:908 },
+  908:{ name:'マスカーニャ',type:'grass',   color:'#1B5E20'                         },
+  909:{ name:'ホゲータ',   type:'fire',     color:'#FF8A65', evoLv:16, evosTo:910 },
+  910:{ name:'アチゲータ', type:'fire',     color:'#FF5722', evoLv:36, evosTo:911 },
+  911:{ name:'ラウドボーン',type:'fire',    color:'#BF360C'                         },
+  912:{ name:'クワッス',   type:'water',    color:'#64B5F6', evoLv:16, evosTo:913 },
+  913:{ name:'ウェルカモ', type:'water',    color:'#1976D2', evoLv:36, evosTo:914 },
+  914:{ name:'ウェーニバル',type:'water',   color:'#0D47A1'                         },
 }
 
 export const PARTNER_EXP_FOR_LEVEL = (lv) => lv * 12 + 25
@@ -983,4 +1046,28 @@ const APPROVAL_POOL = {
 export function generateApprovalMessage(type) {
   const pool = APPROVAL_POOL[type] || APPROVAL_POOL.morning
   return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/* ═══════════════════════════════════════════
+   MILESTONE TICKET REWARDS
+═══════════════════════════════════════════ */
+const STREAK_MILESTONES = [
+  { key: 'ms_streak_10',  streakReq: 10,  tickets: 5,  msg: '🎉 10日連続達成！+5チケット🎟️ おめでとう！' },
+  { key: 'ms_streak_20',  streakReq: 20,  tickets: 5,  msg: '🔥 20日連続！+5チケット🎟️ 本物の継続力だ。' },
+  { key: 'ms_streak_30',  streakReq: 30,  tickets: 10, msg: '⭐ 30日連続！+10チケット🎟️ 1ヶ月の本気、すごい。' },
+  { key: 'ms_streak_50',  streakReq: 50,  tickets: 10, msg: '💎 50日連続！+10チケット🎟️ 習慣が血肉になってきた。' },
+  { key: 'ms_streak_100', streakReq: 100, tickets: 20, msg: '👑 100日連続！+20チケット🎟️ 伝説の領域だ。' },
+]
+
+export function checkMilestoneRewards() {
+  const streak = getStreak()
+  const newRewards = []
+  for (const m of STREAK_MILESTONES) {
+    if (streak >= m.streakReq && !load(m.key)) {
+      addGachaTickets(m.tickets)
+      save(m.key, true)
+      newRewards.push(m)
+    }
+  }
+  return newRewards
 }
