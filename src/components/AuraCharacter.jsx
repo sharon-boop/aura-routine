@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 
-const TOAST_STREAK_KEY  = 'rewardLastStreak'
+const TOAST_TOTALDAYS_KEY = 'rewardLastTotalDays'  // 累計日数ベース（メイン）
+const TOAST_STREAK_KEY  = 'rewardLastStreak'        // 連続日数（参照のみ）
 const TOAST_PERFECT_KEY = 'rewardLastPerfect'
 import {
   POKEMON_REWARDS, FRAME_REWARDS, ACCESSORY_REWARDS,
@@ -174,20 +175,20 @@ export default function AuraCharacter({ streak = 0, perfect = 0, totalDays: tota
   const prevStreakRef = useRef(streak)
   const prevPerfectRef = useRef(perfect)
 
-  // Detect new streak unlocks — 1日1回のみ表示
+  // 累計日数ベースでリワード解放（メイン）。初回起動時に過去分をまとめて付与。
   useEffect(() => {
-    const lastShown = parseInt(localStorage.getItem(TOAST_STREAK_KEY) || '0')
-    if (streak > lastShown) {
+    if (totalDays <= 0) return
+    const lastShown = parseInt(localStorage.getItem(TOAST_TOTALDAYS_KEY) || '0')
+    if (totalDays > lastShown) {
       const unlocked = []
-      for (let d = lastShown + 1; d <= streak; d++) getAllRewardsAtDay(d).forEach(r => unlocked.push(r))
+      for (let d = lastShown + 1; d <= totalDays; d++) getAllRewardsAtDay(d).forEach(r => unlocked.push(r))
       if (unlocked.length) {
         setNewRewards(unlocked)
         setShowToast(true)
       }
-      localStorage.setItem(TOAST_STREAK_KEY, String(streak))
-      prevStreakRef.current = streak
+      localStorage.setItem(TOAST_TOTALDAYS_KEY, String(totalDays))
     }
-  }, [streak])
+  }, [totalDays])
 
   // Detect perfect unlocks — localStorage基準（ページ再読み込みで再表示しない）
   useEffect(() => {
@@ -332,6 +333,10 @@ export default function AuraCharacter({ streak = 0, perfect = 0, totalDays: tota
           </div>
 
           <div className="aura-stats-row">
+            <div className="aura-stat">
+              <div className="aura-stat-val" style={{color:'var(--orange)'}}>{totalDays}</div>
+              <div className="aura-stat-lbl">累計日数</div>
+            </div>
             <div className="aura-stat">
               <div className="aura-stat-val aura-gold">{streak}</div>
               <div className="aura-stat-lbl">連続日数</div>

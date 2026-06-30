@@ -2086,13 +2086,68 @@ body{
 /* 時空の彼方 */
 .bg-poke-space{background:radial-gradient(ellipse at 30% 30%,#1a0033 0%,#0d0020 45%,#000010 75%,#1a0033 100%);}
 
-/* ─── 欠けていたフレーム CSS クラス ─── */
+/* ─── 欠けていたフレーム CSS クラス（全追加） ─── */
 .frame-cherry{border:3px solid #E91E63;box-shadow:0 0 14px rgba(233,30,99,0.55);}
 .coll-frame-preview.frame-cherry{background:linear-gradient(135deg,#880e4f,#E91E63,#F48FB1);}
 .frame-emerald{border:3px solid #00C853;box-shadow:0 0 14px rgba(0,200,83,0.55);}
 .coll-frame-preview.frame-emerald{background:linear-gradient(135deg,#1B5E20,#00C853,#A5D6A7);}
 .frame-midnight{border:3px solid #37474F;box-shadow:0 0 14px rgba(55,71,79,0.7),inset 0 0 20px rgba(0,0,0,0.4);}
 .coll-frame-preview.frame-midnight{background:linear-gradient(135deg,#000000,#263238,#455A64);}
+
+/* ─── premium gacha frame CSS クラス（pg_fr04〜pg_fr23 用） ─── */
+.frame-navy{border:3px solid #1565C0;box-shadow:0 0 12px rgba(21,101,192,0.55);}
+.coll-frame-preview.frame-navy{background:linear-gradient(135deg,#1A237E,#1565C0,#64B5F6);}
+
+.frame-coral{border:3px solid #FF7043;box-shadow:0 0 14px rgba(255,112,67,0.55);}
+.coll-frame-preview.frame-coral{background:linear-gradient(135deg,#BF360C,#FF7043,#FFAB91);}
+
+.frame-deep-purple{border:3px solid #7B2FFF;box-shadow:0 0 16px rgba(123,47,255,0.65);}
+.coll-frame-preview.frame-deep-purple{background:linear-gradient(135deg,#1A0030,#4A148C,#7B2FFF);}
+
+/* チタニウム — メタリックグレー＋ブルーハイライト */
+.frame-titanium{border:3px solid #90A4AE;box-shadow:0 0 16px rgba(144,164,174,0.6),0 0 32px rgba(120,144,156,0.3);}
+.coll-frame-preview.frame-titanium{background:linear-gradient(145deg,#263238,#546E7A,#90A4AE,#78909C);}
+
+/* ドラゴンスケール — 深紅＋ゴールド光沢 */
+.frame-dragon{border:3px solid #C62828;box-shadow:0 0 20px rgba(198,40,40,0.7),0 0 40px rgba(255,0,0,0.25);}
+.coll-frame-preview.frame-dragon{background:linear-gradient(135deg,#1A0000,#6D1010,#C62828,#FF8F00);}
+
+.frame-forest{border:3px solid #2E7D32;box-shadow:0 0 14px rgba(46,125,50,0.55);}
+.coll-frame-preview.frame-forest{background:linear-gradient(135deg,#1B5E20,#2E7D32,#66BB6A);}
+
+.frame-aqua{border:3px solid #00BCD4;box-shadow:0 0 16px rgba(0,188,212,0.6);}
+.coll-frame-preview.frame-aqua{background:linear-gradient(135deg,#006064,#00BCD4,#80DEEA);}
+
+/* スターダスト — 淡紫＋パルスアニメ */
+.frame-stardust{border:2px solid #CE93D8;box-shadow:0 0 14px rgba(206,147,216,0.55);animation:stardustPulse 2.5s ease-in-out infinite;}
+.coll-frame-preview.frame-stardust{background:linear-gradient(135deg,#4A148C,#9C27B0,#CE93D8);}
+@keyframes stardustPulse{0%,100%{box-shadow:0 0 14px rgba(206,147,216,0.5)}50%{box-shadow:0 0 28px rgba(206,147,216,0.85),0 0 56px rgba(149,117,205,0.4)}}
+
+/* ネオン（グリーン） — 強いグリーンネオン */
+.frame-neon{border:3px solid #00FF41;box-shadow:0 0 20px rgba(0,255,65,0.8),0 0 40px rgba(0,255,65,0.35);animation:neonPulse 1.2s ease-in-out infinite;}
+.coll-frame-preview.frame-neon{background:#001100;}
+@keyframes neonPulse{0%,100%{box-shadow:0 0 16px #00FF4180}50%{box-shadow:0 0 32px #00FF41CC,0 0 64px #00FF4145}}
+
+/* ヴィンテージ — ブラウン＋旧感 */
+.frame-vintage{border:3px solid #A0522D;box-shadow:0 0 12px rgba(160,82,45,0.5),inset 0 0 15px rgba(0,0,0,0.1);}
+.coll-frame-preview.frame-vintage{background:linear-gradient(135deg,#3E2723,#5D4037,#A0522D,#D7CCC8);}
+
+/* クリスタル — 水色＋シマーアニメ */
+.frame-crystal{border:3px solid #80DEEA;box-shadow:0 0 20px rgba(128,222,234,0.7),0 0 40px rgba(0,229,255,0.35);animation:crystalShimmer2 1.8s ease-in-out infinite;}
+.coll-frame-preview.frame-crystal{background:linear-gradient(135deg,#E0F7FA,#80DEEA,#B2EBF2);}
+@keyframes crystalShimmer2{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2) hue-rotate(15deg)}}
+
+/* ホログラム — 虹回転 */
+.frame-hologram{border:3px solid transparent;position:relative;}
+.frame-hologram::before{content:'';position:absolute;inset:-3px;border-radius:23px;background:linear-gradient(45deg,#FF0080,#FF8C00,#40E0D0,#0040FF,#FF0080);z-index:-1;animation:hologramSpin 2s linear infinite;}
+.coll-frame-preview.frame-hologram{background:conic-gradient(#FF0080,#FF8C00,#40E0D0,#0040FF,#FF0080);}
+@keyframes hologramSpin{to{filter:hue-rotate(360deg)}}
+
+/* 神話の枠 — 複数色ゴールデン回転 */
+.frame-myth{border:4px solid transparent;position:relative;}
+.frame-myth::before{content:'';position:absolute;inset:-4px;border-radius:24px;background:linear-gradient(45deg,#FFD700,#9B59B6,#E74C3C,#3498DB,#FFD700);z-index:-1;animation:mythSpin 3s linear infinite;}
+.coll-frame-preview.frame-myth{background:linear-gradient(135deg,#1A0020,#9B59B6,#FFD700);}
+@keyframes mythSpin{to{filter:hue-rotate(360deg) brightness(1.15)}}
 
 /* ─── 欠けていたエフェクト CSS クラス ─── */
 .ef-sakura{animation:efSakura 3s ease-in-out infinite;}

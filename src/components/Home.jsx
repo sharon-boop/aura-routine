@@ -6,7 +6,7 @@ import {
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
   shouldShowWeeklyReminder, markWeeklyReminderShown,
   getAuraProfile, getAuraLevel, AURA_LEVELS,
-  getTotalDays, getMonthlyGoal, saveMonthlyGoal,
+  getTotalDays, getMonthlyGoals, saveMonthlyGoals,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -311,22 +311,27 @@ function RoutineCards({ record, onNavigate }) {
   )
 }
 
-/* ─── 月の目標 ─── */
+/* ─── 月の目標（複数リスト） ─── */
 function MonthlyGoal() {
-  const [goal, setGoal] = useState(() => getMonthlyGoal())
-  const [editing, setEditing] = useState(false)
+  const [goals, setGoals] = useState(() => getMonthlyGoals())
   const [input, setInput] = useState('')
   const d = new Date()
   const monthLabel = `${d.getMonth()+1}月の目標`
+  const doneAll = goals.length > 0 && goals.every(g => g.done)
 
-  const handleSave = () => {
+  const persist = (list) => { setGoals(list); saveMonthlyGoals(list) }
+
+  const addGoal = () => {
     const t = input.trim()
     if (!t) return
-    saveMonthlyGoal(t)
-    setGoal(t)
-    setEditing(false)
-    toast('今月の目標を刻んだ 🎯')
+    persist([...goals, { id: Date.now(), text: t, done: false }])
+    setInput('')
   }
+
+  const toggleGoal = (id) =>
+    persist(goals.map(g => g.id === id ? { ...g, done: !g.done } : g))
+
+  const deleteGoal = (id) => persist(goals.filter(g => g.id !== id))
 
   return (
     <div style={{
@@ -337,69 +342,77 @@ function MonthlyGoal() {
       border: '1px solid rgba(255,255,255,0.08)',
       boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
     }}>
-      <div style={{ fontSize:9, fontWeight:900, letterSpacing:'0.2em', color:'rgba(255,255,255,0.4)', textTransform:'uppercase', marginBottom:10 }}>
-        {monthLabel}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+        <div style={{ fontSize:9, fontWeight:900, letterSpacing:'0.2em', color:'rgba(255,255,255,0.4)', textTransform:'uppercase' }}>
+          {monthLabel}
+        </div>
+        {doneAll && (
+          <div style={{ fontSize:11, fontWeight:900, color:'#FFD700', letterSpacing:1 }}>✦ 全達成！</div>
+        )}
       </div>
-      {!editing ? (
-        <>
-          {goal ? (
-            <div style={{ fontSize:20, fontWeight:900, color:'#fff', lineHeight:1.35, letterSpacing:'-0.02em', marginBottom:14 }}>
-              {goal}
-            </div>
-          ) : (
-            <div style={{ fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.35)', marginBottom:14 }}>
-              今月の目標を設定しよう
-            </div>
-          )}
-          <button
-            onClick={() => { setInput(goal || ''); setEditing(true) }}
-            style={{
-              background: goal ? 'rgba(255,255,255,0.08)' : 'var(--orange)',
-              border: 'none', borderRadius: 50,
-              padding: '8px 18px', fontSize: 12, fontWeight: 800,
-              color: goal ? 'rgba(255,255,255,0.6)' : '#fff',
-              cursor: 'pointer', fontFamily: 'var(--font)',
-            }}
-          >
-            {goal ? '✏ 編集' : '+ 目標を設定'}
-          </button>
-        </>
+
+      {/* 目標リスト */}
+      {goals.length === 0 ? (
+        <div style={{ fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.3)', marginBottom:16 }}>
+          今月の目標を追加しよう
+        </div>
       ) : (
-        <div>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="今月達成したいことを一言で"
-            autoFocus
-            rows={2}
-            style={{
-              width: '100%', padding: '12px 14px', borderRadius: 12,
-              border: '1.5px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.07)', color: '#fff',
-              fontFamily: 'var(--font)', fontSize: 15, fontWeight: 700,
-              outline: 'none', resize: 'none', boxSizing: 'border-box',
-            }}
-          />
-          <div style={{ display:'flex', gap:8, marginTop:10 }}>
-            <button
-              onClick={handleSave}
-              style={{
-                flex:1, padding:'11px', background:'var(--orange)', color:'#fff',
-                border:'none', borderRadius:50, fontSize:13, fontWeight:800,
-                cursor:'pointer', fontFamily:'var(--font)',
-              }}
-            >決定</button>
-            <button
-              onClick={() => setEditing(false)}
-              style={{
-                padding:'11px 16px', background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)',
-                border:'none', borderRadius:50, fontSize:13, fontWeight:700,
-                cursor:'pointer', fontFamily:'var(--font)',
-              }}
-            >キャンセル</button>
-          </div>
+        <div style={{ marginBottom:14, display:'flex', flexDirection:'column', gap:8 }}>
+          {goals.map(g => (
+            <div key={g.id} style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <button
+                onClick={() => toggleGoal(g.id)}
+                style={{
+                  width:22, height:22, borderRadius:6, flexShrink:0,
+                  background: g.done ? 'var(--orange)' : 'rgba(255,255,255,0.08)',
+                  border: `1.5px solid ${g.done ? 'var(--orange)' : 'rgba(255,255,255,0.2)'}`,
+                  cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
+                  fontSize:11, color:'#fff', fontWeight:900,
+                }}
+              >{g.done ? '✓' : ''}</button>
+              <div style={{
+                flex:1, fontSize:15, fontWeight:700, lineHeight:1.4,
+                color: g.done ? 'rgba(255,255,255,0.4)' : '#fff',
+                textDecoration: g.done ? 'line-through' : 'none',
+              }}>
+                {g.text}
+              </div>
+              <button
+                onClick={() => deleteGoal(g.id)}
+                style={{
+                  background:'none', border:'none', cursor:'pointer',
+                  fontSize:14, color:'rgba(255,255,255,0.25)', padding:'2px 4px',
+                  flexShrink:0,
+                }}
+              >×</button>
+            </div>
+          ))}
         </div>
       )}
+
+      {/* 追加フォーム */}
+      <div style={{ display:'flex', gap:8 }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addGoal()}
+          placeholder="目標を追加..."
+          style={{
+            flex:1, padding:'10px 14px', borderRadius:50,
+            border:'1.5px solid rgba(255,255,255,0.12)',
+            background:'rgba(255,255,255,0.06)', color:'#fff',
+            fontFamily:'var(--font)', fontSize:13, outline:'none',
+          }}
+        />
+        <button
+          onClick={addGoal}
+          style={{
+            background:'var(--orange)', border:'none', borderRadius:50,
+            padding:'10px 16px', fontSize:14, fontWeight:900,
+            color:'#fff', cursor:'pointer', fontFamily:'var(--font)', flexShrink:0,
+          }}
+        >+</button>
+      </div>
     </div>
   )
 }

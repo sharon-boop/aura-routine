@@ -257,19 +257,25 @@ export function getTotalDays() {
   return Object.keys(getAllRecords()).length
 }
 
-/* ─── 月の目標 ─── */
+/* ─── 月の目標（複数リスト形式） ─── */
 function _currentMonth() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
 }
-export function getMonthlyGoal() {
-  const goals = load('monthlyGoals') || {}
-  return goals[_currentMonth()] || null
+// 後方互換: 旧 string 形式を配列に変換
+export function getMonthlyGoals() {
+  const store = load('monthlyGoalsV2') || {}
+  const month = _currentMonth()
+  if (store[month]) return store[month]
+  // 旧データ移行
+  const old = (load('monthlyGoals') || {})[month]
+  if (old) return [{ id: 1, text: old, done: false }]
+  return []
 }
-export function saveMonthlyGoal(text) {
-  const goals = load('monthlyGoals') || {}
-  goals[_currentMonth()] = text
-  save('monthlyGoals', goals)
+export function saveMonthlyGoals(list) {
+  const store = load('monthlyGoalsV2') || {}
+  store[_currentMonth()] = list
+  save('monthlyGoalsV2', store)
 }
 
 // 深夜（4時前）は前日として扱う（夜更かし対応）
