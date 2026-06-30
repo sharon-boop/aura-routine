@@ -252,6 +252,26 @@ export function updateTodayRecord(partial) {
 
 export function getAllRecords() { return load('dailyRecords') || {} }
 
+// 累計ログイン日数（連続でなくてよい）
+export function getTotalDays() {
+  return Object.keys(getAllRecords()).length
+}
+
+/* ─── 月の目標 ─── */
+function _currentMonth() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+}
+export function getMonthlyGoal() {
+  const goals = load('monthlyGoals') || {}
+  return goals[_currentMonth()] || null
+}
+export function saveMonthlyGoal(text) {
+  const goals = load('monthlyGoals') || {}
+  goals[_currentMonth()] = text
+  save('monthlyGoals', goals)
+}
+
 // 深夜（4時前）は前日として扱う（夜更かし対応）
 export function getEveningDate() {
   const now = new Date()

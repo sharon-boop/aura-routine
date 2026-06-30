@@ -6,6 +6,7 @@ import {
   getAttitudeOptions, RARE_ATTITUDES, getTodos, saveTodos, addTodo,
   shouldShowWeeklyReminder, markWeeklyReminderShown,
   getAuraProfile, getAuraLevel, AURA_LEVELS,
+  getTotalDays, getMonthlyGoal, saveMonthlyGoal,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -310,6 +311,99 @@ function RoutineCards({ record, onNavigate }) {
   )
 }
 
+/* ─── 月の目標 ─── */
+function MonthlyGoal() {
+  const [goal, setGoal] = useState(() => getMonthlyGoal())
+  const [editing, setEditing] = useState(false)
+  const [input, setInput] = useState('')
+  const d = new Date()
+  const monthLabel = `${d.getMonth()+1}月の目標`
+
+  const handleSave = () => {
+    const t = input.trim()
+    if (!t) return
+    saveMonthlyGoal(t)
+    setGoal(t)
+    setEditing(false)
+    toast('今月の目標を刻んだ 🎯')
+  }
+
+  return (
+    <div style={{
+      margin: '0 20px 24px',
+      background: 'linear-gradient(135deg,#0d1225 0%,#1a2040 100%)',
+      borderRadius: 20,
+      padding: '20px 22px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+    }}>
+      <div style={{ fontSize:9, fontWeight:900, letterSpacing:'0.2em', color:'rgba(255,255,255,0.4)', textTransform:'uppercase', marginBottom:10 }}>
+        {monthLabel}
+      </div>
+      {!editing ? (
+        <>
+          {goal ? (
+            <div style={{ fontSize:20, fontWeight:900, color:'#fff', lineHeight:1.35, letterSpacing:'-0.02em', marginBottom:14 }}>
+              {goal}
+            </div>
+          ) : (
+            <div style={{ fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.35)', marginBottom:14 }}>
+              今月の目標を設定しよう
+            </div>
+          )}
+          <button
+            onClick={() => { setInput(goal || ''); setEditing(true) }}
+            style={{
+              background: goal ? 'rgba(255,255,255,0.08)' : 'var(--orange)',
+              border: 'none', borderRadius: 50,
+              padding: '8px 18px', fontSize: 12, fontWeight: 800,
+              color: goal ? 'rgba(255,255,255,0.6)' : '#fff',
+              cursor: 'pointer', fontFamily: 'var(--font)',
+            }}
+          >
+            {goal ? '✏ 編集' : '+ 目標を設定'}
+          </button>
+        </>
+      ) : (
+        <div>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="今月達成したいことを一言で"
+            autoFocus
+            rows={2}
+            style={{
+              width: '100%', padding: '12px 14px', borderRadius: 12,
+              border: '1.5px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.07)', color: '#fff',
+              fontFamily: 'var(--font)', fontSize: 15, fontWeight: 700,
+              outline: 'none', resize: 'none', boxSizing: 'border-box',
+            }}
+          />
+          <div style={{ display:'flex', gap:8, marginTop:10 }}>
+            <button
+              onClick={handleSave}
+              style={{
+                flex:1, padding:'11px', background:'var(--orange)', color:'#fff',
+                border:'none', borderRadius:50, fontSize:13, fontWeight:800,
+                cursor:'pointer', fontFamily:'var(--font)',
+              }}
+            >決定</button>
+            <button
+              onClick={() => setEditing(false)}
+              style={{
+                padding:'11px 16px', background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)',
+                border:'none', borderRadius:50, fontSize:13, fontWeight:700,
+                cursor:'pointer', fontFamily:'var(--font)',
+              }}
+            >キャンセル</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ─── 週次レビューリマインダーバナー ─── */
 function WeeklyReviewBanner({ onNavigate, onDismiss }) {
   return (
@@ -346,6 +440,7 @@ export default function Home({ onNavigate, onSettings }) {
   const [progress, setProgress] = useState(0)
   const [streak, setStreak] = useState(0)
   const [perfect, setPerfect] = useState(0)
+  const [totalDays, setTotalDays] = useState(0)
   const [perfectStatus, setPerfectStatus] = useState(null)
   const [tickets, setTickets] = useState(0)
   const [showGacha, setShowGacha] = useState(false)
@@ -357,6 +452,7 @@ export default function Home({ onNavigate, onSettings }) {
     setProgress(calcDayProgress(r))
     setStreak(getStreak())
     setPerfect(getPerfectCount())
+    setTotalDays(getTotalDays())
     setPerfectStatus(getPerfectDayStatus(r))
     setTickets(getGachaTickets())
     // 週次レビューリマインダー（日曜日・初回のみ）
@@ -434,8 +530,11 @@ export default function Home({ onNavigate, onSettings }) {
         </div>
       )}
 
+      {/* ─── 月の目標 ─── */}
+      <MonthlyGoal />
+
       {/* ─── MY AURA キャラクター ─── */}
-      <AuraCharacter streak={streak} perfect={perfect} />
+      <AuraCharacter streak={streak} perfect={perfect} totalDays={totalDays} />
 
       {/* ─── Quote ─── */}
       <div className="sec">

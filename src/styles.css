@@ -2044,3 +2044,68 @@ body{
   padding:6px 14px;border-radius:50px;white-space:nowrap;
 }
 
+/* ═══════════════════════════════════════════
+   PREMIUM GACHA — MISSING BACKGROUND CSS CLASSES
+   （cssClass ベースの背景。.aura-char-card に適用）
+═══════════════════════════════════════════ */
+/* ─── 通常系 ─── */
+.bg-sunset{background:linear-gradient(180deg,#FF7043 0%,#FFA726 50%,#FFCC80 100%);}
+.bg-deep-sea{background:radial-gradient(ellipse at 50% 100%,#006994 0%,#003973 50%,#001a33 100%);}
+.bg-forest-dawn{background:linear-gradient(180deg,#E8F5E9 0%,#A5D6A7 30%,#388E3C 70%,#1B5E20 100%);}
+.bg-snowscape{background:linear-gradient(180deg,#E3F2FD 0%,#BBDEFB 40%,#90CAF9 70%,#E8EAF6 100%);}
+.bg-desert-stars{background:linear-gradient(180deg,#0D0D2B 0%,#1A1A4D 30%,#8B6914 70%,#C4A052 100%);}
+.bg-city-night{background:linear-gradient(180deg,#0D0D1A 0%,#1A1A2E 30%,#16213E 60%,#0F3460 100%);}
+/* 春の桜並木 */
+.bg-sakura-alley{background:linear-gradient(180deg,#FDE8F0 0%,#F9C9D8 25%,#FFB7C5 55%,#FFDCE9 80%,#FFF0F5 100%);}
+/* 宇宙 */
+.bg-space{background:radial-gradient(ellipse at 20% 10%,#1a0033 0%,#06001e 40%,#000010 70%,#010015 100%);}
+
+/* ─── ポケモン風壁紙 ─── */
+/* 草原フィールド */
+.bg-poke-grass{background:linear-gradient(160deg,#E8F5E9 0%,#A5D6A7 40%,#4CAF50 70%,#2E7D32 100%);}
+/* 炎の山道 */
+.bg-poke-fire{background:linear-gradient(160deg,#BF360C 0%,#E64A19 35%,#FF7043 65%,#FFD54F 100%);}
+/* 海洋コロシアム */
+.bg-poke-water{background:linear-gradient(160deg,#0277BD 0%,#0288D1 35%,#29B6F6 70%,#81D4FA 100%);}
+/* 電気の洞窟 */
+.bg-poke-electric{background:linear-gradient(160deg,#F57F17 0%,#F9A825 35%,#FFD600 65%,#FFF176 100%);}
+/* 幻の森 */
+.bg-poke-psychic{background:linear-gradient(160deg,#4A148C 0%,#6A1B9A 35%,#AB47BC 70%,#CE93D8 100%);}
+/* 氷の神殿 */
+.bg-poke-ice{background:linear-gradient(160deg,#B3E5FC 0%,#80DEEA 35%,#4DD0E1 65%,#0097A7 100%);}
+/* 竜の巣（ドラゴンスケール） */
+.bg-poke-dragon{background:linear-gradient(160deg,#1A0000 0%,#4A0000 30%,#8B0000 60%,#C62828 90%,#D32F2F 100%);}
+/* 霊峰サミット */
+.bg-poke-ghost{background:linear-gradient(160deg,#1A0030 0%,#2D1B69 35%,#4527A0 65%,#6A1B9A 100%);}
+/* 伝説のピーク */
+.bg-poke-legend{background:linear-gradient(160deg,#1A0020 0%,#4A0060 30%,#7B2FFF 65%,#FFD700 100%);}
+/* マスターリーグ */
+.bg-poke-master{background:radial-gradient(ellipse at 50% 40%,#FFD700 0%,#FF8F00 35%,#E65100 65%,#1A0010 100%);}
+/* 空の柱 */
+.bg-poke-sky{background:linear-gradient(180deg,#E3F2FD 0%,#90CAF9 30%,#42A5F5 65%,#1565C0 100%);}
+/* 時空の彼方 */
+.bg-poke-space{background:radial-gradient(ellipse at 30% 30%,#1a0033 0%,#0d0020 45%,#000010 75%,#1a0033 100%);}
+
+/* ─── 欠けていたフレーム CSS クラス ─── */
+.frame-cherry{border:3px solid #E91E63;box-shadow:0 0 14px rgba(233,30,99,0.55);}
+.coll-frame-preview.frame-cherry{background:linear-gradient(135deg,#880e4f,#E91E63,#F48FB1);}
+.frame-emerald{border:3px solid #00C853;box-shadow:0 0 14px rgba(0,200,83,0.55);}
+.coll-frame-preview.frame-emerald{background:linear-gradient(135deg,#1B5E20,#00C853,#A5D6A7);}
+.frame-midnight{border:3px solid #37474F;box-shadow:0 0 14px rgba(55,71,79,0.7),inset 0 0 20px rgba(0,0,0,0.4);}
+.coll-frame-preview.frame-midnight{background:linear-gradient(135deg,#000000,#263238,#455A64);}
+
+/* ─── 欠けていたエフェクト CSS クラス ─── */
+.ef-sakura{animation:efSakura 3s ease-in-out infinite;}
+@keyframes efSakura{0%,100%{filter:hue-rotate(0deg) brightness(1)}50%{filter:hue-rotate(20deg) brightness(1.08)}}
+.ef-bubble{animation:efBubble 2s ease-in-out infinite;}
+@keyframes efBubble{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+.ef-rainbow{animation:efRainbow 2s linear infinite;}
+@keyframes efRainbow{to{filter:hue-rotate(360deg)}}
+.ef-cosmos{animation:efCosmos 3s ease-in-out infinite;}
+@keyframes efCosmos{0%,100%{box-shadow:0 0 20px #6C63FF,0 0 40px rgba(108,99,255,0.4)}50%{box-shadow:0 0 40px #00E5FF,0 0 80px rgba(0,229,255,0.6)}}
+.ef-diamond-dust{animation:efDiamondDust 1.5s ease-in-out infinite;}
+@keyframes efDiamondDust{0%,100%{filter:brightness(1) drop-shadow(0 0 4px #B9F2FF)}50%{filter:brightness(1.2) drop-shadow(0 0 12px #E0F7FA)}}
+
+/* ─── legendary gacha アニメ ─── */
+@keyframes legendaryGlow{from{text-shadow:0 0 8px #00E5FF}to{text-shadow:0 0 20px #7B2FFF,0 0 40px #00E5FF}}
+

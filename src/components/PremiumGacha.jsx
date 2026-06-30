@@ -22,19 +22,23 @@ function pickBall() {
   return BALLS[0]
 }
 
-// ポケモン20% / その他80% で排出。
-// ポケモンの場合はボールのrarity完全一致。その他はrarity以上を対象とする。
+// ポケモン25% / その他75% で排出。legendary は 0.05% 独立判定。
 function pickReward(ball) {
+  // 0.05% legendary（ボール種類に関係なく発動）
+  if (Math.random() < 0.0005) {
+    const pool = PREMIUM_GACHA_POOL.filter(r => r.rarity === 'legendary')
+    if (pool.length) return pool[Math.floor(Math.random() * pool.length)]
+  }
   const rarityOrder = ['common','uncommon','rare','ultra']
   const ballIdx = rarityOrder.indexOf(ball.rarity)
-  const isPoke = Math.random() < 0.2
+  const isPoke = Math.random() < 0.25
   let pool
   if (isPoke) {
-    pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && r.rarity === ball.rarity)
+    pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && r.rarity === ball.rarity && r.rarity !== 'legendary')
     if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && rarityOrder.indexOf(r.rarity) >= ballIdx)
   } else {
-    pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && rarityOrder.indexOf(r.rarity) >= ballIdx)
-    if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon')
+    pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && r.rarity !== 'legendary' && rarityOrder.indexOf(r.rarity) >= ballIdx)
+    if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && r.rarity !== 'legendary')
   }
   if (!pool.length) return PREMIUM_GACHA_POOL[0]
   return pool[Math.floor(Math.random() * pool.length)]
@@ -79,11 +83,20 @@ function Pokeball3D({ ball, phase }) {
 function RewardCard({ reward }) {
   if (!reward) return null
   const typeLabel = { pokemon:'ポケモン', frame:'フレーム', acc:'アクセサリー', bg:'背景テーマ', title:'称号', effect:'エフェクト', stamp:'スタンプ' }
-  const rarityColor = { common:'#84A98C', uncommon:'#4CAF50', rare:'#6C63FF', ultra:'#FFD700' }
-  const rarityLabel = { common:'コモン', uncommon:'アンコモン', rare:'レア', ultra:'ウルトラレア' }
-  const rarityGlow  = { common:'none', uncommon:'0 0 20px rgba(76,175,80,0.5)', rare:'0 0 30px rgba(108,99,255,0.6)', ultra:'0 0 40px rgba(255,215,0,0.8)' }
+  const rarityColor = { common:'#84A98C', uncommon:'#4CAF50', rare:'#6C63FF', ultra:'#FFD700', legendary:'#00E5FF' }
+  const rarityLabel = { common:'コモン', uncommon:'アンコモン', rare:'レア', ultra:'ウルトラレア', legendary:'★ LEGENDARY ★' }
+  const rarityGlow  = { common:'none', uncommon:'0 0 20px rgba(76,175,80,0.5)', rare:'0 0 30px rgba(108,99,255,0.6)', ultra:'0 0 40px rgba(255,215,0,0.8)', legendary:'0 0 60px rgba(0,229,255,0.9), 0 0 120px rgba(123,47,255,0.5)' }
+  const isLegendary = reward.rarity === 'legendary'
   return (
-    <div className="pg-reward-card slide-up" style={{ boxShadow: rarityGlow[reward.rarity] }}>
+    <div className="pg-reward-card slide-up" style={{
+      boxShadow: rarityGlow[reward.rarity],
+      ...(isLegendary ? { background:'linear-gradient(145deg,#0d0020,#1a0040,#0d0020)', border:'1px solid rgba(0,229,255,0.4)' } : {}),
+    }}>
+      {isLegendary && (
+        <div style={{ fontSize:11, fontWeight:900, letterSpacing:3, color:'#00E5FF', textTransform:'uppercase', marginBottom:4, textAlign:'center', animation:'legendaryGlow 1s ease-in-out infinite alternate' }}>
+          🌟 LEGENDARY 🌟
+        </div>
+      )}
       <div style={{ fontSize:10, fontWeight:900, letterSpacing:3, color: rarityColor[reward.rarity] || '#6C63FF', textTransform:'uppercase', marginBottom:8 }}>
         {rarityLabel[reward.rarity] || 'REWARD'} ✦ {typeLabel[reward.type] || reward.type}
         {reward.shiny && <span style={{ marginLeft:6, color:'#00E5FF' }}>★ 色違い</span>}
@@ -92,7 +105,8 @@ function RewardCard({ reward }) {
         <div style={{ position:'relative', display:'inline-block' }}>
           <img src={SPRITE(reward.pokeId, reward.shiny)} alt={reward.name}
             style={{ width:120, height:120, objectFit:'contain', marginBottom:8,
-              filter: reward.shiny ? 'drop-shadow(0 0 16px #00E5FF) drop-shadow(0 0 8px #fff)' :
+              filter: isLegendary ? 'drop-shadow(0 0 24px #00E5FF) drop-shadow(0 0 12px #7B2FFF)' :
+                reward.shiny ? 'drop-shadow(0 0 16px #00E5FF) drop-shadow(0 0 8px #fff)' :
                 reward.rarity === 'ultra' ? 'drop-shadow(0 0 12px gold)' :
                 reward.rarity === 'rare' ? 'drop-shadow(0 0 8px #9b59b6)' : 'none' }} />
           {reward.shiny && (
@@ -146,14 +160,17 @@ export default function PremiumGacha({ onClose, asPage = false }) {
     }, 2900)
     addTimer(() => {
       setPhase('reveal')
-      if (chosenBall.rarity === 'ultra') {
+      if (chosenReward.rarity === 'legendary') {
+        confetti({ particleCount:300, spread:160, origin:{y:0.3}, colors:['#00E5FF','#7B2FFF','#FFD700','#fff','#FF4081'] })
+        setTimeout(() => confetti({ particleCount:200, spread:120, origin:{y:0.5}, colors:['#00E5FF','#7B2FFF','#FF4081'] }), 600)
+      } else if (chosenBall.rarity === 'ultra') {
         confetti({ particleCount:180, spread:100, origin:{y:0.4}, colors:['#FFD700','#9333EA','#E91E63','#fff'] })
       } else if (chosenBall.rarity === 'rare') {
         confetti({ particleCount:100, spread:80, origin:{y:0.5}, colors:['#6C63FF','#F2994A','#84A98C'] })
       } else {
         confetti({ particleCount:50, spread:60, origin:{y:0.6}, colors:['#3B82F6','#fff','#84A98C'] })
       }
-      const rarityMsg = { common:'', uncommon:'✦ アンコモン！', rare:'✦✦ レア！', ultra:'✦✦✦ ウルトラレア！！' }
+      const rarityMsg = { common:'', uncommon:'✦ アンコモン！', rare:'✦✦ レア！', ultra:'✦✦✦ ウルトラレア！！', legendary:'🌟 LEGENDARY！！！ 伝説の出現！！' }
       const shinyMsg = chosenReward.shiny ? '✨ 色違い！！ ' : ''
       toast(`${shinyMsg}${rarityMsg[chosenReward.rarity] || ''} ${chosenReward.name}`)
     }, 3200)

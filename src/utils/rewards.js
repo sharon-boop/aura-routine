@@ -1460,6 +1460,14 @@ export const PREMIUM_GACHA_POOL = [
   { id:'pg_fr_new04', type:'frame', style:{border:'4px solid #C0C0C0',boxShadow:'0 0 22px rgba(192,192,192,0.9)'},name:'プラチナ光',       label:'プラチナ光',       rarity:'ultra',    premiumGacha:true },
   { id:'pg_fr_new05', type:'frame', style:{border:'3px solid #9C27B0',boxShadow:'0 0 14px rgba(156,39,176,0.5)'},name:'パープルマジック', label:'パープルマジック', rarity:'uncommon', premiumGacha:true },
 
+  // ── legendary（0.05%特別ポケモン）
+  { id:'pg_leg01', type:'pokemon', pokeId:658, name:'サトシゲッコウガ',    rarity:'legendary', shiny:true,  premiumGacha:true },
+  { id:'pg_leg02', type:'pokemon', pokeId:6,   name:'色違いメガリザードンX', rarity:'legendary', shiny:true, premiumGacha:true },
+  { id:'pg_leg03', type:'pokemon', pokeId:150, name:'色違いメガミュウツーX', rarity:'legendary', shiny:true, premiumGacha:true },
+  { id:'pg_leg04', type:'pokemon', pokeId:94,  name:'色違いメガゲンガー',   rarity:'legendary', shiny:true,  premiumGacha:true },
+  { id:'pg_leg05', type:'pokemon', pokeId:448, name:'色違いメガルカリオ',   rarity:'legendary', shiny:true,  premiumGacha:true },
+  { id:'pg_leg06', type:'pokemon', pokeId:384, name:'色違いメガレックウザ', rarity:'legendary', shiny:true,  premiumGacha:true },
+
   // ── 新アクセサリー（common〜ultra）
   { id:'pg_ac_new01', type:'acc', emoji:'🎖️', pos:ACC_POS.tc, name:'功績バッジ', label:'功績バッジ', rarity:'uncommon', premiumGacha:true },
   { id:'pg_ac_new02', type:'acc', emoji:'🦋', pos:ACC_POS.tr, name:'蝶のフレーム', label:'蝶のフレーム', rarity:'common',   premiumGacha:true },
@@ -1481,14 +1489,19 @@ export function addPremiumUnlocked(id) {
 }
 
 /* ─── ユーティリティ ─── */
-export function isUnlocked(item, streak, perfect = 0) {
+// totalDays = 累計ログイン日数（連続不要）; streak = 連続日数（特定報酬専用）
+export function isUnlocked(item, streak, perfect = 0, totalDays = 0) {
   if (item.perfectCount != null) return perfect >= item.perfectCount
   if (item.perfectReq) return perfect >= item.perfectReq
   if (item.premiumGacha) {
     try { return (JSON.parse(localStorage.getItem('premiumUnlocked')) || []).includes(item.id) } catch { return false }
   }
-  const req = item.day ?? item.streakReq ?? 0
-  return req <= streak
+  // streakReq は連続日数が必要な特別報酬（別途チケット等で管理）
+  if (item.streakReq != null) return streak >= item.streakReq
+  // 通常タイムライン報酬 → 累計日数ベース（day プロパティ）
+  const req = item.day ?? 0
+  const base = totalDays > 0 ? totalDays : streak  // 後方互換：totalDays未渡し時はstreak
+  return req <= base
 }
 
 export function getAllRewardsAtDay(day) {

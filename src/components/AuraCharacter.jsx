@@ -11,7 +11,7 @@ import {
   getEquipped, saveEquipped,
   SECRET_REWARDS, checkSecretUnlocks, getSecretUnlocked,
 } from '../utils/rewards'
-import { getSecretCounts } from '../utils/storage'
+import { getSecretCounts, getTotalDays } from '../utils/storage'
 
 const SPRITE = (id) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`
@@ -76,10 +76,10 @@ export function RewardToast({ rewards, onClose }) {
 }
 
 /* ─── Next Rewards (mystery) ─── */
-function NextRewards({ streak }) {
+function NextRewards({ totalDays = 0 }) {
   const upcoming = []
-  for (let d = streak + 1; d <= streak + 15 && upcoming.length < 5; d++) {
-    if (getAllRewardsAtDay(d).length > 0) upcoming.push({ daysLeft: d - streak })
+  for (let d = totalDays + 1; d <= totalDays + 15 && upcoming.length < 5; d++) {
+    if (getAllRewardsAtDay(d).length > 0) upcoming.push({ daysLeft: d - totalDays })
   }
   if (!upcoming.length) return null
   return (
@@ -153,7 +153,8 @@ function CollItem({ item, equipped, unlocked, onEquip }) {
 /* ═══════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════ */
-export default function AuraCharacter({ streak = 0, perfect = 0 }) {
+export default function AuraCharacter({ streak = 0, perfect = 0, totalDays: totalDaysProp }) {
+  const totalDays = totalDaysProp ?? getTotalDays()
   const [equipped, setEquipped] = useState(() => {
     const e = getEquipped()
     return {
@@ -261,14 +262,14 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
   const stamp  = allStamps.find(s => s.id === equipped.stamp)
     || { id:'none', label:'なし', type:'stamp', emoji:'', stampBg:'transparent' }
 
-  // Unlock counts
-  const unlockedPoke   = allPoke.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedFrame  = allFrames.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedAcc    = allAccs.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedBg     = allBgs.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedTitle  = allTitles.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedEffect = allEffects.filter(r => isUnlocked(r, streak, perfect)).length
-  const unlockedStamp  = allStamps.filter(r => isUnlocked(r, streak, perfect)).length
+  // Unlock counts — totalDays（累計）ベース
+  const unlockedPoke   = allPoke.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedFrame  = allFrames.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedAcc    = allAccs.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedBg     = allBgs.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedTitle  = allTitles.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedEffect = allEffects.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
+  const unlockedStamp  = allStamps.filter(r => isUnlocked(r, streak, perfect, totalDays)).length
   const totalUnlocked  = unlockedPoke + unlockedFrame + unlockedAcc + unlockedBg + unlockedTitle + unlockedEffect + unlockedStamp
 
   const CATS = [
@@ -306,8 +307,8 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
       {tab === 'home' && (
         <div className="aura-char-home">
           <div
-            className={`aura-char-card ${frameClass} ${effect.cssClass}`}
-            style={{ background: bg.bg, ...frameBorderStyle }}
+            className={`aura-char-card ${frameClass} ${effect.cssClass} ${bg.cssClass || ''}`}
+            style={{ ...(bg.bg ? { background: bg.bg } : {}), ...frameBorderStyle }}
           >
             {showSparkles && <Sparkles count={8} />}
             {acc.emoji && (
@@ -345,7 +346,7 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
             </div>
           </div>
 
-          <NextRewards streak={streak} />
+          <NextRewards totalDays={totalDays} />
         </div>
       )}
 
@@ -364,7 +365,7 @@ export default function AuraCharacter({ streak = 0, perfect = 0 }) {
           <div className="coll-grid">
             {CATS.find(c=>c.id===collCat)?.items.map(item => (
               <CollItem key={item.id} item={item} equipped={equipped}
-                unlocked={isUnlocked(item, streak, perfect)}
+                unlocked={isUnlocked(item, streak, perfect, totalDays)}
                 onEquip={equip} />
             ))}
           </div>
