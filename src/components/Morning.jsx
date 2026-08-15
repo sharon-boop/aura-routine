@@ -10,7 +10,9 @@ import {
   addPartnerExp, getPartner,
   addAuraXp, addFeedEntry, generateApprovalMessage, checkNeedsComeback, getComebackMessage,
   getTodos, saveTodos, addTodo, getToday,
+  getContactMindset,
 } from '../utils/storage'
+import MindMovie from './MindMovie'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 import ApprovalCard from './ApprovalCard'
@@ -78,6 +80,31 @@ function SleepInput({ value, onChange }) {
 }
 
 const MOODS = ['🔥', '😌', '😆', '😢', '😳', '😐']
+
+/* ─── 人との接し方（読み取り専用カード）─── */
+function ContactMindsetDisplay() {
+  const items = getContactMindset()
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+      {items.map((item, i) => (
+        <div key={i} style={{
+          display:'flex', alignItems:'center', gap:12,
+          background:'linear-gradient(135deg,#E0F7FA,#B2EBF2)',
+          borderRadius:14, padding:'13px 16px',
+          border:'1.5px solid rgba(0,188,212,0.2)',
+        }}>
+          <div style={{
+            width:28, height:28, borderRadius:8, flexShrink:0,
+            background:'rgba(0,188,212,0.25)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:13, fontWeight:900, color:'#006064',
+          }}>{i+1}</div>
+          <div style={{ fontSize:15, fontWeight:700, color:'#004D40', lineHeight:1.4 }}>{item}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 /* ─── 在り方ガチャ（人との接し方）─── */
 function AttitudeSection({ value, onChange }) {
@@ -378,15 +405,26 @@ export default function Morning() {
         </div>
       </div>
 
+      {/* マインドムービー */}
+      <div className="sec">
+        <MindMovie />
+      </div>
+
       {/* 睡眠時間 */}
       <div className="sec">
         <div className="sec-title">昨夜の睡眠</div>
         <SleepInput value={data.morning?.sleepHours} onChange={v => setMorning({ sleepHours: v })} />
       </div>
 
-      {/* 人との接し方で意識すること */}
+      {/* 人との接し方で意識すること（読み取り専用）*/}
       <div className="sec">
-        <div className="sec-title">人との接し方で意識すること</div>
+        <div className="sec-title">今日、人との接し方で意識すること</div>
+        <ContactMindsetDisplay />
+      </div>
+
+      {/* 今日の在り方ガチャ */}
+      <div className="sec">
+        <div className="sec-title">今日の在り方</div>
         <AttitudeSection
           value={data.morning?.arikata}
           onChange={val => setMorning({ arikata: val })}

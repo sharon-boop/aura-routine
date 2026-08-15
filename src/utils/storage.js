@@ -1097,3 +1097,31 @@ export function checkMilestoneRewards() {
   }
   return newRewards
 }
+
+/* ═══════════════════════════════════════════
+   人との接し方 — 編集可能リスト
+═══════════════════════════════════════════ */
+const DEFAULT_CONTACT_MINDSET = [
+  '相手の話を最後まで聞く',
+  '相手の立場で考える',
+  '感謝を言葉にする',
+  '自分から笑顔で接する',
+  '批判より理解を選ぶ',
+]
+export function getContactMindset() { return load('contactMindset') || DEFAULT_CONTACT_MINDSET }
+export function saveContactMindset(list) { save('contactMindset', list) }
+
+/* ═══════════════════════════════════════════
+   成功者マインド — 編集可能リスト
+═══════════════════════════════════════════ */
+const DEFAULT_SUCCESS_MINDSET = [
+  { id:1, icon:'🎯', title:'自己責任',    body:'全ての結果は、自分が選んだ行動の積み重ね。環境のせいにしない。' },
+  { id:2, icon:'⏳', title:'長期思考',    body:'今日の1%が3年後を決める。焦らず積み上げる人が勝つ。' },
+  { id:3, icon:'💬', title:'アウトプット', body:'学んだことを話し、書き、行動に変える。それだけで人と差がつく。' },
+  { id:4, icon:'🤝', title:'与える力',    body:'先に与える人に、人とお金は集まる。見返りを求めない与え方。' },
+  { id:5, icon:'💪', title:'健康が基盤',  body:'睡眠・食事・運動。整った体が、最高のパフォーマンスを生む。' },
+  { id:6, icon:'🧘', title:'感情制御',    body:'感情ではなく意図で動く。怒りの前に3秒だけ止まれ。' },
+  { id:7, icon:'🔥', title:'継続の力',    body:'才能は継続に勝てない。60点でいいから、毎日続けることが奇跡を起こす。' },
+]
+export function getSuccessMindset() { return load('successMindset') || DEFAULT_SUCCESS_MINDSET }
+export function saveSuccessMindset(list) { save('successMindset', list) }

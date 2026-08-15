@@ -6,7 +6,9 @@ import {
   addPartnerExp, getPartner,
   addAuraXp, addFeedEntry, generateApprovalMessage,
   getTodos, saveTodos,
+  getContactMindset,
 } from '../utils/storage'
+import MindMovie from './MindMovie'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
 import ApprovalCard from './ApprovalCard'
@@ -220,56 +222,48 @@ function IqSection({ ev, setEv }) {
   )
 }
 
-/* ─── 人との接し方振り返り ─── */
-function AttitudeReview({ arikata, ev, setEv }) {
-  const result = ev.arikataOX
-  const set = (val) => setEv({ arikataOX: val })
+const OX_COLORS = { '○':'#00C851', '△':'#F2994A', '×':'#FF5252' }
+const OX_MSG   = { '○':'よかった！その調子', '△':'半分できた。それで十分', '×':'気づいたことが大事' }
+
+/* ─── 人との接し方振り返り（各項目に○△×）─── */
+function AttitudeReview({ ev, setEv }) {
+  const items = getContactMindset()
+  const review = ev.contactReview || {}
+
+  const setMark = (idx, val) => {
+    const next = { ...review, [idx]: review[idx] === val ? null : val }
+    setEv({ contactReview: next })
+  }
 
   return (
-    <div style={{ background:'linear-gradient(135deg,#0d1225,#1a2040)', borderRadius:16, padding:'18px 20px', border:'1px solid rgba(255,255,255,0.08)' }}>
-      {arikata && (
-        <div style={{ marginBottom:14 }}>
-          <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:4 }}>今朝の在り方</div>
-          <div style={{ fontSize:17, fontWeight:900, color:'#fff' }}>「{arikata}」</div>
-        </div>
-      )}
-      <div style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.6)', marginBottom:12 }}>できましたか？</div>
-      <div style={{ display:'flex', gap:12 }}>
-        <button onClick={() => set('○')} style={{
-          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
-          border: result === '○' ? '3px solid #00C851' : '2px solid rgba(255,255,255,0.15)',
-          background: result === '○' ? 'rgba(0,200,81,0.2)' : 'rgba(255,255,255,0.05)',
-          color: result === '○' ? '#00C851' : 'rgba(255,255,255,0.5)',
-          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
-        }}>○</button>
-        <button onClick={() => set('△')} style={{
-          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
-          border: result === '△' ? '3px solid #F2994A' : '2px solid rgba(255,255,255,0.15)',
-          background: result === '△' ? 'rgba(242,153,74,0.2)' : 'rgba(255,255,255,0.05)',
-          color: result === '△' ? '#F2994A' : 'rgba(255,255,255,0.5)',
-          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
-        }}>△</button>
-        <button onClick={() => set('×')} style={{
-          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
-          border: result === '×' ? '3px solid #FF5252' : '2px solid rgba(255,255,255,0.15)',
-          background: result === '×' ? 'rgba(255,82,82,0.2)' : 'rgba(255,255,255,0.05)',
-          color: result === '×' ? '#FF5252' : 'rgba(255,255,255,0.5)',
-          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
-        }}>×</button>
-      </div>
-      {result && (
-        <div style={{ marginTop:12, fontSize:12, color:'rgba(255,255,255,0.5)', textAlign:'center' }}>
-          {result === '○' ? '✨ よかった！その調子' : result === '△' ? '半分できた。それで十分' : '× でも大丈夫。気づいたことが大事'}
-        </div>
-      )}
-      {/* 一言メモ */}
-      <textarea
-        value={ev.arikataNote || ''}
-        onChange={e => setEv({ arikataNote: e.target.value })}
-        placeholder="一言メモ（任意）どんな場面で？"
-        rows={2}
-        style={{ width:'100%', marginTop:12, padding:'10px 12px', borderRadius:10, border:'1px solid rgba(255,255,255,0.12)', background:'rgba(255,255,255,0.06)', color:'#fff', fontFamily:'var(--font)', fontSize:13, outline:'none', resize:'none', boxSizing:'border-box' }}
-      />
+    <div style={{ background:'linear-gradient(135deg,#0d1225,#1a2040)', borderRadius:16, padding:'18px 20px', border:'1px solid rgba(255,255,255,0.08)', display:'flex', flexDirection:'column', gap:12 }}>
+      {items.map((item, i) => {
+        const val = review[i]
+        return (
+          <div key={i} style={{ borderBottom: i < items.length-1 ? '1px solid rgba(255,255,255,0.07)' : 'none', paddingBottom: i < items.length-1 ? 12 : 0 }}>
+            <div style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.8)', marginBottom:10, lineHeight:1.4 }}>
+              <span style={{ fontSize:10, fontWeight:900, color:'rgba(255,255,255,0.3)', marginRight:8 }}>{String(i+1).padStart(2,'0')}</span>
+              {item}
+            </div>
+            <div style={{ display:'flex', gap:8 }}>
+              {['○','△','×'].map(mark => (
+                <button key={mark} onClick={() => setMark(i, mark)} style={{
+                  flex:1, padding:'12px 0', borderRadius:12, fontSize:24, fontWeight:900,
+                  border: val === mark ? `2.5px solid ${OX_COLORS[mark]}` : '1.5px solid rgba(255,255,255,0.12)',
+                  background: val === mark ? `${OX_COLORS[mark]}22` : 'rgba(255,255,255,0.04)',
+                  color: val === mark ? OX_COLORS[mark] : 'rgba(255,255,255,0.35)',
+                  cursor:'pointer', transition:'all 0.18s', fontFamily:'var(--font)',
+                }}>{mark}</button>
+              ))}
+            </div>
+            {val && (
+              <div style={{ marginTop:6, fontSize:11, color: OX_COLORS[val], fontWeight:700, textAlign:'center' }}>
+                {OX_MSG[val]}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -472,6 +466,11 @@ export default function Evening() {
         <div className="ph-title">今日を成長に変える</div>
       </div>
 
+      {/* マインドムービー */}
+      <div className="sec" style={{ paddingTop:0 }}>
+        <MindMovie />
+      </div>
+
       {/* 日付ピッカー */}
       <div className="sec">
         <DatePicker selectedDate={selectedDate} onChange={date => { setSelectedDate(date); setSaved(false); setTicketMsg('') }} />
@@ -499,7 +498,7 @@ export default function Evening() {
       {/* 人との接し方の振り返り */}
       <div className="sec">
         <div className="sec-title">人との接し方の振り返り</div>
-        <AttitudeReview arikata={data.morning?.arikata} ev={ev} setEv={setEv} />
+        <AttitudeReview ev={ev} setEv={setEv} />
       </div>
 
       {/* 一言振り返り */}
