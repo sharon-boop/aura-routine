@@ -2,14 +2,12 @@ import { useState, useEffect } from 'react'
 import Home from './components/Home'
 import Morning from './components/Morning'
 import Afternoon from './components/Afternoon'
-import ValueProvision from './components/ValueProvision'
 import Evening from './components/Evening'
 import Summary from './components/Summary'
 import FunnyStory from './components/FunnyStory'
 import Investment from './components/Investment'
 import TodoList from './components/TodoList'
 import Records from './components/Records'
-import WeeklyMonthly from './components/WeeklyMonthly'
 import WeeklyReview from './components/WeeklyReview'
 import Settings from './components/Settings'
 import PremiumGacha from './components/PremiumGacha'
@@ -26,7 +24,7 @@ const NAV = [
   { id:'log',     icon:'▦', label:'Log' },
 ]
 
-const ROUTINE_TABS  = [{ id:'morning', label:'朝' }, { id:'value', label:'価値提供' }, { id:'evening', label:'夜' }, { id:'challenge', label:'チャレンジ' }]
+const ROUTINE_TABS  = [{ id:'morning', label:'☀️ 朝' }, { id:'evening', label:'🌙 夜' }]
 const WORLD_TABS    = [{ id:'summary', label:'要約' }, { id:'funny', label:'話術' }, { id:'tiktok', label:'台本📱' }]
 const INVEST_TABS   = [{ id:'investment', label:'90分投資' }, { id:'todo', label:'ToDo' }]
 const LOG_TABS      = [{ id:'records', label:'カレンダー' }, { id:'weekly', label:'週次レビュー' }]
@@ -174,10 +172,8 @@ export default function App() {
     if (nav === 'home') return <Home onNavigate={handleNavigate} onSettings={() => setNav('settings')} />
 
     if (nav === 'routine') {
-      if (routineTab === 'morning')   return <Morning />
-      if (routineTab === 'value')     return <ValueProvision />
-      if (routineTab === 'evening')   return <Evening />
-      if (routineTab === 'challenge') return <WeeklyMonthly />
+      if (routineTab === 'morning') return <Morning />
+      if (routineTab === 'evening') return <Evening />
     }
     if (nav === 'world') {
       if (worldTab === 'summary') return <Summary />

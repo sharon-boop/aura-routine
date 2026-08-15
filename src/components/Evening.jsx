@@ -5,6 +5,7 @@ import {
   getGachaTickets, addGachaTickets, wasTicketAwarded, markTicketAwarded,
   addPartnerExp, getPartner,
   addAuraXp, addFeedEntry, generateApprovalMessage,
+  getTodos, saveTodos,
 } from '../utils/storage'
 import { toast } from './Toast'
 import confetti from 'canvas-confetti'
@@ -219,12 +220,115 @@ function IqSection({ ev, setEv }) {
   )
 }
 
+/* ─── 人との接し方振り返り ─── */
+function AttitudeReview({ arikata, ev, setEv }) {
+  const result = ev.arikataOX
+  const set = (val) => setEv({ arikataOX: val })
+
+  return (
+    <div style={{ background:'linear-gradient(135deg,#0d1225,#1a2040)', borderRadius:16, padding:'18px 20px', border:'1px solid rgba(255,255,255,0.08)' }}>
+      {arikata && (
+        <div style={{ marginBottom:14 }}>
+          <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:4 }}>今朝の在り方</div>
+          <div style={{ fontSize:17, fontWeight:900, color:'#fff' }}>「{arikata}」</div>
+        </div>
+      )}
+      <div style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.6)', marginBottom:12 }}>できましたか？</div>
+      <div style={{ display:'flex', gap:12 }}>
+        <button onClick={() => set('○')} style={{
+          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
+          border: result === '○' ? '3px solid #00C851' : '2px solid rgba(255,255,255,0.15)',
+          background: result === '○' ? 'rgba(0,200,81,0.2)' : 'rgba(255,255,255,0.05)',
+          color: result === '○' ? '#00C851' : 'rgba(255,255,255,0.5)',
+          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
+        }}>○</button>
+        <button onClick={() => set('△')} style={{
+          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
+          border: result === '△' ? '3px solid #F2994A' : '2px solid rgba(255,255,255,0.15)',
+          background: result === '△' ? 'rgba(242,153,74,0.2)' : 'rgba(255,255,255,0.05)',
+          color: result === '△' ? '#F2994A' : 'rgba(255,255,255,0.5)',
+          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
+        }}>△</button>
+        <button onClick={() => set('×')} style={{
+          flex:1, padding:'16px 0', borderRadius:16, fontSize:32, fontWeight:900,
+          border: result === '×' ? '3px solid #FF5252' : '2px solid rgba(255,255,255,0.15)',
+          background: result === '×' ? 'rgba(255,82,82,0.2)' : 'rgba(255,255,255,0.05)',
+          color: result === '×' ? '#FF5252' : 'rgba(255,255,255,0.5)',
+          cursor:'pointer', transition:'all 0.2s', fontFamily:'var(--font)',
+        }}>×</button>
+      </div>
+      {result && (
+        <div style={{ marginTop:12, fontSize:12, color:'rgba(255,255,255,0.5)', textAlign:'center' }}>
+          {result === '○' ? '✨ よかった！その調子' : result === '△' ? '半分できた。それで十分' : '× でも大丈夫。気づいたことが大事'}
+        </div>
+      )}
+      {/* 一言メモ */}
+      <textarea
+        value={ev.arikataNote || ''}
+        onChange={e => setEv({ arikataNote: e.target.value })}
+        placeholder="一言メモ（任意）どんな場面で？"
+        rows={2}
+        style={{ width:'100%', marginTop:12, padding:'10px 12px', borderRadius:10, border:'1px solid rgba(255,255,255,0.12)', background:'rgba(255,255,255,0.06)', color:'#fff', fontFamily:'var(--font)', fontSize:13, outline:'none', resize:'none', boxSizing:'border-box' }}
+      />
+    </div>
+  )
+}
+
+/* ─── ToDo振り返り ─── */
+function EveningTodoReview({ selectedDate }) {
+  const [todos, setTodos] = useState(() => getTodos())
+  const today = getToday()
+
+  const todayItems = todos.filter(t => t.todayFlag || t.date === today || t.date === selectedDate)
+  const undone = todayItems.filter(t => !t.done)
+  const done = todayItems.filter(t => t.done)
+
+  const toggle = (id) => {
+    const updated = todos.map(t => t.id === id ? { ...t, done: !t.done } : t)
+    saveTodos(updated); setTodos(updated)
+  }
+
+  if (todayItems.length === 0) return (
+    <div style={{ padding:'14px 18px', background:'#F9F7F4', borderRadius:14, fontSize:13, color:'var(--muted)', textAlign:'center' }}>
+      今日のToDoがまだありません
+    </div>
+  )
+
+  return (
+    <div style={{ background:'#fff', borderRadius:16, padding:'16px 18px', border:'1.5px solid var(--border)' }}>
+      {done.length > 0 && (
+        <div style={{ marginBottom: undone.length > 0 ? 12 : 0 }}>
+          <div style={{ fontSize:10, fontWeight:800, color:'var(--success)', letterSpacing:1, marginBottom:8 }}>✓ 完了 ({done.length}件)</div>
+          {done.map(item => (
+            <div key={item.id} onClick={() => toggle(item.id)}
+              style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', cursor:'pointer', opacity:0.6 }}>
+              <div className="ck-box on" style={{ width:20, height:20, borderRadius:5, flexShrink:0 }} />
+              <span style={{ fontSize:13, textDecoration:'line-through', color:'var(--muted)' }}>{item.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {undone.length > 0 && (
+        <div>
+          <div style={{ fontSize:10, fontWeight:800, color:'var(--orange)', letterSpacing:1, marginBottom:8 }}>● 未完了 ({undone.length}件)</div>
+          {undone.map(item => (
+            <div key={item.id} onClick={() => toggle(item.id)}
+              style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 0', cursor:'pointer', borderBottom:'1px solid #F5F2ED' }}>
+              <div className="ck-box" style={{ width:20, height:20, borderRadius:5, flexShrink:0 }} />
+              <span style={{ fontSize:13, fontWeight:600, flex:1 }}>{item.text}</span>
+              <span style={{ fontSize:10, color:'var(--muted)' }}>タップで完了</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ─── 振り返りフィールド ─── */
 const EV_FIELDS = [
-  { key:'arikataResult',  label:'今日の在り方はできたか',     ph:'正直に振り返ろう。できてなくてもOK。' },
-  { key:'roughAction',    label:'今日、雑だった対応',         ph:'責めなくていい。ただ気づく。' },
-  { key:'bgView',         label:'人を背景で見られたか',       ph:'どんな場面で？' },
-  { key:'tomorrowImprove',label:'明日、一つだけ改善すること', ph:'具体的に一つだけ' },
+  { key:'roughAction',     label:'今日、雑だった対応',         ph:'責めなくていい。ただ気づく。' },
+  { key:'tomorrowImprove', label:'明日、一つだけ改善すること', ph:'具体的に一つだけ' },
 ]
 
 export default function Evening() {
@@ -343,7 +447,6 @@ export default function Evening() {
 
   if (!data) return null
   const ev = data.evening || {}
-  const vp = data.morning?.valuePeople || []
   const score = ev.score || 0
   const evCheckState  = ev.checks || {}
   const afCheckState  = ev.afReviewChecks || {}
@@ -365,12 +468,11 @@ export default function Evening() {
         />
       )}
       <div className="ph">
-        <div className="ph-eyebrow">Routine — Evening</div>
+        <div className="ph-eyebrow">🌙 Evening</div>
         <div className="ph-title">今日を成長に変える</div>
-        <div className="ph-sub">一日を振り返り、明日の自分を決める</div>
       </div>
 
-      {/* ── 日付ピッカー ── */}
+      {/* 日付ピッカー */}
       <div className="sec">
         <DatePicker selectedDate={selectedDate} onChange={date => { setSelectedDate(date); setSaved(false); setTicketMsg('') }} />
         {isPastDate && (
@@ -380,64 +482,6 @@ export default function Evening() {
         )}
       </div>
 
-      {/* ── 今朝の決意（朝に決めたこと振り返り）── */}
-      {(data.morning?.arikata || data.morning?.wordTheme || data.morning?.rule) && (
-        <div className="sec">
-          <div className="sec-title">今朝、決めたこと</div>
-          <div style={{
-            background: 'linear-gradient(135deg,#0d1225 0%,#1a2040 100%)',
-            borderRadius: 16, overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}>
-            {data.morning.arikata && (
-              <div style={{ padding:'13px 18px', borderBottom: (data.morning.wordTheme || data.morning.rule) ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:4 }}>今日の在り方</div>
-                <div style={{ fontSize:16, fontWeight:900, color:'#fff', letterSpacing:'-0.02em' }}>{data.morning.arikata}</div>
-              </div>
-            )}
-            {data.morning.wordTheme && (
-              <div style={{ padding:'11px 18px', borderBottom: data.morning.rule ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:3 }}>言葉テーマ</div>
-                <div style={{ fontSize:14, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{data.morning.wordTheme}</div>
-              </div>
-            )}
-            {data.morning.rule && (
-              <div style={{ padding:'11px 18px' }}>
-                <div style={{ fontSize:9, fontWeight:800, letterSpacing:'0.18em', color:'rgba(255,255,255,0.35)', marginBottom:3 }}>今日の誓い</div>
-                <div style={{ fontSize:14, color:'rgba(255,255,255,0.8)', fontWeight:600 }}>{data.morning.rule}</div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 今日の名言 */}
-      <div className="sec">
-        <div style={{ padding:'16px 18px', background:'var(--cream)', borderRadius:'var(--r-sm)', borderLeft:'3px solid var(--orange)' }}>
-          <div style={{ fontSize:12, fontWeight:700, color:'var(--orange)', letterSpacing:1, marginBottom:5, textTransform:'uppercase' }}>Today's Words</div>
-          <div style={{ fontSize:14, fontWeight:700, lineHeight:1.6 }}>「{quote.text}」</div>
-          <div style={{ fontSize:11, color:'var(--muted)', marginTop:4 }}>— {quote.author}</div>
-        </div>
-      </div>
-
-      {/* 価値提供まとめ */}
-      {vp.filter(p=>p.name).length > 0 && (
-        <div className="sec">
-          <div className="sec-title">今日の価値提供</div>
-          <div className="card static">
-            {vp.map((p,i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 0', borderBottom:i<vp.filter(p=>p.name).length-1?'1px solid #F5F2ED':'none' }}>
-                <div style={{ width:26, height:26, borderRadius:7, background:p.done?'var(--main)':'#F0EDE7', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:900, color:p.done?'#fff':'#CCC', flexShrink:0 }}>
-                  {p.done?'✓':i+1}
-                </div>
-                <span style={{ fontSize:14, fontWeight:600 }}>{p.name||`${i+1}人目`}</span>
-                {p.valueType && <span style={{ fontSize:11, color:'var(--muted)' }}>{p.valueType}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* 今日のスコア */}
       <div className="sec">
         <div className="sec-title">今日のスコア</div>
@@ -446,9 +490,21 @@ export default function Evening() {
         </div>
       </div>
 
-      {/* ── 今日の振り返り ── */}
+      {/* ToDo振り返り */}
       <div className="sec">
-        <div className="sec-title">今日の振り返り</div>
+        <div className="sec-title">今日のToDo</div>
+        <EveningTodoReview selectedDate={selectedDate} />
+      </div>
+
+      {/* 人との接し方の振り返り */}
+      <div className="sec">
+        <div className="sec-title">人との接し方の振り返り</div>
+        <AttitudeReview arikata={data.morning?.arikata} ev={ev} setEv={setEv} />
+      </div>
+
+      {/* 一言振り返り */}
+      <div className="sec">
+        <div className="sec-title">一言振り返り</div>
         <div className="card static">
           {EV_FIELDS.map((f, i) => (
             <div className="f" key={f.key} style={{ marginBottom: i < EV_FIELDS.length-1 ? 16 : 0 }}>
@@ -456,45 +512,7 @@ export default function Evening() {
               <textarea value={ev[f.key]||''} onChange={e=>setEv({[f.key]:e.target.value})} placeholder={f.ph} rows={2} />
             </div>
           ))}
-          <EqSection ev={ev} setEv={setEv} />
-          <IqSection ev={ev} setEv={setEv} />
         </div>
-      </div>
-
-      {/* ── 今日の行動チェック ── */}
-      <div className="sec">
-        <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span>今日の行動チェック</span>
-          {afChecks.length > 0 && (
-            <span style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>{afCheckDone}/{afChecks.length}</span>
-          )}
-        </div>
-        <SortableChecklist
-          items={afChecks}
-          checkState={afCheckState}
-          onToggle={toggleAfCheck}
-          onAdd={addAfItem}
-          onRemove={removeAfItem}
-          onMove={moveAfItem}
-        />
-      </div>
-
-      {/* ── 夜のチェックリスト ── */}
-      <div className="sec">
-        <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span>夜のチェックリスト</span>
-          {evChecks.length > 0 && (
-            <span style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>{evCheckDone}/{evChecks.length}</span>
-          )}
-        </div>
-        <SortableChecklist
-          items={evChecks}
-          checkState={evCheckState}
-          onToggle={toggleEvCheck}
-          onAdd={addEvItem}
-          onRemove={removeEvItem}
-          onMove={moveEvItem}
-        />
       </div>
 
       {/* 日記 */}
@@ -522,6 +540,24 @@ export default function Evening() {
             rows={10} />
           <div className="diary-count">{(ev.diary||'').length} 文字</div>
         </div>
+      </div>
+
+      {/* 夜のルーティン */}
+      <div className="sec">
+        <div className="sec-title" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span>夜のルーティン</span>
+          {evChecks.length > 0 && (
+            <span style={{ fontSize:11, color:'var(--muted)', fontWeight:600 }}>{evCheckDone}/{evChecks.length}</span>
+          )}
+        </div>
+        <SortableChecklist
+          items={evChecks}
+          checkState={evCheckState}
+          onToggle={toggleEvCheck}
+          onAdd={addEvItem}
+          onRemove={removeEvItem}
+          onMove={moveEvItem}
+        />
       </div>
 
       {ticketMsg && (

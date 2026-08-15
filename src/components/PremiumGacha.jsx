@@ -22,26 +22,39 @@ function pickBall() {
   return BALLS[0]
 }
 
-// ポケモン25% / その他75% で排出。legendary は 0.05% 独立判定。
+// ポケモン50% / その他50%。ポケモン内レアリティ: ノーマル60%/レア20%/ハイパーレア10%/ウルトラレア5%/レジェンドレア5%
+function pickPokeRarity() {
+  const r = Math.random()
+  if (r < 0.60) return 'common'
+  if (r < 0.80) return 'uncommon'
+  if (r < 0.90) return 'rare'
+  if (r < 0.95) return 'ultra'
+  return 'legendary'
+}
+
 function pickReward(ball) {
-  // 0.05% legendary（ボール種類に関係なく発動）
+  // 0.05% legendary 独立判定
   if (Math.random() < 0.0005) {
     const pool = PREMIUM_GACHA_POOL.filter(r => r.rarity === 'legendary')
     if (pool.length) return pool[Math.floor(Math.random() * pool.length)]
   }
   const rarityOrder = ['common','uncommon','rare','ultra']
   const ballIdx = rarityOrder.indexOf(ball.rarity)
-  const isPoke = Math.random() < 0.25
-  let pool
-  if (isPoke) {
-    pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && r.rarity === ball.rarity && r.rarity !== 'legendary')
+
+  if (Math.random() < 0.50) {
+    // ポケモン排出
+    const pokeRarity = pickPokeRarity()
+    let pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && r.rarity === pokeRarity)
     if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon' && rarityOrder.indexOf(r.rarity) >= ballIdx)
+    if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type === 'pokemon')
+    return pool[Math.floor(Math.random() * pool.length)]
   } else {
-    pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && r.rarity !== 'legendary' && rarityOrder.indexOf(r.rarity) >= ballIdx)
+    // その他排出
+    let pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && r.rarity !== 'legendary' && rarityOrder.indexOf(r.rarity) >= ballIdx)
     if (!pool.length) pool = PREMIUM_GACHA_POOL.filter(r => r.type !== 'pokemon' && r.rarity !== 'legendary')
+    if (!pool.length) return PREMIUM_GACHA_POOL[0]
+    return pool[Math.floor(Math.random() * pool.length)]
   }
-  if (!pool.length) return PREMIUM_GACHA_POOL[0]
-  return pool[Math.floor(Math.random() * pool.length)]
 }
 
 /* ─── 3D ポケボール ─── */
